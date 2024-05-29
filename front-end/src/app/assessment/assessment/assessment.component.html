@@ -1,0 +1,30 @@
+
+
+
+  <ng-container *ngIf="!deviceXs; else xsLayout">
+    <mat-grid-list [cols]="col" rowHeight="100px" gutterSize="6px">
+      <mat-grid-tile *ngFor="let subject of subjectNames" [colspan]="1">
+       <a mat-button [routerLink]="['/assessment-panel', subject]">
+      
+        <mat-icon>quiz</mat-icon>
+        {{subject}}
+      </a>
+      </mat-grid-tile>
+    </mat-grid-list>
+  </ng-container>
+  
+  <ng-template #xsLayout>
+    <mat-grid-list [cols]="col" rowHeight="100px" gutterSize="6px">
+      <mat-grid-tile *ngFor="let subject of subjectNames" [colspan]="1">
+        <a mat-button [routerLink]="['/assessment-panel', subject]">
+      
+          <mat-icon>quiz</mat-icon>
+          {{subject}}
+        </a>
+      </mat-grid-tile>
+    </mat-grid-list>
+  </ng-template>
+
+
+
+ 

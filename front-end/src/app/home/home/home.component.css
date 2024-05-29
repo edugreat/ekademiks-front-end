@@ -1,0 +1,82 @@
+/* home.component.css */
+.gridList {
+ 
+  margin: 20px;
+}
+
+
+
+
+.welcome{
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  text-align: center;
+  padding: 20px;
+  background-color: #424242;
+  color: white;
+  border-radius: 8px;
+  
+
+  /*
+  text-align: center;
+  padding: 20px;
+  background-color: #424242;
+  color: white;
+  border-radius: 8px;
+  
+  */
+}
+
+
+
+
+mat-grid-list .welcomTile ~ .mat-grid-tile{
+
+  margin-top: 25px;
+}
+
+mat-grid-tile{
+  
+
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+mat-card{
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#example-radio-group-label{
+  font-weight: bolder;
+  font-size: large;
+}
+
+.example-radio-button{
+  font-style: italic;
+}
+
+
+
+#radio-label-div{
+  text-align: center;
+}
+.levelRadioGroup{
+  text-align: center;
+  margin-top: 50px;
+}
+
+
+
+/* 
+#continueBTN {
+ 
+  padding: 10px;
+  font-size: 1em;
+  background-color: #0288d1;
+  color: #fff;
+  border-radius: 8px;
+} */

@@ -1,0 +1,57 @@
+
+
+.mat-sidenav{
+    background-color: #3F51B5;
+    width: 160px;
+}
+#menuTitle{
+    font-size: medium;
+    margin-right: 60px;
+}
+
+.mat-toolbar{
+    height: 60px;
+    margin-bottom: 0px !important;
+}
+
+#topMenuLoginLogout{
+
+    margin-right: 0px;
+    margin-left: auto;
+}
+
+
+.side-nav-items{
+    display: flexbox;
+    flex-direction: column;
+}
+
+.side-menu-item{
+    color: white !important;
+    margin-top: 20px;
+}
+@media(min-width:900px){
+
+    #menuItem{
+        display: none;
+    }
+
+    mat-sidenav{
+        display: none;
+    }
+}
+
+.main-content{
+    margin: 20px;
+    margin-top: 5px;
+    min-height: 75vh;
+    max-height: 75vh;
+    
+}
+
+@media(max-width:900px){
+
+    .top-menu-item{
+        display: none;
+    }
+}
