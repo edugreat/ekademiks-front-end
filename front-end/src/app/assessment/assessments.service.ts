@@ -9,6 +9,7 @@ export class AssessmentsService {
 
   baseUrl = `http://localhost:8080/learning/levels`;
   subjectNameUrl = `http://localhost:8080/tests/level`;
+  topicUrl = `http://localhost:8080/tests`
 
   constructor(private http:HttpClient) { }
 
@@ -36,6 +37,12 @@ export class AssessmentsService {
 
       category:level.category
     }))
+  }
+
+  //fetches from the server test topics for the given subject and category
+  getTopics(subjectName:string, category:string):Observable<string[]>{
+
+    return this.http.get<string[]>(`${this.topicUrl}?subject=${subjectName}&category=${category}`);
   }
 }
 

@@ -14,6 +14,7 @@ import { LogoutComponent } from './logout/logout.component';
 import { HomeModule } from './home/home.module';
 import { MaterialModule } from './material/material.module';
 import { AssessmentModule } from './assessment/assessment.module';
+import { SortPipe } from './sort.pipe';
 
   
 
@@ -23,18 +24,22 @@ import { AssessmentModule } from './assessment/assessment.module';
     AppComponent,
     LoginComponent,
     ContactComponent,
-    LogoutComponent
+    LogoutComponent,
+   
   ],
   imports: [
+    
     CommonModule,
     AppRoutingModule,
    TestModule,
     BrowserModule,
     BrowserAnimationsModule,
     HttpClientModule,
-    HomeModule,
     MaterialModule,
-    AssessmentModule
+    HomeModule,
+    AssessmentModule,
+   
+   
    
   ],
  // exports:[RouterModule],

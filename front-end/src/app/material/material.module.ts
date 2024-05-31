@@ -8,6 +8,9 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import{MatCardModule} from '@angular/material/card';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatRadioModule} from '@angular/material/radio';
+import {MatExpansionModule} from '@angular/material/expansion';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 
 
@@ -20,7 +23,10 @@ const materials = [
   FlexLayoutModule,
   MatCardModule,
   MatGridListModule,
-  MatRadioModule
+  MatRadioModule,
+  MatExpansionModule,
+  MatDividerModule,
+  MatTooltipModule
 ]
 
 @NgModule({
