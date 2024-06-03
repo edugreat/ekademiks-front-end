@@ -1,3 +1,36 @@
-<div>
-    {{questions | json}}
+
+<div class="quiz-container">
+
+    <mat-toolbar color="primary" class="quiz-toolbar">
+        <span class="left-label">subject</span>
+        <span class="right-label">{{topic}}</span>
+    </mat-toolbar>
+    
+
+
+    
+<mat-accordion>
+
+    <mat-expansion-panel *ngFor="let question of questions, let i = index" >
+
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                {{question.number}}. {{question.text}}
+            </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <mat-radio-group [(ngModel)]="selectedOptions[i]"
+        *ngIf="question.options.length > 0" >
+        <mat-radio-button *ngFor="let option of question.options |optionSort "
+        [value]="option" >
+        {{option.letter}}. {{option.text}}
+
+        </mat-radio-button>
+    
+    </mat-radio-group>
+    </mat-expansion-panel>
+
+</mat-accordion>
+
+<button mat-raised-button color="primary" (click)="submitQuiz()">Submit</button>
 </div>

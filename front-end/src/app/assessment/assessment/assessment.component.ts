@@ -109,4 +109,10 @@ export class AssessmentComponent implements OnInit, OnDestroy{
     }
   }
 
+
+  //takes the user one-step back
+  goBack() {
+    window.history.back()
+    }
+    
 }

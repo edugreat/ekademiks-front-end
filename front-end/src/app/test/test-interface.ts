@@ -5,7 +5,6 @@ export interface Question{
 
     number:number,
     text:string,
-    answer:string,
     options:Option[]
 }
 

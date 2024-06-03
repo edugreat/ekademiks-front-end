@@ -8,16 +8,16 @@ import { Observable, map } from 'rxjs';
 })
 export class TestService {
 
-  baseUrl = 'http://localhost:8080/tests/1'
+  baseUrl = 'http://localhost:8080/tests/start'
 
   constructor(private http:HttpClient) { }
 
 
 
-getTest():Observable<Question[]>{
+getTest(topic:string, category:string):Observable<Question[]>{
 
-  return this.http.get<{questions:QuestionDTO[]}>(this.baseUrl).pipe(
-    map(dtos => dtos.questions.map(dto =>  {
+  return this.http.get<QuestionDTO[]>(`${this.baseUrl}?topic=${topic}&category=${category}`).pipe(
+    map(dtos => dtos.map(dto =>  {
       return this.convertToQuestion(dto)
     }))
   )
@@ -29,7 +29,6 @@ getTest():Observable<Question[]>{
     return {
       number:dto.questionNumber,
       text:dto.text,
-      answer:dto.answer,
       options:dto.options
     }
     

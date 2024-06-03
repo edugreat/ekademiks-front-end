@@ -11,6 +11,7 @@ import { MediaService } from '../../media-service';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit, OnDestroy {
+
   //Observable arrays of academic levels received from the server
   levels$: Observable<Levels[]> | undefined; 
 
@@ -22,7 +23,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   colspan = 2;
 
   //welcome message displayable on large screens
-  welcomeMsg = "Embark on your academic journey with us and unlock a world of knowledge and growth. Whether you're a student striving for excellence or an educator dedicated to nurturing minds, our platform is here to empower you every step of the way. Explore our comprehensive range of assessments tailored to junior and senior high school levels, designed to challenge and inspire. Dive into subjects that spark your curiosity, from mathematics to literature, and beyond. With personalized profiles, real-time feedback, and insightful analytics, your learning experience is as unique as you are. Join a community of learners committed to success and discover your full potential with e-Kademiks. Start your adventure now. The path to greatness awaits";
+  welcomeMsg = "Join e-Kademiks for a transformative learning experience. Access tailored assessments for junior and senior high school levels, explore diverse subjects, and benefit from personalized profiles, real-time feedback, and insightful analytics. Unleash your potential and join a community dedicated to success. Start your journey now";
 
   //welcome message displayable on extra small screens
   weclome2 = "Embark on your academic journey with us by exploring our different range of assessments tailored for both students of junior and senior categories."
@@ -67,5 +68,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     
     this.router.navigate(['/assessments', this.selectedLevel]);
   }
+
+  goBack() {
+    window.history.back()
+    }
   
 }

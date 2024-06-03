@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AssessmentsService } from '../assessments.service';
 import { Observable } from 'rxjs';
 
@@ -10,7 +10,11 @@ import { Observable } from 'rxjs';
 })
 export class AssessmentExpansionPanelComponent implements OnInit{
 
-  constructor(private activatedRoute: ActivatedRoute, private assessmentService:AssessmentsService){}
+  
+
+  constructor(private activatedRoute: ActivatedRoute, 
+    private assessmentService:AssessmentsService,
+  private router:Router){}
 
   //subject topics on which the assessment is based
   topics$:Observable<string[]>|undefined;
@@ -18,6 +22,7 @@ export class AssessmentExpansionPanelComponent implements OnInit{
   subject = '';
   category = '';
   level = '';
+  topic = ''; //topic upon which the test assessment is based
 
 
   ngOnInit(): void {
@@ -25,11 +30,16 @@ export class AssessmentExpansionPanelComponent implements OnInit{
 
   }
 
-  //implement onint
-  //declare the coonstructor and inject Assessment service and activated route
-  //grab the router param ['subject]
-  //fetch from the server, all topics under the subject
-  //design expansion panel 
+
+  commenceTest(topic:string) {
+
+    console.log(`topic chosen = ${topic}`)
+    console.log(`category = ${this.category}`)
+    
+    this.router.navigate(['/start', topic, this.category]);
+
+
+    }
 
   private getTopics(){
 

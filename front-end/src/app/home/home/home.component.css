@@ -1,82 +1,90 @@
-/* home.component.css */
-.gridList {
- 
-  margin: 20px;
+
+
+
+
+
+
+.container {
+  position: relative;
+  width: 100%;
 }
 
-
-
-
-.welcome{
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  text-align: center;
-  padding: 20px;
-  background-color: #424242;
-  color: white;
-  border-radius: 8px;
+.back-button {
   
-
-  /*
-  text-align: center;
-  padding: 20px;
-  background-color: #424242;
-  color: white;
-  border-radius: 8px;
-  
-  */
+  top: 0 ;
+  right: 0 ;
+  margin: 15px;
+  background-color: #9E9E9E;
 }
 
 
 
-
-mat-grid-list .welcomTile ~ .mat-grid-tile{
-
-  margin-top: 25px;
-}
-
-mat-grid-tile{
-  
-
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
-
-mat-card{
-  flex: 1 1 auto;
+.centered-content {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  margin-top: 20px; /* Adjust the margin as needed */
 }
 
-#example-radio-group-label{
-  font-weight: bolder;
-  font-size: large;
-}
-
-.example-radio-button{
-  font-style: italic;
-}
-
-
-
-#radio-label-div{
+#radio-label-div {
   text-align: center;
 }
-.levelRadioGroup{
-  text-align: center;
-  margin-top: 50px;
+
+#levelRadio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.centered-button {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px; /* Adjust the margin as needed */
 }
 
 
 
-/* 
-#continueBTN {
- 
+/* <<<<<<<styling for devices greater than android sizes */
+@media( min-width: 400px){
+#featured-assessment{
+
+  width: 260px;
+  float: right;
+  background-color: #FFAB40;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  padding: 20px;
+  border-radius: 5px;
+  font-size: 25px;
+  clear: both;
+}
+/* styling for devices greater than android sizes.>>>>> */
+
+.welcomeDiv{
+  margin-left: 10px;
+  margin-top: 10px;
+  margin-bottom:  10px;
+  margin-right: 320px;
   padding: 10px;
-  font-size: 1em;
-  background-color: #0288d1;
-  color: #fff;
-  border-radius: 8px;
-} */
+  font-size: 110%;
+  border-radius: 5px;
+  background-color: darkred;
+ }
+
+
+ 
+mat-grid-list{
+
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  
+}
+
+mat-grid-list mat-grid-tile{
+
+  border-radius: 5px;
+}
+}

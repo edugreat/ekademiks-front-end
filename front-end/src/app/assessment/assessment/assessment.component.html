@@ -2,11 +2,19 @@
 
 
   <ng-container *ngIf="!deviceXs; else xsLayout">
+
+    <a mat-button class="back-button" 
+    (click)="goBack()"
+    matTooltip="Go back" 
+ matTooltipShowDelay="1000" matTooltipHideDelay="2000">
+      <mat-icon>arrow_back</mat-icon>
+    </a>
+
     <mat-grid-list [cols]="col" rowHeight="100px" gutterSize="6px">
       <mat-grid-tile *ngFor="let subject of subjectNames |sort " [colspan]="1">
        <a mat-button [routerLink]="['/assessment-panel', subject, selectedLevel]">
       
-        <mat-icon>quiz</mat-icon>
+        <mat-icon >quiz</mat-icon>
         {{subject}}
       </a>
       </mat-grid-tile>
@@ -14,6 +22,14 @@
   </ng-container>
   
   <ng-template #xsLayout>
+
+    <a mat-button class="back-button" 
+    matTooltip="Go back" 
+    (click)="goBack()"
+ matTooltipShowDelay="1000" matTooltipHideDelay="2000">
+      <mat-icon>arrow_back</mat-icon>
+    </a>
+
     <mat-grid-list [cols]="col" rowHeight="100px" gutterSize="6px">
       <mat-grid-tile *ngFor="let subject of subjectNames | sort " [colspan]="1">
         <a mat-button [routerLink]="['/assessment-panel', subject, selectedLevel]">

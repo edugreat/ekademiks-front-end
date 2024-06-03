@@ -2,3 +2,12 @@ mat-grid-tile{
     display: flex;
     flex-direction: column;
   }
+
+  .back-button{
+    background-color: #9E9E9E;
+  }
+  
+  .back-button mat-icon{
+
+    transform: scaleX(2.0);
+  }

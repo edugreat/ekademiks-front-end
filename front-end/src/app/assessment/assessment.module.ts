@@ -4,7 +4,8 @@ import { AssessmentComponent } from './assessment/assessment.component';
 import { MaterialModule } from '../material/material.module';
 import { AssessmentExpansionPanelComponent } from './assessment-expansion-panel/assessment-expansion-panel.component';
 import { AppRoutingModule } from '../app-routing/app-routing.module';
-import { SortPipe } from '../sort.pipe';
+import { SharedModule } from '../shared/shared.module';
+import { FormsModule } from '@angular/forms';
 
 
 
@@ -13,12 +14,14 @@ import { SortPipe } from '../sort.pipe';
     declarations: [
         AssessmentComponent,
         AssessmentExpansionPanelComponent,
-        SortPipe
+        
     ],
     imports: [
         CommonModule,
+        SharedModule,
         MaterialModule,
         AppRoutingModule,
+        FormsModule
         
     ]
 })
