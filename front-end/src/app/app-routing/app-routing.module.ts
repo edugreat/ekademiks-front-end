@@ -18,7 +18,7 @@ const routes:Routes = [
   {path: 'login', component: LoginComponent},
   {path: 'logout', component: LogoutComponent},
   {path:'assessment-panel/:subject/:category', component: AssessmentExpansionPanelComponent},
-  {path: 'start/:topic/:category', component: TestComponent}
+  {path: 'start/:topic/:duration/:subject/:category', component: TestComponent}
 ]
 
 @NgModule({

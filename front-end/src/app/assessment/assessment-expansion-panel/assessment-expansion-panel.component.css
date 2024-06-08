@@ -3,6 +3,72 @@
 
     margin-top: 20px;
     margin-bottom: 25px;
-    background-color: gray;
+    color: #00796b;
     max-width: 75px;
 }
+
+  
+  #back a {
+   
+    color: #00796b; 
+  } 
+  
+  
+  #back mat-icon {
+    font-size: 1.5em;
+    margin-right: 0.5em; 
+  }
+
+
+
+#panelContainer {
+    padding: 1em;
+    background-color: #f9f9f9; /* Light background for contrast */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  }
+  
+  mat-accordion {
+    margin-bottom: 1em; /* Space between accordions */
+  }
+  
+  mat-expansion-panel-header {
+    background-color: #e0f7fa; /* Light teal background */
+    color: #00796b; /* Dark teal text */
+  }
+  
+  mat-panel-title {
+    font-weight: bold;
+    font-size: 1.2em; /* Increase font size */
+  }
+  
+  mat-panel-description {
+    font-size: 1em; /* Consistent font size */
+    color: #004d40; /* Darker teal color */
+  }
+  
+  p {
+    font-weight: bold;
+    margin: 0.5em 0; /* Consistent spacing */
+  }
+  
+  mat-action-row {
+    display: flex;
+    justify-content: flex-end; /* Align buttons to the right */
+  }
+  
+  mat-action-row button {
+    font-weight: bold;
+    background-color: #00796b; /* Primary color background */
+    color: #fff; /* White text */
+    margin-top: 1em; /* Space above button */
+  }
+  
+  mat-action-row button:hover {
+    background-color: #004d40; /* Darker teal on hover */
+  }
+  
+  mat-divider {
+    margin: 1em 0; /* Space around divider */
+
+  }

@@ -1,24 +1,15 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { SortPipe } from '../sort.pipe';
+import { FormsModule } from '@angular/forms';
 import { OptionSortPipe } from '../option-sort.pipe';
+import { SortPipe } from '../sort.pipe';
 
 
 
 @NgModule({
-  declarations: [
-    SortPipe,
-    OptionSortPipe
-  ],
-
-  exports:[
-    SortPipe,
-    OptionSortPipe
-    
-  ],
+  declarations: [OptionSortPipe, SortPipe],
   imports: [
-    CommonModule,
-   
-  ]
+    FormsModule, 
+  ],
+  exports:[FormsModule, OptionSortPipe,SortPipe]
 })
 export class SharedModule { }

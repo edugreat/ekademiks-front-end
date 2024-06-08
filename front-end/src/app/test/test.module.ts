@@ -1,11 +1,10 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { TestComponent } from './test/test.component';
-import { MathJaxDirective } from './math-jax.directive';
 import { MaterialModule } from '../material/material.module';
-import { FormsModule } from '@angular/forms';
 import { SharedModule } from '../shared/shared.module';
-
+import { CommonModule } from '@angular/common';
+import { MathJaxDirective } from '../math-jax.directive';
+import { TimerComponent } from './timer/timer.component';
 
 
 
@@ -13,13 +12,14 @@ import { SharedModule } from '../shared/shared.module';
   declarations: [
     TestComponent,
     MathJaxDirective,
+    TimerComponent
   ],
   imports: [
+    MaterialModule,
     CommonModule,
-   SharedModule,
-    FormsModule,
-    MaterialModule
+    SharedModule,
+    
   ],
-  exports:[TestComponent]
+  exports:[TestComponent, SharedModule]
 })
 export class TestModule { }

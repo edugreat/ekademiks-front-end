@@ -1,90 +1,132 @@
+/* Apply css for small screen devices */
+
+@media(min-width: 200px) and (max-width: 600px) {
+  .gridListDiv {
+    background-color: #e5e4d7;
+    margin: 10px;
+    padding: 20px;
+    border-radius: 5px;
+    
+    
+  }
+
+  #welcomeDiv {
+    margin: 10px;
+    padding: 20px;
+    border-radius: 5px;
+    font-size: 105%;
+    background-color: #e5e4d7;
+  }
+}
+
+/* A screen sizes greater than extra small but less than medium */
+@media(min-width: 599px) and (max-width: 760px) {
+  .gridListDiv {
+    background-color: #e5e4d7;
+    
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    margin-top: 0px;
+    padding: 20px;
+    border-radius: 5px;
+    width: 250px;
+    float: right;
+    clear: right;
+  }
+
+  #welcomeDiv {
+    margin-right: 310px;
+    margin-left: 10px;
+    margin-top: 10px;
+    padding: 20px;
+    border-radius: 5px;
+    font-size: 105%;
+    background-color: #e5e4d7;
+  }
+}
+
+
+/* For screen sizes of 599 px */
+
+@media(min-width: 599px) and (max-width: 599px) {
+  .gridListDiv {
+    background-color: #e5e4d7;
+    margin: 10px;
+    padding: 20px;
+    border-radius: 5px;
+    width: 480px;
+    
+    
+    
+  }
+
+  #welcomeDiv {
+    margin: 10px;
+    padding: 20px;
+    border-radius: 5px;
+    font-size: 105%;
+    background-color: #e5e4d7;
+  }
+}
 
 
 
+/* Apply css to large screens */
+@media(min-width: 760px) {
+  .gridListDiv {
+    background-color: #e5e4d7;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    margin-top: 0px;
+    padding: 10px;
+    border-radius: 5px;
+    width: 300px;
+    float: right;
+    clear: right;
+  }
+
+  #welcomeDiv {
+    margin-right: 340px;
+    margin-left: 10px;
+    margin-top: 10px;
+    padding: 20px;
+    border-radius: 5px;
+    font-size: 105%;
+    background-color: #e5e4d7;
+  }
+}
 
 
-
-.container {
-  position: relative;
+/* Div for the radio button and the selections */
+.levelRadioGroup {
   width: 100%;
-}
-
-.back-button {
-  
-  top: 0 ;
-  right: 0 ;
-  margin: 15px;
-  background-color: #9E9E9E;
-}
-
-
-
-.centered-content {
+  /* border: 0.05em solid green; */
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 20px; /* Adjust the margin as needed */
+  flex-direction: column; /* Arrange children divs vertically */
+  align-items: center; /* Center the children horizontally */
+  justify-content: center; /* Center the children vertically */
+  padding: 2em 0; /* Add extra space vertically between the edges of the parent div */
+}
+
+.example-radio-group {
+  display: flex;
+  flex-direction: row; /* Arrange radio buttons horizontally */
+  margin-bottom: 0.5em; /* Reduce space between radio groups */
 }
 
 #radio-label-div {
-  text-align: center;
+  margin-bottom: 0.5em; /* Reduce space below the label */
 }
 
-#levelRadio {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+#continueBTN {
+  margin-top: 0.5em; /* Reduce space above the button */
 }
 
-.centered-button {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px; /* Adjust the margin as needed */
-}
-
-
-
-/* <<<<<<<styling for devices greater than android sizes */
-@media( min-width: 400px){
-#featured-assessment{
-
-  width: 260px;
-  float: right;
-  background-color: #FFAB40;
-  margin-left: 10px;
-  margin-right: 10px;
-  margin-bottom: 10px;
-  padding: 20px;
-  border-radius: 5px;
-  font-size: 25px;
-  clear: both;
-}
-/* styling for devices greater than android sizes.>>>>> */
-
-.welcomeDiv{
-  margin-left: 10px;
-  margin-top: 10px;
-  margin-bottom:  10px;
-  margin-right: 320px;
-  padding: 10px;
-  font-size: 110%;
-  border-radius: 5px;
-  background-color: darkred;
- }
-
-
- 
-mat-grid-list{
-
-  margin-top: 20px;
-  margin-bottom: 20px;
-  margin-left: auto;
-  margin-right: auto;
-  
-}
-
-mat-grid-list mat-grid-tile{
-
-  border-radius: 5px;
-}
+#example-radio-group-label {
+  font-size: 1.5em; /* Increase font size */
+  font-weight: bold; /* Make the text bold */
+  color: #00796b; /* Change color to a standout green */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Add subtle shadow for emphasis */
 }

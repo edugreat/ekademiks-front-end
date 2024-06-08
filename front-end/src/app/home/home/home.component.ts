@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
+import { Component, OnInit, HostListener, OnDestroy, AfterViewInit, viewChild, ElementRef, ViewChild, Renderer2 } from '@angular/core';
 import { MediaChange, MediaObserver } from '@angular/flex-layout';
 import { Observable, Subscription } from 'rxjs';
 import { AssessmentsService, Levels } from '../../assessment/assessments.service';
@@ -17,10 +17,14 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   //If the user's device is extra small
   deviceXs:boolean = false;
+
+
+  //If the user's device is medium
+  deviceSm: boolean = false;
   mediaSubscription?:Subscription;
 
-  //the default span for a set of mat-grid-tile
-  colspan = 2;
+  
+
 
   //welcome message displayable on large screens
   welcomeMsg = "Join e-Kademiks for a transformative learning experience. Access tailored assessments for junior and senior high school levels, explore diverse subjects, and benefit from personalized profiles, real-time feedback, and insightful analytics. Unleash your potential and join a community dedicated to success. Start your journey now";
@@ -42,12 +46,14 @@ export class HomeComponent implements OnInit, OnDestroy {
    
   }
 
+
   private mediaAlias() {
    
     return this.mediaService.mediaChanges().subscribe((changes:MediaChange[]) =>{
 
       this.deviceXs = changes.some(change => change.mqAlias === 'xs');
-      this.colspan = this.deviceXs ? 4: 2;
+      this.deviceSm = changes.some(change => change.mqAlias === 'sm');
+      changes.forEach(c => console.log(c.mqAlias));
     })
     
   }
@@ -69,8 +75,4 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.router.navigate(['/assessments', this.selectedLevel]);
   }
 
-  goBack() {
-    window.history.back()
-    }
-  
 }
