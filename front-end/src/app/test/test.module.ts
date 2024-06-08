@@ -1,16 +1,25 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { TestComponent } from './test/test.component';
+import { MaterialModule } from '../material/material.module';
+import { SharedModule } from '../shared/shared.module';
+import { CommonModule } from '@angular/common';
+import { MathJaxDirective } from '../math-jax.directive';
+import { TimerComponent } from './timer/timer.component';
 
 
 
 @NgModule({
   declarations: [
-    TestComponent
+    TestComponent,
+    MathJaxDirective,
+    TimerComponent
   ],
   imports: [
-    CommonModule
+    MaterialModule,
+    CommonModule,
+    SharedModule,
+    
   ],
-  exports:[TestComponent]
+  exports:[TestComponent, SharedModule]
 })
 export class TestModule { }

@@ -1,0 +1,83 @@
+.header-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.header-left {
+  flex: 1;
+  text-align: center;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.topic-header {
+  font-size: 0.8em;
+  font-weight: normal;
+  margin-left: 4px;
+}
+
+
+/* css header layout on small screen sizes */
+.vertical-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
+.quiz-container {
+  position: relative;
+  width: 80%;
+  margin: auto;
+  padding-top: 64px; /* Height of the toolbar */
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.quiz-toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  background-color: #3f51b5;
+  color: white;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.left-label {
+  flex: 1;
+  text-align: left;
+}
+
+.right-label {
+  flex: 1;
+  text-align: right;
+}
+
+mat-accordion {
+  margin-top: 16px; /* Space between toolbar and accordion */
+}
+
+mat-expansion-panel-header {
+  background-color: #e3f2fd;
+  border-bottom: 1px solid #ddd;
+}
+
+mat-radio-button {
+  display: block;
+  margin: 8px 0;
+}
+
+button {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  font-size: 1em;
+}

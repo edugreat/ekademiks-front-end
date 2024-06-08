@@ -2,3 +2,35 @@ mat-grid-tile{
     display: flex;
     flex-direction: column;
   }
+
+  .subject-text {
+    font-size: 1.2em; /* Increase font size */
+    font-weight: bold; /* Make the text bold */
+    color: #00796b; /* Change color to a standout green */
+  }
+  
+  .mat-icon-quiz {
+    color: #ff9800; /* Change color to a standout orange */
+    font-size: 1.5em; /* Increase icon size */
+    margin-right: 0.5em; /* Add space between the icon and the text */
+    vertical-align: middle; /* Align icon vertically in the middle */
+  }
+  #back{
+
+    margin-top: 20px;
+    margin-bottom: 25px;
+    color: #00796b;
+    max-width: 75px;
+}
+
+  
+  #back a {
+   
+    color: #00796b; 
+  } 
+  
+  
+  #back mat-icon {
+    font-size: 1.5em;
+    margin-right: 0.5em; 
+  }

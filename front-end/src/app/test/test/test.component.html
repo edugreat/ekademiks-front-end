@@ -1,3 +1,32 @@
-<div>
-    {{questions | json}}
-</div>
+<div  class="header-container">
+    <div class="header-left" 
+    [ngClass]="{'vertical-layout':smallScreen}"
+    >
+      {{ subject }}<span [hidden]="smallScreen">:</span> <span class="topic-header">{{ topic }}</span>
+      
+    </div>
+  </div>
+
+<div class="quiz-container">
+
+    <mat-accordion>
+      <mat-expansion-panel *ngFor="let question of questions; let i = index">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <span style="padding-right: 5px;" >{{ i + 1 }}.</span><span [appMathJax]= "question.problem"></span>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <mat-radio-group [(ngModel)]="selectedOptions[i]" *ngIf="question.options.length">
+          <mat-radio-button *ngFor="let option of question.options | optionSort"
+         
+          [value]="option.letter">
+            <span style="font-weight: bold;margin-right: 15px; " [appMathJax]="option.letter ">. </span> <span [appMathJax]="  option.text"></span>
+          </mat-radio-button>
+        </mat-radio-group>
+      </mat-expansion-panel>
+    </mat-accordion>
+  
+    <button mat-raised-button color="primary" (click)="submit()">Submit</button>
+  </div>
+  

@@ -4,7 +4,7 @@ An interface for the question object which corresponds to the question object of
 export interface Question{
 
     number:number,
-    text:string,
+    problem:string,
     answer:string,
     options:Option[]
 }

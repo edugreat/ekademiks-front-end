@@ -1,27 +1,40 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { TopicAndDuration } from './assessment/assessments.service';
 
 @Pipe({
   name: 'sort',
 })
 export class SortPipe implements PipeTransform {
 
-  transform(value: string[] | null):string[] {
+  transform(values: any[] | null):any[] {
 
-    if(value){
+    if(values){
 
-      return value.sort((a:string, b:string) => {
+      //if values has the 'topic' and 'duration' properties, then it is a 'TopicAndDuration' object
+      if(values.every((value) => 'topic' in value && 'duration' in value)){
 
-        if(a < b){
-          
-          return -1;
-        }else if(a > b){
+        return values.sort((val1:any , val2: any) =>{
 
-         
-          return 1;
-        } return 0;
+          if(val1.topic < val2.topic) return -1;
+          else if(val1.topic > val2.topic) return 1
+          else return 0;
 
-      })
+        })
+
+
+      }
+      //checks if values is a string array type
+      else if(values.every((value) => typeof value === 'string')){
+
+        return values.sort((str1:string, str2:string) =>{
+
+          if(str1 < str2) return -1;
+          else if(str1 > str2) return 1;
+          else return 0;
+        })
+      }
     }
+
 
     return [];
   }

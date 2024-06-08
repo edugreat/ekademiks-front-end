@@ -1,17 +1,17 @@
 
 <div id="back" (click)="goBack()" matTooltip="Go back" 
  matTooltipShowDelay="1000" matTooltipHideDelay="2000" >
-    <a mat-button style="min-width: 75px; max-width: 75px;">
+    <a mat-button >
         <mat-icon   >arrow_back</mat-icon>
     </a>
 </div>
 <ng-container id="panelContainer" >
-<mat-accordion *ngFor="let topic of topics$ | async | sort,let last= last; " >
+<mat-accordion *ngFor="let test of topicsAndDurations$ | async  | sort, let last= last; " >
     <mat-expansion-panel>
 <mat-expansion-panel-header>
 
 <mat-panel-title>
-    {{topic}}
+    {{test.topic}}
 </mat-panel-title>
 
 <mat-panel-description>
@@ -22,7 +22,7 @@
 
 <p  style="font-weight: bold;" >Total Duration: 45 min</p>
 <mat-action-row>
-    <button mat-button color="primary" style="font-weight: bold;" >Start</button>
+    <button (click)="commenceTest(test.topic, test.duration)" mat-button color="primary" style="font-weight: bold;" >Start</button>
 </mat-action-row>
 
 </mat-expansion-panel>

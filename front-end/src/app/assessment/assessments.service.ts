@@ -39,10 +39,15 @@ export class AssessmentsService {
     }))
   }
 
-  //fetches from the server test topics for the given subject and category
-  getTopics(subjectName:string, category:string):Observable<string[]>{
+  //fetches from the server test topics and durations for the given subject and category
+  getTopics(subjectName:string, category:string):Observable<TopicAndDuration[]>{
 
-    return this.http.get<string[]>(`${this.topicUrl}?subject=${subjectName}&category=${category}`);
+    return this.http.get<Array<{testName:string, duration:number}>>(`${this.topicUrl}?subject=${subjectName}&category=${category}`).pipe(
+      map((results) => results.map(result =>{
+
+        return {topic:result.testName, duration:result.duration}
+      }))
+    );
   }
 }
 
@@ -59,10 +64,20 @@ export interface levelDTO{
   
 }
 
+//models the server side Level object
 export interface Levels{
 category:string
 
 }
+
+//models the returned server side topicAndDuration object
+export interface TopicAndDuration{
+topic:string,
+duration:number
+
+}
+
+
 
 
 

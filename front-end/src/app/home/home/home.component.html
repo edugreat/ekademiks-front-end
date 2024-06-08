@@ -1,67 +1,81 @@
- <!--For large screen rendering-->
- <mat-grid-list *ngIf="!levels$" class="gridList" rowHeight="100px" gutterSize="6px" [cols]="4" >
-  <mat-grid-tile class="welcomTile" *ngIf="!deviceXs"   colspan="4" [style.background]="'dark'">
-   <mat-card class="welcome" >
-    <mat-card-title style="font-weight: bold; text-align: center;">WELCOME</mat-card-title>
-    <mat-card-content style="font-style: italic;" >{{welcomeMsg}}</mat-card-content>
-   </mat-card>
-  </mat-grid-tile>
+<!--Display this secction of the page when the user has not made selection for the assessment level to take-->
+<section *ngIf="!levels$; else selectionMade">
+  <!--For screen sizes not extra small-->
+  <div class="gridListDiv" *ngIf="!deviceXs; else extraSmallScreen" >
 
-  <!--End. For small screen rendering-->
-
-<!--For small screen rendering-->
-  <mat-grid-tile class="welcomTile" *ngIf="deviceXs"  colspan="4" [style.background]="'dark'">
-    <mat-card class="welcome" >
-     <mat-card-title style="font-weight: bold; text-align: center;">WELCOME</mat-card-title>
-     <mat-card-content style="font-style: italic;" >{{weclome2}}</mat-card-content>
-    </mat-card>
-   </mat-grid-tile>
-
-   <!--End. For small screen rendering-->
-  <mat-grid-tile [colspan]="colspan" [style.background]="'red'">
-   <a mat-button (click)="getAcademicLevels()" >Take Assessments</a>
-  </mat-grid-tile>
-
-  <mat-grid-tile [colspan]="colspan"  [style.background]="'green'">
-    Account 
-  </mat-grid-tile>
-
-  <mat-grid-tile [colspan]="colspan" [style.background]="'grey'">
-    Read Article   </mat-grid-tile>
+    <mat-grid-list  class="gridList" 
+    rowHeight="2:1" gutterSize="6px"
+     cols="4" >
+  <mat-grid-tile colspan="4" 
+   id="feature-assessment" >Featured Assessment</mat-grid-tile>
   
-
-  <mat-grid-tile [colspan]="colspan"  [style.background]="'teal'">
-    Recommended Test 
-  </mat-grid-tile>
-</mat-grid-list>
-
-
-<div class="levelRadioGroup" *ngIf="levels$">
-  <div id="radio-label-div">
-    <label id="example-radio-group-label">Pick assessment level</label>
+  <mat-grid-tile colspan="4" >
+     <a mat-button (click)="getAcademicLevels()" >Take Assessments</a>
+    </mat-grid-tile>
+  <mat-grid-tile colspan="4" >Account</mat-grid-tile>
+  <mat-grid-tile colspan="4" >Recommended Test</mat-grid-tile>
+    </mat-grid-list>
   </div>
-  <mat-radio-group #levelRadio [(ngModel)]="selectedLevel"
-   name="_level"
-  *ngFor="let level of levels$ | async"
-    aria-labelledby="example-radio-group-label"
-    class="example-radio-group"
-    
-    >
-    
-    <mat-radio-button  class="example-radio-button" [value]="level.category">{{level.category}}</mat-radio-button>
+  
  
-  </mat-radio-group>
-
-  <div>
-    <button id='continueBTN'  (click)="handleSelection()" [disabled]="!selectedLevel" color="primary" style="width: 25vw; text-align: end; " mat-raised-button>
-      <mat-icon   >arrow_forward</mat-icon>
-    </button>
+  <div *ngIf="!deviceXs" id="welcomeDiv">
+    <p>{{welcomeMsg}}</p>
   </div>
+
+  <!--Extra small screen sizes-->
+
+  <ng-template #extraSmallScreen>
+
+<div  id="welcomeDiv">
+  <p>{{welcomeMsg}}</p>
 </div>
 
 
+<div class="gridListDiv" >
+  <mat-grid-list  class="gridList" 
+  rowHeight="2:1" gutterSize="6px"
+   cols="4" >
+
+<mat-grid-tile colspan="4" 
+ id="feature-assessment" >Featured Assessment</mat-grid-tile>
+
+<mat-grid-tile colspan="4" >
+  <a mat-button (click)="getAcademicLevels()" >Take Assessments</a>
+</mat-grid-tile>
+
+<mat-grid-tile colspan="4" >Account</mat-grid-tile>
+<mat-grid-tile colspan="4" >Recommended Test</mat-grid-tile>
+  </mat-grid-list>
+</div>
+
+  </ng-template>
+
+</section>
+
+<!--Display this section of the page when the user has made selection for the asssement level to take-->
+<ng-template #selectionMade>
 
 
+  <div class="levelRadioGroup">
+    <div id="radio-label-div">
+      <label id="example-radio-group-label">Pick assessment level</label>
+    </div>
+    <mat-radio-group #levelRadio [(ngModel)]="selectedLevel"
+     name="_level"
+    *ngFor="let level of levels$ | async"
+      aria-labelledby="example-radio-group-label"
+      class="example-radio-group">
+      
+      <mat-radio-button  class="example-radio-button" [value]="level.category">{{level.category}}</mat-radio-button>
+   
+    </mat-radio-group>
+  
+    <div>
+      <button id='continueBTN'  (click)="handleSelection()" [disabled]="!selectedLevel" color="primary" style="width: 25vw; text-align: end; " mat-raised-button>
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </div>
+  </div>
 
 
-
+</ng-template>
