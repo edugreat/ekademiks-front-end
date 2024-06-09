@@ -11,7 +11,7 @@ export class SortPipe implements PipeTransform {
     if(values){
 
       //if values has the 'topic' and 'duration' properties, then it is a 'TopicAndDuration' object
-      if(values.every((value) => 'topic' in value && 'duration' in value)){
+      if(values.every((value) => typeof value !== 'string' && ('topic' in value && 'duration' in value))){
 
         return values.sort((val1:any , val2: any) =>{
 

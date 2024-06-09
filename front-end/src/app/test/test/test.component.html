@@ -1,3 +1,12 @@
+<!--NAVIGATE BACK-->
+<div id="back" (click)="goBack()" matTooltip="Go back" 
+ matTooltipShowDelay="1000" matTooltipHideDelay="2000" >
+    <a mat-button >
+        <mat-icon   >arrow_back</mat-icon>
+    </a>
+</div>
+
+
 <div  class="header-container">
     <div class="header-left" 
     [ngClass]="{'vertical-layout':smallScreen}"
@@ -5,9 +14,13 @@
       {{ subject }}<span [hidden]="smallScreen">:</span> <span class="topic-header">{{ topic }}</span>
       
     </div>
+    <a id="starTest" mat-raised-button color="primary" 
+    (click)="startTest()"
+    [hidden]="testStarted"
+    >Start</a>
   </div>
 
-<div class="quiz-container">
+<div [hidden]="!testStarted" class="quiz-container">
 
     <mat-accordion>
       <mat-expansion-panel *ngFor="let question of questions; let i = index">

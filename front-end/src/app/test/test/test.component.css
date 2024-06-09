@@ -1,31 +1,54 @@
-<<<<<<< HEAD
-.quiz-container {
-  position: fixed;
-  width: 80%;
-  padding-top: 64px; /* Height of the toolbar */
-  position: absolute;
+
+#back{
+
+  margin-top: 20px;
+  margin-bottom: 25px;
+  color: #00796b;
+  max-width: 75px;
 }
 
-.quiz-toolbar {
-  
-=======
+
+#back a {
+ 
+  color: #00796b; 
+} 
+
+
+#back mat-icon {
+  font-size: 1.5em;
+  margin-right: 0.5em; 
+}
+
 .header-container {
   display: flex;
   justify-content: center;
   align-items: center;
   margin-bottom: 16px;
+  position: relative;
 }
 .header-left {
-  flex: 1;
   text-align: center;
   font-size: 1.2em;
   font-weight: bold;
+ 
+  
 }
+
+#starTest{
+  margin-left: 50px;
+}
+
+
+
+
+
+
 
 .topic-header {
   font-size: 0.8em;
   font-weight: normal;
   margin-left: 4px;
+  
 }
 
 
@@ -50,20 +73,16 @@
 
 .quiz-toolbar {
   position: fixed;
->>>>>>> fixture
   top: 0;
   left: 0;
   width: 100%;
   z-index: 2;
   display: flex;
   justify-content: space-between;
-<<<<<<< HEAD
-=======
   background-color: #3f51b5;
   color: white;
   padding: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
->>>>>>> fixture
 }
 
 .left-label {
@@ -79,8 +98,6 @@
 mat-accordion {
   margin-top: 16px; /* Space between toolbar and accordion */
 }
-<<<<<<< HEAD
-=======
 
 mat-expansion-panel-header {
   background-color: #e3f2fd;
@@ -98,4 +115,3 @@ button {
   padding: 10px 20px;
   font-size: 1em;
 }
->>>>>>> fixture

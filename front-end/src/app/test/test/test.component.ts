@@ -13,6 +13,8 @@ import { MediaChange } from '@angular/flex-layout';
 })
 export class TestComponent implements OnInit, OnDestroy{
 
+
+
 questions: Question[] = [];
 
 
@@ -31,6 +33,8 @@ selectedOptions:any[] = [];
 
 //boolean flag showing whether the user's screen is small
 smallScreen = false;
+testStarted: boolean = false; // boolean flag indicating whether the student has clicked on the start button to commence the test
+
  
 
   constructor(private testService:TestService,
@@ -71,6 +75,14 @@ smallScreen = false;
   
 }
 
+
+//triggers the commencement of test and the start of timer
+startTest() {
+
+  this.testStarted = true;
+  
+}
+
 //submits the test assessment after the time elapses
 //Reminder: Reimplement to send to database after time elapses or user submits willingly
 submit() {
@@ -93,6 +105,14 @@ private mediaAlias(){
     changes.forEach(c => console.log(c.mqAlias));
   })
 }
+
+
+goBack() {
+  window.history.back();
+ 
+
+}
+
 
 }
 
