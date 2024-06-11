@@ -1,0 +1,26 @@
+#timer {
+   
+    display: flex;
+    align-items: center;
+    justify-content: center;
+   
+    padding: 5px 15px; /* Padding for space inside the container */
+    border-radius: 8px; /* Rounded corners */
+   
+    font-size: 1.2em; /* Larger font size for readability */
+    font-weight: bold; /* Bold text for emphasis */
+    color: #333; /* Dark text color for contrast */
+    margin-left: 20px; /* Space to separate from adjacent elements */
+  }
+  
+  #timer mat-icon {
+    margin-right: 10px; /* Space between icon and text */
+    font-size: 1.4em; /* Larger icon size */
+    
+  }
+  
+  #timer span {
+    display: flex;
+    align-items: center; /* Center-align the icon and text */
+  }
+  

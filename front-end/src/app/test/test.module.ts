@@ -4,6 +4,8 @@ import { MaterialModule } from '../material/material.module';
 import { SharedModule } from '../shared/shared.module';
 import { CommonModule } from '@angular/common';
 import { MathJaxDirective } from '../math-jax.directive';
+import { TimerComponent } from './timer/timer.component';
+import { TimerPipe } from './timer/timer.pipe';
 
 
 
@@ -12,6 +14,8 @@ import { MathJaxDirective } from '../math-jax.directive';
   declarations: [
     TestComponent,
     MathJaxDirective,
+    TimerComponent,
+    TimerPipe
     
   ],
   imports: [

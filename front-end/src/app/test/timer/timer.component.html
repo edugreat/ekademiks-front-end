@@ -1,0 +1,21 @@
+<div id="timer" 
+
+>
+   <span [style.color]="durationElapsing ? 'red' : 'green' " >  
+    
+    <mat-icon *ngIf= "isOneMinuteRemaining"
+    
+    matTooltip="About to submit" 
+    matTooltipShowDelay="1000" matTooltipHideDelay="2000"
+
+    >pending_actions</mat-icon>
+    <mat-icon *ngIf="! isOneMinuteRemaining"
+
+    matTooltip="Time left" 
+    matTooltipShowDelay="1000" matTooltipHideDelay="2000"
+
+    >timer</mat-icon> {{testDuration | timer}}
+     
+</span>
+
+</div>

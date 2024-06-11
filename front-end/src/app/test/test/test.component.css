@@ -52,6 +52,18 @@
 }
 
 
+
+/* CSS for the timer container */
+.timer-container {
+  margin-left: 20px;
+  font-size: 1em;
+  font-weight: bold;
+ 
+  padding: 5px 10px;
+  border-radius: 8px;
+  
+}
+
 /* css header layout on small screen sizes */
 .vertical-layout {
   display: flex;

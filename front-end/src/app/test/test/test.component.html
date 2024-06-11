@@ -17,13 +17,19 @@
     <a id="starTest" mat-raised-button color="primary" 
     (click)="startTest()"
     [hidden]="testStarted"
-    >Start</a>
+    >Start</a> 
+    <span *ngIf="testStarted" > 
+      <app-timer   [testDuration]="testDuration"
+      (timeUp)="submit($event)">
+
+      </app-timer> 
+    </span>
   </div>
 
 <div [hidden]="!testStarted" class="quiz-container">
 
     <mat-accordion>
-      <mat-expansion-panel *ngFor="let question of questions; let i = index">
+      <mat-expansion-panel *ngFor="let question of testContent?.questions; let i = index">
         <mat-expansion-panel-header>
           <mat-panel-title>
             <span style="padding-right: 5px;" >{{ i + 1 }}.</span><span [appMathJax]= "question.problem"></span>
@@ -40,6 +46,6 @@
       </mat-expansion-panel>
     </mat-accordion>
   
-    <button mat-raised-button color="primary" (click)="submit()">Submit</button>
+    <button mat-raised-button color="primary" (click)="submit(true)">Submit</button>
   </div>
   

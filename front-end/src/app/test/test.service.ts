@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Option, Question } from './test-interface';
+import { QuestionDTO, QuestionPart, TestContent, TestContentDTO } from './test-interface';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 
@@ -15,32 +15,33 @@ export class TestService {
 
 
 
-getTest(topic:string, category:string):Observable<Question[]>{
+getTest(topic:string, category:string):Observable<TestContent>{
 
-  return this.http.get<QuestionDTO[]>(`${this.baseTestUrl}?topic=${topic}&category=${category}`).pipe(
-    map(dtos => dtos.map(dto =>  {
-      return this.convertToQuestion(dto)
-    }))
+  return this.http.get<TestContentDTO>(`${this.baseTestUrl}?topic=${topic}&category=${category}`).pipe(
+    map(dto => this.convertToTestContent(dto))
   )
 }
 
 //helper method to transform the Question dto object fetched from the server side to the question object to display on th front end
-  private convertToQuestion(dto:QuestionDTO):Question{
 
-    return {
-      number:dto.questionNumber,
-      problem:dto.text,
-      answer:dto.answer,
-      options:dto.options
-    }
-    
-  }
+private convertToQuestionPart(dto: QuestionDTO): QuestionPart {
+  return {
+    number: dto.questionNumber,
+    problem: dto.text,
+    answer: dto.answer,
+    options: dto.options
+  };
+}
+
+
+
+private convertToTestContent(dto: TestContentDTO): TestContent {
+  return {
+    questions: dto.questions.map(this.convertToQuestionPart),
+    instructions: dto.instructions
+  };
+}
 
 }
-// a data transfer object for easy communication between the backend and front end
-export interface QuestionDTO{
-  questionNumber:number,
-  text:string,
-  answer:string,
-  options:Option[]
-}
+
+
