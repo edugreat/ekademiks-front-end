@@ -1,0 +1,54 @@
+/* Container for the dialog */
+.mat-dialog-container {
+    padding: 20px;
+    background-color: #f9f9f9; /* Light background for readability */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Title styling */
+  .mat-dialog-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  
+  /* Content styling */
+  .mat-dialog-content {
+    max-height: 300px;
+    overflow-y: auto; /* Allow scrolling if content is too long */
+    font-size: 1.1em;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  
+  /* Each instruction paragraph */
+  .mat-dialog-content p {
+    margin: 10px 0;
+  }
+  
+  /* Actions container */
+  .mat-dialog-actions {
+    display: flex;
+    justify-content: center;
+  }
+  
+  /* Button styling */
+  .mat-dialog-actions button {
+    background-color: #1976d2; /* Primary button color */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .mat-dialog-actions button:hover {
+    background-color: #155a9a; /* Darker shade on hover */
+  }
+  

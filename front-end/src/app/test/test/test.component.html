@@ -16,7 +16,7 @@
     </div>
     <a id="starTest" mat-raised-button color="primary" 
     (click)="startTest()"
-    [hidden]="testStarted"
+    [hidden]="testStarted && hasReadInstructions"
     >Start</a> 
     <span *ngIf="testStarted" > 
       <app-timer   [testDuration]="testDuration"
@@ -26,7 +26,7 @@
     </span>
   </div>
 
-<div [hidden]="!testStarted" class="quiz-container">
+<div *ngIf= "testStarted && hasReadInstructions" class="quiz-container">
 
     <mat-accordion>
       <mat-expansion-panel *ngFor="let question of testContent?.questions; let i = index">
@@ -48,4 +48,4 @@
   
     <button mat-raised-button color="primary" (click)="submit(true)">Submit</button>
   </div>
-  
+ 

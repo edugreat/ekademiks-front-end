@@ -11,6 +11,7 @@ import {MatRadioModule} from '@angular/material/radio';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {MatDialogModule} from '@angular/material/dialog';
 
 
 
@@ -26,7 +27,8 @@ const materials = [
   MatRadioModule,
   MatExpansionModule,
   MatDividerModule,
-  MatTooltipModule
+  MatTooltipModule, 
+  MatDialogModule
 ]
 
 @NgModule({

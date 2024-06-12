@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { MathJaxDirective } from '../math-jax.directive';
 import { TimerComponent } from './timer/timer.component';
 import { TimerPipe } from './timer/timer.pipe';
+import { InstructionDialogComponent } from './instruction-dialog/instruction-dialog.component';
 
 
 
@@ -15,9 +16,11 @@ import { TimerPipe } from './timer/timer.pipe';
     TestComponent,
     MathJaxDirective,
     TimerComponent,
-    TimerPipe
+    TimerPipe,
+    InstructionDialogComponent
     
   ],
+  
   imports: [
     MaterialModule,
     CommonModule,
