@@ -13,15 +13,15 @@ import { FormsModule } from '@angular/forms';
 @NgModule({
     declarations: [
         AssessmentComponent,
-        AssessmentExpansionPanelComponent,
+        AssessmentExpansionPanelComponent
         
     ],
     imports: [
         CommonModule,
-        SharedModule,
-        MaterialModule,
+        SharedModule ,
         AppRoutingModule,
-        FormsModule
+        MaterialModule,
+        FormsModule,  
         
     ]
 })

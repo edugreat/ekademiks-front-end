@@ -1,19 +1,24 @@
 import { Component, OnInit, HostListener, OnDestroy, AfterViewInit, viewChild, ElementRef, ViewChild, Renderer2 } from '@angular/core';
 import { MediaChange, MediaObserver } from '@angular/flex-layout';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, finalize } from 'rxjs';
 import { AssessmentsService, Levels } from '../../assessment/assessments.service';
 import { Router } from '@angular/router';
 import { MediaService } from '../../media-service';
+import { SpinnerComponent } from '../../shared/spinner/spinner.component';
+
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+  styleUrls: ['./home.component.css'],
 })
 export class HomeComponent implements OnInit, OnDestroy {
 
-  //Observable arrays of academic levels received from the server
-  levels$: Observable<Levels[]> | undefined; 
+
+  //An arrays of academic levels received from the server
+  levels: Levels[] = []; 
+
+  levelSub:Subscription|undefined;
 
   //If the user's device is extra small
   deviceXs:boolean = false;
@@ -23,6 +28,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   deviceSm: boolean = false;
   mediaSubscription?:Subscription;
 
+  networkBusy?:boolean; //shows the network is busy, hence the spinner should be rotating
   
 
 
@@ -53,19 +59,26 @@ export class HomeComponent implements OnInit, OnDestroy {
 
       this.deviceXs = changes.some(change => change.mqAlias === 'xs');
       this.deviceSm = changes.some(change => change.mqAlias === 'sm');
-      changes.forEach(c => console.log(c.mqAlias));
+      
     })
     
   }
 
   ngOnDestroy(): void {
    this.mediaSubscription?.unsubscribe();
+   this.levelSub?.unsubscribe();
   }
 
   //calls the service to retrieve the academic levels
   getAcademicLevels(){
+    this.networkBusy = true;
 
-     this.levels$ = this.assessmentService.getAssessmentLevels();
+    console.log(this.networkBusy)
+    
+     this.levelSub = this.assessmentService.getAssessmentLevels().pipe(
+      finalize(() => this.networkBusy = false )
+     ).subscribe({
+      next:(result) => this.levels = result})
     
   }
 
@@ -75,4 +88,12 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.router.navigate(['/assessments', this.selectedLevel]);
   }
 
+
+  goBack() {
+    
+    //resets the levels array to empty so the page can reset to default display
+
+    this.selectedLevel = '';//resets the previous user selection
+    this.levels = [];
+    }
 }

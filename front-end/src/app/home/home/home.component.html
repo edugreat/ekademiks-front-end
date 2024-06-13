@@ -1,5 +1,17 @@
+
+
+<div *ngIf="levels.length > 0" id="back" matTooltip="Go back" 
+matTooltipShowDelay="1000"
+matTooltipPosition="below"
+matTooltipHideDelay="2000" >
+   <a mat-button (click)="goBack()" >
+       <mat-icon   >arrow_back</mat-icon>
+   </a>
+</div>
+
+
 <!--Display this secction of the page when the user has not made selection for the assessment level to take-->
-<section *ngIf="!levels$; else selectionMade">
+<section *ngIf="!levels?.length; else selectionMade">
   <!--For screen sizes not extra small-->
   <div class="gridListDiv" *ngIf="!deviceXs; else extraSmallScreen" >
 
@@ -53,16 +65,16 @@
 </section>
 
 <!--Display this section of the page when the user has made selection for the asssement level to take-->
+
 <ng-template #selectionMade>
-
-
+  <app-spinner *ngIf="networkBusy" [deviceXs]="deviceXs || deviceSm" ></app-spinner>
   <div class="levelRadioGroup">
     <div id="radio-label-div">
       <label id="example-radio-group-label">Pick assessment level</label>
     </div>
     <mat-radio-group #levelRadio [(ngModel)]="selectedLevel"
      name="_level"
-    *ngFor="let level of levels$ | async"
+    *ngFor="let level of levels"
       aria-labelledby="example-radio-group-label"
       class="example-radio-group">
       

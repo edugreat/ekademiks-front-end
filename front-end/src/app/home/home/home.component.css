@@ -130,3 +130,26 @@
   color: #00796b; /* Change color to a standout green */
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Add subtle shadow for emphasis */
 }
+
+
+
+/* Styles the back button */
+#back{
+
+  margin-top: 20px;
+  margin-bottom: 25px;
+  color: #00796b;
+  max-width: 75px;
+}
+
+
+#back a {
+ 
+  color: #00796b; 
+} 
+
+
+#back mat-icon {
+  font-size: 1.5em;
+  margin-right: 0.5em; 
+}

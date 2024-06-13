@@ -1,8 +1,10 @@
+<app-spinner *ngIf="networkBusy"  [deviceXs]="deviceXs"></app-spinner>
+
 <div  id="back" matTooltip="Go back" 
  matTooltipShowDelay="1000"
  matTooltipPosition="below"
  matTooltipHideDelay="2000" >
-    <a mat-button >
+    <a mat-button (click)="goBack()" >
         <mat-icon   >arrow_back</mat-icon>
     </a>
 </div>

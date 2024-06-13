@@ -4,6 +4,8 @@ import { MaterialModule } from '../material/material.module';
 import { CommonModule } from '@angular/common';
 import { AppRoutingModule } from '../app-routing/app-routing.module';
 import { FormsModule } from '@angular/forms';
+import { SharedModule } from '../shared/shared.module';
+import { SpinnerComponent } from '../shared/spinner/spinner.component';
 
 
 
@@ -16,9 +18,11 @@ import { FormsModule } from '@angular/forms';
     CommonModule,
     FormsModule,
     MaterialModule,
-    AppRoutingModule
+    AppRoutingModule,
+    SharedModule,
+   
    
   ],
-  exports:[HomeComponent]
+  //exports:[HomeComponent]
 })
 export class HomeModule { }

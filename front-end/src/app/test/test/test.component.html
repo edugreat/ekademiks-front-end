@@ -46,6 +46,6 @@
       </mat-expansion-panel>
     </mat-accordion>
   
-    <button mat-raised-button color="primary" (click)="submit(true)">Submit</button>
+    <button [disabled]="!submitable()" mat-raised-button color="primary" (click)="submit(true)">Submit</button>
   </div>
  

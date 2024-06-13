@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AssessmentsService } from '../assessments.service';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, finalize } from 'rxjs';
 import { MediaService } from '../../media-service';
 import { MediaChange } from '@angular/flex-layout';
 
@@ -15,6 +15,7 @@ export class AssessmentComponent implements OnInit, OnDestroy{
   //academic assessment level the component should serve to the html component
   selectedLevel = '';
 
+  networkBusy = true;//flag that controls that spinning effect of the spinner
 
   //subject names received from the network call
   subjectNames:string[] = [];
@@ -77,7 +78,11 @@ export class AssessmentComponent implements OnInit, OnDestroy{
     if(this.selectedLevel){//when activated router is a result of user's selection of a particular assessment
 
       
-   this.subjectNamesSub =  this.assessmentService.fetchSubjectNames(this.selectedLevel).subscribe(subjectNames => {
+   this.subjectNamesSub =  this.assessmentService.fetchSubjectNames(this.selectedLevel).pipe(
+    finalize(() => this.networkBusy = false)
+    
+   ).subscribe( subjectNames =>{
+
     this.subjectNames = subjectNames;
     this.totalSubject = subjectNames.length;
 
@@ -87,13 +92,14 @@ export class AssessmentComponent implements OnInit, OnDestroy{
     } else {//if there was no user selection for assessment level, then default to 'JUNIOR' category assessments
 
       this.selectedLevel = this.DEFAULT_LEVEL; //set selected level to the default value
-      this.subjectNamesSub = this.assessmentService.fetchSubjectNames(this.selectedLevel).subscribe(subjectNames =>{
+      this.subjectNamesSub = this.assessmentService.fetchSubjectNames(this.selectedLevel).pipe(
+        finalize(() => this.networkBusy = false)
+      ).subscribe(subjectNames =>{
 
         this.subjectNames = subjectNames;
         this.totalSubject= subjectNames.length;
 
         this.updateGridSettings(); //updates the mat-grid-list setting
-   
       })
     }
   }

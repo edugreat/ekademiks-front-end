@@ -14,6 +14,7 @@ import { LogoutComponent } from './logout/logout.component';
 import { HomeModule } from './home/home.module';
 import { MaterialModule } from './material/material.module';
 import { AssessmentModule } from './assessment/assessment.module';
+import { SharedModule } from './shared/shared.module';
 
   
 
@@ -23,8 +24,7 @@ import { AssessmentModule } from './assessment/assessment.module';
     AppComponent,
     LoginComponent,
     ContactComponent,
-    LogoutComponent,
-   
+    LogoutComponent
    
   ],
   
@@ -36,13 +36,12 @@ import { AssessmentModule } from './assessment/assessment.module';
     BrowserAnimationsModule,
     HttpClientModule,
     MaterialModule,
+    SharedModule,
     HomeModule,
     AssessmentModule,
     TestModule
-   
-   
-   
   ],
+  
  // exports:[RouterModule],
   providers: [],
   bootstrap: [AppComponent]

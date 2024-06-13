@@ -46,7 +46,6 @@ subject = ''; //subject for which the test assessment is based
 selectedOptions:any[] = [];
 
 
-
 //boolean flag showing whether the user's screen is small
 smallScreen = false;
 testStarted: boolean = false; // boolean flag indicating whether the student has clicked on the start button to commence the test
@@ -114,7 +113,7 @@ startTest() {
   else 
   {
     //get the duration for the test converted to seconds
-  this.testDuration =  1*60; //this.activatedRoute.snapshot.params['duration'] * 60;
+  this.testDuration = this.activatedRoute.snapshot.params['duration'] * 60;
   this.testStarted = true;
 }
  
@@ -149,11 +148,11 @@ private mediaAlias(){
 
   return this.mediaService.mediaChanges().subscribe((changes:MediaChange[]) =>{
 
-   let  mediaChange =changes.values()
+   
     this.smallScreen = changes.some(change => change.mqAlias === 'xs' || change.mqAlias === 'sm');
 
 
-    changes.forEach(c => console.log(c.mqAlias));
+    
     
     this.dialogWidth = this.smallScreen ? '250px':'500px'; 
   })
@@ -163,6 +162,24 @@ private mediaAlias(){
 goBack() {
   window.history.back();
  
+}
+
+//The instruction says a student must attempt at leat five questions to be able to submit
+public submitable(): boolean{
+  let attempted = 0;
+  //if questions have arrived
+ if(this.selectedOptions.length){
+
+ 
+  this.selectedOptions.filter(option =>{
+
+   option !== null ? attempted++ : attempted;
+
+  })
+
+}
+
+ return attempted >= 5 ? true : false
 
 }
 
