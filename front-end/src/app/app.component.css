@@ -30,6 +30,8 @@
     color: white !important;
     margin-top: 20px;
 }
+
+
 @media(min-width:900px){
 
     #menuItem{
@@ -38,6 +40,11 @@
 
     mat-sidenav{
         display: none;
+    }
+
+    #user{
+
+        margin-left: 50px;
     }
 }
 
@@ -53,5 +60,9 @@
 
     .top-menu-item{
         display: none;
+    }
+
+    #user{
+        margin-left: 0px;
     }
 }

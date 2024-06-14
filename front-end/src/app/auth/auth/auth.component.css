@@ -1,0 +1,46 @@
+/* Center the form on the page */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 70vh; /* Full viewport height */
+    background-color: #f5f5f5; /* Light grey background */
+    padding: 0 20px;
+  }
+  
+  /* Style the form */
+  .login-form {
+    background: white; /* White background for the form */
+    padding: 40px; /* Padding inside the form */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    max-width: 400px; /* Maximum width for the form */
+    width: 100%; /* Full width inside the max-width */
+  }
+  
+  /* Space out form fields */
+  .login-form mat-form-field {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+  
+  /* Style the submit button */
+  .login-form button {
+    width: 100%; /* Full width button */
+    padding: 12px; /* Padding inside the button */
+    font-size: 16px; /* Larger font size */
+  }
+
+  
+  /* Style the continue link */
+  .continue-link {
+    text-align: center; /* Center align the text */
+    margin-top: 5px; /* Add some space above the link */
+  }
+  
+  .continue-link a {
+    color: #757575; /* Less prominent color (grey) */
+    font-size: 14px; /* Smaller font size */
+    text-decoration: none; /* Remove underline */
+
+  }

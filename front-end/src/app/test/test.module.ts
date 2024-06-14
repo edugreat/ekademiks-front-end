@@ -22,7 +22,6 @@ import { InstructionDialogComponent } from './instruction-dialog/instruction-dia
   ],
   
   imports: [
-    MaterialModule,
     CommonModule,
     SharedModule,
     

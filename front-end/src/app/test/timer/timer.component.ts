@@ -37,7 +37,7 @@ export class TimerComponent implements OnInit, OnDestroy{
 
       if(this.testDuration > 0) {
 
-        const timeRemaining = Math.floor(this.timer / 60);
+        const timeRemaining = Math.floor(this.testDuration / 60);
 
         if(timeRemaining  <= 5 ){
           this.durationElapsing = true //sets true if remaining time <= 5 minutes

@@ -1,10 +1,9 @@
-import { Component, OnInit, HostListener, OnDestroy, AfterViewInit, viewChild, ElementRef, ViewChild, Renderer2 } from '@angular/core';
-import { MediaChange, MediaObserver } from '@angular/flex-layout';
-import { Observable, Subscription, finalize } from 'rxjs';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { MediaChange } from '@angular/flex-layout';
+import { Subscription, finalize } from 'rxjs';
 import { AssessmentsService, Levels } from '../../assessment/assessments.service';
 import { Router } from '@angular/router';
 import { MediaService } from '../../media-service';
-import { SpinnerComponent } from '../../shared/spinner/spinner.component';
 
 
 @Component({

@@ -17,7 +17,6 @@ import { SpinnerComponent } from '../shared/spinner/spinner.component';
   imports: [
     CommonModule,
     FormsModule,
-    MaterialModule,
     AppRoutingModule,
     SharedModule,
    
