@@ -75,6 +75,7 @@
 /* Apply css to large screens */
 @media(min-width: 760px) {
   .gridListDiv {
+    height: 35vw;
     background-color: #e5e4d7;
     margin-left: 10px;
     margin-right: 10px;
@@ -88,6 +89,7 @@
   }
 
   #welcomeDiv {
+    height: 35vw;
     margin-right: 340px;
     margin-left: 10px;
     margin-top: 10px;
