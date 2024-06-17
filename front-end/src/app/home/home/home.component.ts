@@ -1,38 +1,33 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { MediaChange } from '@angular/flex-layout';
-import { Subscription, finalize } from 'rxjs';
+import { Component, OnInit, HostListener, OnDestroy, AfterViewInit, viewChild, ElementRef, ViewChild, Renderer2 } from '@angular/core';
+import { MediaChange, MediaObserver } from '@angular/flex-layout';
+import { Observable, Subscription } from 'rxjs';
 import { AssessmentsService, Levels } from '../../assessment/assessments.service';
 import { Router } from '@angular/router';
 import { MediaService } from '../../media-service';
 
-
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css'],
+  styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit, OnDestroy {
-
-
-  //An arrays of academic levels received from the server
-  levels: Levels[] = []; 
-
-  levelSub:Subscription|undefined;
+  //Observable arrays of academic levels received from the server
+  levels$: Observable<Levels[]> | undefined; 
 
   //If the user's device is extra small
   deviceXs:boolean = false;
 
+  rowspan = 1; //default mat-grid row span
 
   //If the user's device is medium
   deviceSm: boolean = false;
   mediaSubscription?:Subscription;
 
-  networkBusy?:boolean; //shows the network is busy, hence the spinner should be rotating
   
 
 
   //welcome message displayable on large screens
-  welcomeMsg = "Join e-Kademiks for a transformative learning experience. Access tailored assessments for junior and senior high school levels, explore diverse subjects, and benefit from personalized profiles, real-time feedback, and insightful analytics. Unleash your potential and join a community dedicated to success. Start your journey now";
+  welcomeMsg = "Embark on your academic journey with us and unlock a world of knowledge and growth. Whether you're a student striving for excellence or an educator dedicated to nurturing minds, our platform is here to empower you every step of the way. Explore our comprehensive range of assessments tailored to junior and senior high school levels, designed to challenge and inspire. Dive into subjects that spark your curiosity, from mathematics to literature, and beyond. With personalized profiles, real-time feedback, and insightful analytics, your learning experience is as unique as you are. Join a community of learners committed to success and discover your full potential with e-Kademiks. Start your adventure now. The path to greatness awaits";
 
   //welcome message displayable on extra small screens
   weclome2 = "Embark on your academic journey with us by exploring our different range of assessments tailored for both students of junior and senior categories."
@@ -58,26 +53,21 @@ export class HomeComponent implements OnInit, OnDestroy {
 
       this.deviceXs = changes.some(change => change.mqAlias === 'xs');
       this.deviceSm = changes.some(change => change.mqAlias === 'sm');
-      
+      changes.forEach(c => console.log(c.mqAlias));
+
+      this.rowspan = changes.some(change => change.mqAlias === 'lg' ||  change.mqAlias === 'md') ? 1.5 : 1;
     })
     
   }
 
   ngOnDestroy(): void {
    this.mediaSubscription?.unsubscribe();
-   this.levelSub?.unsubscribe();
   }
 
   //calls the service to retrieve the academic levels
   getAcademicLevels(){
-    this.networkBusy = true;
 
-    console.log(this.networkBusy)
-    
-     this.levelSub = this.assessmentService.getAssessmentLevels().pipe(
-      finalize(() => this.networkBusy = false )
-     ).subscribe({
-      next:(result) => this.levels = result})
+     this.levels$ = this.assessmentService.getAssessmentLevels();
     
   }
 
@@ -88,11 +78,5 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
 
-  goBack() {
-    
-    //resets the levels array to empty so the page can reset to default display
-
-    this.selectedLevel = '';//resets the previous user selection
-    this.levels = [];
-    }
 }
+

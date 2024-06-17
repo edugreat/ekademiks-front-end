@@ -1,80 +1,40 @@
-
-
-<div *ngIf="levels.length > 0" id="back" matTooltip="Go back" 
-matTooltipShowDelay="1000"
-matTooltipPosition="below"
-matTooltipHideDelay="2000" >
-   <a mat-button (click)="goBack()" >
-       <mat-icon   >arrow_back</mat-icon>
-   </a>
-</div>
-
-
-<!--Display this secction of the page when the user has not made selection for the assessment level to take-->
-<section *ngIf="!levels?.length; else selectionMade">
-  <!--For screen sizes not extra small-->
-  <div class="gridListDiv" *ngIf="!deviceXs; else extraSmallScreen" >
-
-    <mat-grid-list  class="gridList" 
-    rowHeight="2:1" gutterSize="6px"
-     cols="4" >
-  <mat-grid-tile colspan="4" 
-   id="feature-assessment" >Featured Assessment</mat-grid-tile>
+<div class="container" *ngIf="!levels$; else selectionMade" >
+  <section style="padding-top: 1px; " class="welcome">
   
-  <mat-grid-tile colspan="4" >
-     <a mat-button (click)="getAcademicLevels()" >Take Assessments</a>
-    </mat-grid-tile>
-  <mat-grid-tile colspan="4" >Account</mat-grid-tile>
-  <mat-grid-tile colspan="4" >Recommended Test</mat-grid-tile>
+    <p >{{welcomeMsg}}</p>
+  </section>
+  <section class="actions">
+    <mat-grid-list  cols="4" rowHeight="2:1">
+      <mat-grid-tile [rowspan]="rowspan" colspan="4" >
+        <div class="action-item">Featured Assessment</div>
+      </mat-grid-tile >
+      <mat-grid-tile [rowspan]="rowspan" colspan="4">
+        <div class="action-item"> <a mat-button (click)="getAcademicLevels()" >Take Assessment</a> </div>
+      </mat-grid-tile>
+      <mat-grid-tile [rowspan]="rowspan" colspan="4">
+        <div class="action-item">Account</div>
+      </mat-grid-tile>
+      <mat-grid-tile [rowspan]="rowspan" colspan="4">
+        <div class="action-item">Recommended Assessment</div>
+      </mat-grid-tile >
     </mat-grid-list>
-  </div>
-  
- 
-  <div *ngIf="!deviceXs" id="welcomeDiv">
-    <p>{{welcomeMsg}}</p>
-  </div>
-
-  <!--Extra small screen sizes-->
-
-  <ng-template #extraSmallScreen>
-
-<div  id="welcomeDiv">
-  <p>{{welcomeMsg}}</p>
+  </section>
 </div>
 
 
-<div class="gridListDiv" >
-  <mat-grid-list  class="gridList" 
-  rowHeight="2:1" gutterSize="6px"
-   cols="4" >
 
-<mat-grid-tile colspan="4" 
- id="feature-assessment" >Featured Assessment</mat-grid-tile>
-
-<mat-grid-tile colspan="4" >
-  <a mat-button (click)="getAcademicLevels()" >Take Assessments</a>
-</mat-grid-tile>
-
-<mat-grid-tile colspan="4" >Account</mat-grid-tile>
-<mat-grid-tile colspan="4" >Recommended Test</mat-grid-tile>
-  </mat-grid-list>
-</div>
-
-  </ng-template>
-
-</section>
 
 <!--Display this section of the page when the user has made selection for the asssement level to take-->
-
 <ng-template #selectionMade>
-  <app-spinner *ngIf="networkBusy" [deviceXs]="deviceXs || deviceSm" ></app-spinner>
+
+
   <div class="levelRadioGroup">
     <div id="radio-label-div">
       <label id="example-radio-group-label">Pick assessment level</label>
     </div>
     <mat-radio-group #levelRadio [(ngModel)]="selectedLevel"
      name="_level"
-    *ngFor="let level of levels"
+    *ngFor="let level of levels$ | async"
       aria-labelledby="example-radio-group-label"
       class="example-radio-group">
       

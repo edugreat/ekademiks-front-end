@@ -1,157 +1,113 @@
-/* Apply css for small screen devices */
-
-@media(min-width: 200px) and (max-width: 600px) {
-  .gridListDiv {
-    background-color: #e5e4d7;
-    margin: 10px;
-    padding: 20px;
-    border-radius: 5px;
-    
-    
-  }
-
-  #welcomeDiv {
-    margin: 10px;
-    padding: 20px;
-    border-radius: 5px;
-    font-size: 105%;
-    background-color: #e5e4d7;
-  }
-}
-
-/* A screen sizes greater than extra small but less than medium */
-@media(min-width: 599px) and (max-width: 760px) {
-  .gridListDiv {
-    background-color: #e5e4d7;
-    
-    margin-left: 10px;
-    margin-right: 10px;
-    margin-bottom: 10px;
-    margin-top: 0px;
-    padding: 20px;
-    border-radius: 5px;
-    width: 250px;
-    float: right;
-    clear: right;
-  }
-
-  #welcomeDiv {
-    margin-right: 310px;
-    margin-left: 10px;
-    margin-top: 10px;
-    padding: 20px;
-    border-radius: 5px;
-    font-size: 105%;
-    background-color: #e5e4d7;
-  }
-}
-
-
-/* For screen sizes of 599 px */
-
-@media(min-width: 599px) and (max-width: 599px) {
-  .gridListDiv {
-    background-color: #e5e4d7;
-    margin: 10px;
-    padding: 20px;
-    border-radius: 5px;
-    width: 480px;
-    
-    
-    
-  }
-
-  #welcomeDiv {
-    margin: 10px;
-    padding: 20px;
-    border-radius: 5px;
-    font-size: 105%;
-    background-color: #e5e4d7;
-  }
-}
-
-
-
-/* Apply css to large screens */
-@media(min-width: 760px) {
-  .gridListDiv {
-    height: 35vw;
-    background-color: #e5e4d7;
-    margin-left: 10px;
-    margin-right: 10px;
-    margin-bottom: 10px;
-    margin-top: 0px;
-    padding: 10px;
-    border-radius: 5px;
-    width: 300px;
-    float: right;
-    clear: right;
-  }
-
-  #welcomeDiv {
-    height: 35vw;
-    margin-right: 340px;
-    margin-left: 10px;
-    margin-top: 10px;
-    padding: 20px;
-    border-radius: 5px;
-    font-size: 105%;
-    background-color: #e5e4d7;
-  }
-}
-
-
-/* Div for the radio button and the selections */
-.levelRadioGroup {
-  width: 100%;
-  /* border: 0.05em solid green; */
+.container {
   display: flex;
-  flex-direction: column; /* Arrange children divs vertically */
-  align-items: center; /* Center the children horizontally */
-  justify-content: center; /* Center the children vertically */
-  padding: 2em 0; /* Add extra space vertically between the edges of the parent div */
+  flex-wrap: wrap;
+  width: 100vw;
+  height: 100vh;
 }
 
-.example-radio-group {
-  display: flex;
-  flex-direction: row; /* Arrange radio buttons horizontally */
-  margin-bottom: 0.5em; /* Reduce space between radio groups */
+.welcome, .actions {
+  box-sizing: border-box;
 }
 
-#radio-label-div {
-  margin-bottom: 0.5em; /* Reduce space below the label */
+.welcome {
+  padding: 1rem;
+  order: 1;
 }
 
-#continueBTN {
-  margin-top: 0.5em; /* Reduce space above the button */
+.actions {
+  padding: 1rem;
+  order: 2;
 }
 
-#example-radio-group-label {
-  font-size: 1.5em; /* Increase font size */
-  font-weight: bold; /* Make the text bold */
-  color: #00796b; /* Change color to a standout green */
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Add subtle shadow for emphasis */
+.welcome p{
+  font-family:  'Roboto', sans-serif;;
 }
 
+@media (min-width: 1024px) {
+  /* Large screens */
+  .welcome {
+    background-color: #e5e4d7;
+    padding: 30px;
+    width: 60vw;
+    height: 40vw;
+    order: 1;
+    border-radius: 5px;
+  }
+  .actions {
+    background-color: #e5e4d7;
+    padding: 20px;
+    width: 30vw;
+    height: 40vw;
+    margin-left: 40px;
+    border-radius: 5px;
+    order: 2;
+  }
+  .welcome p {
+    margin-bottom: 2rem;
+    letter-spacing: 0.1rem;
+    line-height: 1.5rem;
+  }
 
-
-/* Styles the back button */
-#back{
-
-  margin-top: 20px;
-  margin-bottom: 25px;
-  color: #00796b;
-  max-width: 75px;
-}
-
-
-#back a {
  
-  color: #00796b; 
-} 
+  
+
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Medium screens */
+  .welcome {
+    background-color: #e5e4d7;
+    padding: 30px;
+    width: 60vw;
+    height: 50vw;
+    order: 1;
+    border-radius: 5px;
+  }
+  .actions {
+    background-color: #e5e4d7;
+    padding: 20px;
+    width: 30vw;
+    height: 50vw;
+    margin-left: 40px;
+    border-radius: 5px;
+    order: 2;
+  }
+  .welcome p {
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.08rem;
+    line-height: 1.4rem;
+  }
 
 
-#back mat-icon {
-  font-size: 1.5em;
-  margin-right: 0.5em; 
+}
+
+@media (max-width: 767px) {
+  /* Small screens */
+  .welcome, .actions {
+    width: 100vw;
+   
+    order: initial;
+    border-radius: 5px;
+  }
+  .welcome {
+    background-color: #e5e4d7;
+    height: auto;
+    margin-bottom: 4px;
+  }
+  .actions {
+    background-color: #e5e4d7;
+  }
+  .welcome p {
+    margin-bottom: 1rem;
+    letter-spacing: 0.05rem;
+    line-height: 1.3rem;
+    
+   
+  }
+}
+
+.mat-grid-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
