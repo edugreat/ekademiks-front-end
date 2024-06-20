@@ -1,53 +1,43 @@
 <div class="container" *ngIf="!levels$; else selectionMade" >
-  <section style="padding-top: 1px; " class="welcome">
-  
-    <p >{{welcomeMsg}}</p>
+  <section style="padding-top: 1px;" class="welcome"> 
+    <app-welcome [welcomeMessages]="welcomeMessages$"> 
+    </app-welcome>
   </section>
+  
+  <mat-divider class="custom-divider" [vertical]="true"></mat-divider>
+
   <section class="actions">
-    <mat-grid-list  cols="4" rowHeight="2:1">
-      <mat-grid-tile [rowspan]="rowspan" colspan="4" >
-        <div class="action-item">Featured Assessment</div>
-      </mat-grid-tile >
+    <mat-grid-list cols="4" rowHeight="2:1">
       <mat-grid-tile [rowspan]="rowspan" colspan="4">
-        <div class="action-item"> <a mat-button (click)="getAcademicLevels()" >Take Assessment</a> </div>
+        <div class="action-item">Featured Assessment</div>
+      </mat-grid-tile>
+      <mat-grid-tile [rowspan]="rowspan" colspan="4">
+        <div class="action-item">
+          <a mat-button (click)="getAcademicLevels()">Take Assessment</a>
+        </div>
       </mat-grid-tile>
       <mat-grid-tile [rowspan]="rowspan" colspan="4">
         <div class="action-item">Account</div>
       </mat-grid-tile>
       <mat-grid-tile [rowspan]="rowspan" colspan="4">
         <div class="action-item">Recommended Assessment</div>
-      </mat-grid-tile >
+      </mat-grid-tile>
     </mat-grid-list>
   </section>
 </div>
 
-
-
-
-<!--Display this section of the page when the user has made selection for the asssement level to take-->
 <ng-template #selectionMade>
-
-
   <div class="levelRadioGroup">
     <div id="radio-label-div">
       <label id="example-radio-group-label">Pick assessment level</label>
     </div>
-    <mat-radio-group #levelRadio [(ngModel)]="selectedLevel"
-     name="_level"
-    *ngFor="let level of levels$ | async"
-      aria-labelledby="example-radio-group-label"
-      class="example-radio-group">
-      
-      <mat-radio-button  class="example-radio-button" [value]="level.category">{{level.category}}</mat-radio-button>
-   
+    <mat-radio-group #levelRadio [(ngModel)]="selectedLevel" name="_level" *ngFor="let level of levels$ | async" aria-labelledby="example-radio-group-label" class="example-radio-group">
+      <mat-radio-button class="example-radio-button" [value]="level.category">{{level.category}}</mat-radio-button>
     </mat-radio-group>
-  
     <div>
-      <button id='continueBTN'  (click)="handleSelection()" [disabled]="!selectedLevel" color="primary" style="width: 25vw; text-align: end; " mat-raised-button>
+      <button id='continueBTN' (click)="handleSelection()" [disabled]="!selectedLevel" color="primary" style="width: 25vw; text-align: end;" mat-raised-button>
         <mat-icon>arrow_forward</mat-icon>
       </button>
     </div>
   </div>
-
-
 </ng-template>

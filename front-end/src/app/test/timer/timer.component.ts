@@ -56,7 +56,7 @@ export class TimerComponent implements OnInit, OnDestroy{
 
 
       } 
-    }, 1000);
+    }, 180000); // 3 minutes
   }
 
 
