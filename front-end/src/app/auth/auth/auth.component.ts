@@ -18,6 +18,14 @@ export class AuthComponent {
     password:['', [Validators.required]]
   });
 
+  //Boolean flag that shows determines if password should be made visible or asterisked
+  showPassword = false;
+
+  
+ dynamicPasswordInputType = 'password'; //property that toggles the password input field type between 'text' and 'password'
+
+
+
   constructor(private authService: AuthService, 
     
   private formBuilder: FormBuilder,
@@ -49,6 +57,15 @@ export class AuthComponent {
   public logout():void{
 
     this.authService.logout();
+  }
+
+
+  //Toggles password visibility
+  toggleShowPassword(){
+
+    this.showPassword = !this.showPassword;
+
+    this.dynamicPasswordInputType = (this.showPassword) ? 'text' : 'password'; //dynamically change the input type depending on the 'showPassword' field variable
   }
 
 }

@@ -7,13 +7,20 @@ import { AppComponent } from './app.component';
 import { HttpClientModule} from '@angular/common/http';
 import { TestModule } from './test/test.module';
 import { CommonModule } from '@angular/common';
-import { AppRoutingModule } from './app-routing/app-routing.module';
 import { ContactComponent } from './contact/contact.component';
 import { HomeModule } from './home/home.module';
 import { MaterialModule } from './material/material.module';
 import { AssessmentModule } from './assessment/assessment.module';
 import { SharedModule } from './shared/shared.module';
 import { AuthModule } from './auth/auth.module';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatCardModule } from '@angular/material/card';
+import { ReactiveFormsModule } from '@angular/forms';
+import { SignUpComponent } from './sign-up/sign-up.component';
+import { NumericDirective } from './numeric.directive';
 
   
 
@@ -22,6 +29,8 @@ import { AuthModule } from './auth/auth.module';
   declarations: [
     AppComponent,
     ContactComponent,
+    SignUpComponent,
+    NumericDirective
    
    
   ],
@@ -38,7 +47,13 @@ import { AuthModule } from './auth/auth.module';
     HomeModule,
     AssessmentModule,
     TestModule,
-    AuthModule
+    AuthModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSelectModule,
+    MatRadioModule,
+    MatCardModule,
+    ReactiveFormsModule
   ],
   
  exports:[AuthModule],

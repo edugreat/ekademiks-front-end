@@ -7,6 +7,7 @@ import { ContactComponent } from '../contact/contact.component';
 import { AssessmentExpansionPanelComponent } from '../assessment/assessment-expansion-panel/assessment-expansion-panel.component';
 import { TestComponent } from '../test/test/test.component';
 import { AuthComponent } from '../auth/auth/auth.component';
+import { SignUpComponent } from '../sign-up/sign-up.component';
 
 const routes:Routes = [
  {path: 'home', component: HomeComponent},
@@ -17,7 +18,9 @@ const routes:Routes = [
   {path: 'login', component: AuthComponent},
   {path:'assessment-panel/:subject/:category', component: AssessmentExpansionPanelComponent},
   {path: 'start/:topic/:duration/:subject/:category', component: TestComponent},
+  {path: 'sign-up', component: SignUpComponent},
   {path: '', redirectTo: 'login', pathMatch:'full'},
+  
 ]
 
 @NgModule({

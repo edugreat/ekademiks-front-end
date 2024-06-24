@@ -1,0 +1,170 @@
+
+<div id="registrationLabel">
+    <label>PLEASE CREATE ACCOUNT</label>
+</div>
+
+<div class="signup-container">
+    <div class="signup-form" [formGroup]="userForm">
+      
+        <!-- First name input field -->
+        <div>
+        <mat-form-field appearance="outline">
+          <input  type="text" formControlName="firstName" 
+          matInput placeholder="First Name"
+          
+          >
+
+          @if (userForm.get('firstName')?.value) {
+            <button matSuffix mat-icon-button aria-label="Clear" (click)="userForm.get('firstName')!.reset('') " >
+             <mat-icon>close</mat-icon>
+            </button>
+          }
+          <mat-hint>Your First Name</mat-hint>
+          <mat-error *ngIf="userForm.get('firstName')?.touched && userForm.get('firstName')?.hasError('invalidName') " >Name is not valid</mat-error>
+          <mat-error *ngIf="userForm.get('firstName')?.touched && userForm.get('firstName')?.hasError('required') " >First name is required</mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Last name input field -->
+
+      <div>
+        <mat-form-field appearance="outline">
+          <input type="text" formControlName="lastName"
+          
+          matInput placeholder="Last Name">
+          @if (userForm.get('lastName')?.value) {
+            <button matSuffix mat-icon-button aria-label="Clear" (click)="userForm.get('lastName')!.reset('')" >
+             <mat-icon>close</mat-icon>
+            </button>
+          }
+          <mat-hint>Your Last Name</mat-hint>
+          <mat-error *ngIf="userForm.get('lastName')?.touched && userForm.get('lastName')?.hasError('invalidName') " >Name is not valid</mat-error>
+          <mat-error *ngIf="userForm.get('lastName')?.touched && userForm.get('lastName')?.hasError('required') " >Last name is required</mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Email address input field -->
+      <div>
+      <mat-form-field appearance="outline">
+        <input type="text" formControlName="email" 
+        matInput placeholder="Email Address">
+
+        @if (userForm.get('email')?.value) {
+            <button matSuffix mat-icon-button aria-label="Clear" (click)="userForm.get('email')!.reset('')" >
+             <mat-icon>close</mat-icon>
+            </button>
+          }
+        @if (!userForm.get('email')?.value) {
+
+          <mat-icon matSuffix >email</mat-icon>
+        }
+        <mat-hint>Your Email Address</mat-hint>
+        <mat-error *ngIf="userForm.get('email')?.touched && userForm.get('email')?.hasError('invalidEmail') " >Email is not valid</mat-error>
+      </mat-form-field>
+      </div>
+
+      <!-- Mobile number input field -->
+      <div>
+        <mat-form-field appNumeric appearance="outline">
+          <input   type="text" formControlName="mobileNumber" 
+          matInput placeholder="Mobile Number (Optional)">
+
+          @if (userForm.get('mobileNumber')?.value) {
+            <button matSuffix mat-icon-button aria-label="Clear" (click)="userForm.get('mobileNumber')!.reset(undefined) " >
+             <mat-icon>close</mat-icon>
+            </button>
+          }
+          @if (!userForm.get('mobileNumber')?.value) {
+            <mat-icon matSuffix >call</mat-icon>
+          }
+          <mat-hint>Your Mobile Number</mat-hint>
+
+          <mat-error *ngIf="userForm.get('mobileNumber')?.touched && userForm.get('mobileNumber')?.hasError('invalidPhoneNumber') ">Phone not valid</mat-error>
+        </mat-form-field>
+        </div>
+
+        <!-- Password input field -->
+        <div>
+            <mat-form-field appearance="outline">
+               <!-- The password visibility is only shown if the property 'showPassword' is false -->
+             @if (!showPassword) {
+
+              <button matSuffix mat-icon-button
+              
+              (click)="toggleShowPassword()"
+              >
+                <mat-icon >visibility</mat-icon>
+              </button>
+             }
+
+            
+              <input [type]="dynamicPasswordInputType" formControlName="password" 
+              
+              matInput placeholder="Password">
+             
+              <!-- The password visibility off is only shown if the property 'showPassword' is true -->
+               @if (showPassword) {
+
+                <button matSuffix mat-icon-button
+              
+                (click)="toggleShowPassword()"
+                >
+                  <mat-icon >visibility_off</mat-icon>
+                </button>
+               }
+              <mat-hint>Your Password</mat-hint>
+              <mat-error *ngIf="userForm.get('password')?.touched && userForm.get('password')?.hasError('invalidPassword') " >
+
+                <ul class="error-list" >
+                    <li>At least 8 characters, 1 upper case character, 1 lower case character, 1 special character  </li>
+                    </ul>
+
+              </mat-error>
+          <mat-error *ngIf="userForm.get('password')?.touched && userForm.get('password')?.hasError('required') " >Password is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Password confirmation input field -->
+          <div>
+            <mat-form-field appearance="outline">
+               <!-- The password visibility is only shown if the property 'showConfirmationPassword' is false -->
+             @if (!showConfirmationPassword) {
+
+              <button matSuffix mat-icon-button
+              
+              (click)="toggleShowConfirmPassword()"
+              >
+                <mat-icon >visibility</mat-icon>
+              </button>
+             }
+
+             <!-- Password visibility off is displayed if the 'showConfirmationPassword' is true -->
+             @if (showConfirmationPassword) {
+
+              <button  matSuffix mat-icon-button
+              
+              (click)="toggleShowConfirmPassword()"
+              >
+                <mat-icon>visibility_off</mat-icon>
+              </button>
+             }
+              <input [type]="dynamicConfirmPasswordInputType"
+              formControlName="confirmPassword"
+              
+              matInput placeholder="Confirm Password">
+             
+              <mat-hint>Confirm Your Password</mat-hint>
+            </mat-form-field>
+          </div>
+
+      <div>
+
+        <!-- Submit button -->
+        <button (click)="createAccount()" mat-raised-button 
+        [disabled]="(userForm.invalid || passwordMismatch)" color="primary" type="submit">
+          Create Account
+        </button>
+      </div>
+    </div>
+  </div>
+

@@ -1,3 +1,6 @@
+
+<div><label id="signInLabel" >Please Sign In</label></div>
+
 <div class="login-container">
   <div class="login-form" [formGroup]="form">
     <div>
@@ -9,11 +12,21 @@
         <mat-error *ngIf="form.get('email')!.hasError('required')">Email is required</mat-error>
       </mat-form-field>
     </div>
-
+  <!-- PASSWORD FIELD -->
     <div>
       <mat-form-field appearance="outline">
-        <input type="password" formControlName="password" matInput placeholder="Password">
-        <mat-icon matSuffix>vpn_key</mat-icon>
+        <input [type]="dynamicPasswordInputType" formControlName="password" matInput placeholder="Password">
+        @if (showPassword) {
+          <button (click)="toggleShowPassword()" matSuffix mat-icon-button>
+          <mat-icon>visibility_off</mat-icon>
+          </button>
+        }
+
+        @if (!showPassword) {
+          <button (click)="toggleShowPassword()" matSuffix mat-icon-button>
+          <mat-icon>visibility</mat-icon>
+          </button>
+        }
         <mat-hint>Your Password</mat-hint>
         <mat-error *ngIf="form.get('password')!.hasError('required')">Password is required</mat-error>
       </mat-form-field>
@@ -22,10 +35,21 @@
     <div>
       <button (click)="login(form.get('email')!.value, form.get('password')!.value)" mat-raised-button 
       [disabled]="form.invalid" color="primary" type="submit">
-        Submit
+        Login
       </button>
     </div>
   </div>
+</div>
+<!-- If the use does not have account yet,they may decide to sign up instead -->
+<div id="doesNotHaveAccount" >
+ <span><hr> </span>
+ <span >OR</span>
+ <span><hr> </span>
+</div>
+<div id="signUp" >
+  <a mat-button 
+ [routerLink]="['/sign-up']"
+  color="primary" >Sign Up Now</a>
 </div>
 <mat-divider></mat-divider>
   <div class="continue-link" >
