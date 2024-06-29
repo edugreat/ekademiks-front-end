@@ -1,51 +1,72 @@
-<!--NAVIGATE BACK-->
-<div id="back" (click)="goBack()" matTooltip="Go back" 
- matTooltipShowDelay="1000" matTooltipHideDelay="2000" >
-    <a mat-button >
-        <mat-icon   >arrow_back</mat-icon>
-    </a>
-</div>
-
-
-<div  class="header-container">
-    <div class="header-left" 
-    [ngClass]="{'vertical-layout':smallScreen}"
-    >
-      {{ subject }}<span [hidden]="smallScreen">:</span> <span class="topic-header">{{ topic }}</span>
-      
-    </div>
-    <a id="starTest" mat-raised-button color="primary" 
-    (click)="startTest()"
-    [hidden]="testStarted && hasReadInstructions"
-    >Start</a> 
-    <span *ngIf="testStarted" > 
-      <app-timer   [testDuration]="testDuration"
-      (timeUp)="submit($event)">
-
-      </app-timer> 
-    </span>
-  </div>
-
-<div *ngIf= "testStarted && hasReadInstructions" class="quiz-container">
-
-    <mat-accordion>
-      <mat-expansion-panel *ngFor="let question of testContent?.questions; let i = index">
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            <span style="padding-right: 5px;" >{{ i + 1 }}.</span><span [appMathJax]= "question.problem"></span>
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        
-        <mat-radio-group [(ngModel)]="selectedOptions[i]" *ngIf="question.options.length">
-          <mat-radio-button *ngFor="let option of question.options | optionSort"
+<div class="container">
+  <div id="back" (click)="goBack()" matTooltip="Go back" 
+  matTooltipShowDelay="1000" matTooltipHideDelay="2000" >
+     <a mat-button >
+         <mat-icon   >arrow_back</mat-icon>
+     </a>
+ </div>
+ 
+ <div 
+  *ngIf="hasReadInstructions && testStarted"
+ class="progress-bar-fixed" >
+   <app-progress-bar [barColor]="progressBarColor"
+   [barMode]="barMode"
+   [barBufferValue]="progress" ></app-progress-bar>
+   <div class="progress-text">
+     @if (remaining > 0) {
+      <span>Remaining</span>: {{remaining}}
+     } @else if (remaining <= 0 ) {
+      <span>Completed !</span>
+     }
+   </div>
+ </div>
+ 
+ <div  class="header-container">
+     <div class="header-left" 
+     [ngClass]="{'vertical-layout':smallScreen}"
+     >
+       {{ subject }}<span [hidden]="smallScreen">:</span> <span class="topic-header">{{ topic }}</span>
+       
+     </div>
+     <a id="starTest" mat-raised-button color="primary" 
+     (click)="startTest()"
+     [hidden]="testStarted && hasReadInstructions"
+     >Start</a> 
+     <span *ngIf="testStarted" > 
+       <app-timer   [testDuration]="testDuration"
+       (timeUp)="submit($event)">
+ 
+       </app-timer> 
+     </span>
+   </div>
+ 
+ <div *ngIf= "testStarted && hasReadInstructions" class="quiz-container">
+ 
+     <mat-accordion>
+       <mat-expansion-panel *ngFor="let question of testContent?.questions; let i = index">
+         <mat-expansion-panel-header>
+           <mat-panel-title>
+             <span style="padding-right: 5px;" >{{ i + 1 }}.</span><span [appMathJax]= "question.problem"></span>
+           </mat-panel-title>
+         </mat-expansion-panel-header>
          
-          [value]="option.letter">
-            <span style="font-weight: bold;margin-right: 15px; " [appMathJax]="option.letter ">. </span> <span [appMathJax]="  option.text"></span>
-          </mat-radio-button>
-        </mat-radio-group>
-      </mat-expansion-panel>
-    </mat-accordion>
-  
-    <button [disabled]="!submitable()" mat-raised-button color="primary" (click)="submit(true)">Submit</button>
-  </div>
+         <mat-radio-group 
+         
+         (change)="calculateProgress()"
+ 
+         [(ngModel)]="selectedOptions[i]" *ngIf="question.options.length">
+           <mat-radio-button *ngFor="let option of question.options | optionSort"
+          
+           [value]="option.letter">
+             <span style="font-weight: bold;margin-right: 15px; " [appMathJax]="option.letter ">. </span> <span [appMathJax]="  option.text"></span>
+           </mat-radio-button>
+         </mat-radio-group>
+       </mat-expansion-panel>
+     </mat-accordion>
+   
+     <button [disabled]="!submitable()" mat-raised-button color="primary" (click)="submit(true)">Submit</button>
+   </div>
+</div>
+<!--NAVIGATE BACK-->
+
  

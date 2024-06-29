@@ -1,4 +1,9 @@
+/* .container{
 
+  height: 100vh;
+  padding-top: 15px;
+  margin-top: 70px;
+} */
 #back{
 
   margin-top: 20px;
@@ -126,4 +131,19 @@ button {
   margin: 20px auto;
   padding: 10px 20px;
   font-size: 1em;
+}
+
+
+/* Styles the progress bar  */
+.progress-bar-fixed{
+  
+  /* padding: 10px 0; */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+/* Centers text below the progress bar */
+.progress-text{
+
+  text-align: center;
+  font-weight: bold;
+  margin-top: 5px;
 }

@@ -48,18 +48,21 @@
 mat-error {
   color: #d32f2f; /* Material Design error color */
   font-size: 0.875rem; /* Slightly smaller font size */
-  margin-top: 8px; /* Space above the error message */
+  margin-top: 0px; /* Space above the error message */
+  margin-bottom: 5px;
+ 
 }
 
 .error-list {
   list-style-type: none; /* Remove default list styling */
   padding: 0; /* Remove default padding */
-  margin: 0; /* Remove default margin */
+  margin-top: 0; /* Remove default margin */
+  
 }
 
 .error-list li {
-  margin-bottom: 4px; /* Space between list items */
-  line-height: 1.5; /* Increased line height for readability */
+  margin-bottom: 0px; /* Space between list items */
+  line-height: 1; /* Increased line height for readability */
 }
 
 .error-list li::before {
@@ -67,5 +70,6 @@ mat-error {
   color: #d32f2f; /* Same as error text color */
   font-weight: bold; /* Bold bullet point */
 }
+
 
 

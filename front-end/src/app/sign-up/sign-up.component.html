@@ -1,9 +1,18 @@
 
-<div id="registrationLabel">
+@if (networkBusy) {
+
+  <div style="margin-top: 45vh; z-index: 1000;" >
+    <app-progress-bar  [barMode]="progressBarMode" ></app-progress-bar>
+  
+    <div style="text-align:left; color: black; font-weight: bold;" >Loading, wait . . .</div>
+  </div>
+}
+  
+<div *ngIf="!networkBusy" id="registrationLabel">
     <label>PLEASE CREATE ACCOUNT</label>
 </div>
 
-<div class="signup-container">
+<div *ngIf="!networkBusy" class="signup-container">
     <div class="signup-form" [formGroup]="userForm">
       
         <!-- First name input field -->
@@ -103,7 +112,7 @@
               matInput placeholder="Password">
              
               <!-- The password visibility off is only shown if the property 'showPassword' is true -->
-               @if (showPassword) {
+               @if (showPassword ) {
 
                 <button matSuffix mat-icon-button
               
@@ -112,15 +121,18 @@
                   <mat-icon >visibility_off</mat-icon>
                 </button>
                }
+
+              
               <mat-hint>Your Password</mat-hint>
               <mat-error *ngIf="userForm.get('password')?.touched && userForm.get('password')?.hasError('invalidPassword') " >
-
+             
                 <ul class="error-list" >
-                    <li>At least 8 characters, 1 upper case character, 1 lower case character, 1 special character  </li>
-                    </ul>
-
+                  <li>At least 8 characters, 1 uppercase, 1 lowercase, 1 special character</li>
+                 
+                 </ul>
               </mat-error>
-          <mat-error *ngIf="userForm.get('password')?.touched && userForm.get('password')?.hasError('required') " >Password is required</mat-error>
+          
+              <mat-error *ngIf="userForm.get('password')?.touched && userForm.get('password')?.hasError('required') " >Password is required</mat-error>
             </mat-form-field>
           </div>
 

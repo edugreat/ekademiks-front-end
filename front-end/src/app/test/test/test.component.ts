@@ -7,6 +7,7 @@ import { MediaService } from '../../media-service';
 import { MediaChange } from '@angular/flex-layout';
 import { MatDialog } from '@angular/material/dialog';
 import { InstructionDialogComponent } from '../instruction-dialog/instruction-dialog.component';
+import { ProgressBarMode } from '@angular/material/progress-bar';
 
 @Component({
   selector: 'app-test',
@@ -35,6 +36,18 @@ hasReadInstructions = false;
 
 //The current time left before the time alloted to complete the test
 testDuration = 0;
+
+//the number of questions asked
+totalQuestions = 0;
+
+//the progress pace the student makes
+progress = 0;
+
+barMode: ProgressBarMode ='buffer';
+//Changes the progress bar color to reflect the progress of the student. A color of primary indicates good progress
+progressBarColor = '';
+//Number of questions remaining before the students finishes
+remaining = 0;
 
 //to be unsubscribed when the template is destroyed
 questionSub:Subscription | undefined;
@@ -90,7 +103,10 @@ testStarted: boolean = false; // boolean flag indicating whether the student has
     //selected options initialized to null
     this.selectedOptions = new Array(this.testContent.questions.length).fill(null);
 
+    //sets the number of questions askd
+     this.totalQuestions = this.testContent.questions.length;
 
+     this.remaining = this.totalQuestions;
     //opens the dialog box once the question gets loaded
     this.openDialog(this.enterAnimationDuration, this.exitAnimationDuration);
 
@@ -140,6 +156,21 @@ submit(timeUp:boolean) {
 
 
   }
+
+  }
+
+  //calculate the percentage progress of the student
+  calculateProgress(){
+
+    //get the number of attempts
+    const attempted:any[] = this.selectedOptions.filter(option => option !== null);
+    console.log(`attempted = ${attempted.length}`)
+    console.log(`total ${this.totalQuestions}`)
+    this.progress = Math.floor((attempted.length * 100)/this.totalQuestions);
+    console.log(`progress =${this.progress}`)
+    this.remaining = this.totalQuestions - attempted.length;
+  
+    this.progressBarColor = (this.progress >= 50) ? 'primary' : 'warn'; //checks if the student has attempted 50% questions or more,then changes color of the progress bar
 
   }
 

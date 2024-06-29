@@ -16,6 +16,56 @@ input.ng-dirty.ng-valid {
     border: 3px solid lightblue;
    }
 
+   .success-snackbar {
+    background-color: white; 
+    color: #4caf50;
+    font-size: 2rem;
+  }
+
+
+  /* The progress spinner */
+  .spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full height of the viewport */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000; /* Ensure it appears above other content */
+  }
+  
+  mat-spinner {
+    color: #00796b; /* Spinner color to match the quiz app's theme */
+    animation: spin 1s linear infinite; /* Smooth spinning animation */
+  }
+  
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .progress-bar-container{
+    align-items: center;
+    justify-content: center;
+    /* position: relative;
+    display: flex;
+     */
+  }
+
+  /* .mat-progress-bar{
+
+    flex-grow: 1;
+  } */
+
+ 
+  
    /* .invalid-phone-number{
 
     color:  #F9A825;

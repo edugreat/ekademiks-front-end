@@ -111,3 +111,73 @@
   align-items: center;
   justify-content: center;
 }
+
+.radio-button-container{
+  display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+}
+
+
+#radioBtnDIV {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 90%;
+  width: 400px;
+  text-align: center;
+}
+
+#example-radio-group-label {
+  font-size: 1.2em;
+  margin-bottom: 20px;
+  display: block;
+  color: #333;
+}
+
+.example-radio-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.example-radio-button {
+  margin: 10px 0;
+}
+
+#continueBTN {
+  margin-top: 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#continueBTN[disabled] {
+  background-color: #c0c0c0;
+  cursor: not-allowed;
+}
+
+#continueBTN mat-icon {
+  vertical-align: middle;
+}
+
+@media (max-width: 480px) {
+  #radioBtnDIV {
+    padding: 10px;
+    width: 100%;
+  }
+
+  #continueBTN {
+    width: 100%;
+    padding: 15px 0;
+  }
+}

@@ -1,18 +1,24 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { emailValidator, nameValidator, passwordValidator, phoneNumberValidator } from './valid.credentials';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { emailValidator, nameValidator, passwordValidator } from './valid.credentials';
 import { NewUser, SignUpService } from './sign-up.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { ProgressBarMode } from '@angular/material/progress-bar';
 
 
 @Component({
   selector: 'app-sign-up',
   templateUrl: './sign-up.component.html',
-  styleUrl: './sign-up.component.css'
+  styleUrl: './sign-up.component.css',
+  //encapsulation: ViewEncapsulation.None // Disable view encapsulation
 })
 export class SignUpComponent implements OnInit {
 
-  constructor(private signupService:SignUpService){}
+  constructor(private signupService:SignUpService,
+    private successSnackBar:MatSnackBar,
+    private router: Router){}
 
 
   
@@ -27,6 +33,16 @@ export class SignUpComponent implements OnInit {
  dynamicConfirmPasswordInputType = 'password';//property that toggles the password confirmation field between 'text' and 'password'
 
  showConfirmationPassword = false; //boolean flag that determines if the confirmation password should be visible or asteriked
+
+
+ accountCreated = false; //shows if the new account creation is successul or not
+
+ 
+ networkBusy = false;//shows if the network is busy or, for the purpose of spinner
+
+ //deviceSm = false; //true if users device is small screen
+
+ progressBarMode:ProgressBarMode = 'buffer';
 
  //Object representing the new user form group
   userForm = new FormGroup({
@@ -65,6 +81,8 @@ export class SignUpComponent implements OnInit {
 
       this.chechPasswordMatch()
     });
+
+    
     
   }
 
@@ -79,14 +97,33 @@ export class SignUpComponent implements OnInit {
     this.userForm.get('password')!.value,
     this.userForm.get('mobileNumber')?.value,
   );
- // console.log(`${newUser._email} ${newUser._firstName} ${newUser._password} ${newUser._mobileNumber} ${newUser._lastName}`)
 
-  this.signupService.registerUser(newUser).subscribe(status =>{
+  this.networkBusy =true;
+  this.signupService.registerUser(newUser).subscribe(({
+    next:(status) => {
+      console.log(status);
+      this.networkBusy = false;
 
-    console.log(status);
+    },
 
-  })
-  //console.log(JSON.stringify(this.newUser))
+    error:(error) => {
+      this.networkBusy =false;
+      console.log(error)
+    },
+
+    complete:() => {
+      this.userForm.reset();
+      this.networkBusy = true;//take a while to let user know their account creation was successful by setting timeout
+      this.openSnackBar();//shows the account creation success message
+
+      setTimeout(() =>{
+
+        this.router.navigate(['/login']) //redirects the user to the login page once the snack bar closes
+      },5000)//5 seconds delay to let users know account creation was successful before routing to the login page
+
+    }
+  }))
+  
 
   }
 
@@ -112,4 +149,19 @@ export class SignUpComponent implements OnInit {
  this.dynamicConfirmPasswordInputType = (this.showConfirmationPassword === true) ? 'text' : 'password';
 
   }
+
+  //opens the snack bar to notify user of successful account creation
+  private openSnackBar(){
+   this.successSnackBar.open(
+    'Account Created!', '', {
+      duration: 5000, // 5 seconds
+      verticalPosition: 'top', 
+      horizontalPosition: 'center', 
+      panelClass: ['success-snackbar']
+    }
+   )
+
+  }
+
+  
 }

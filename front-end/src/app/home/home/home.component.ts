@@ -56,7 +56,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
       this.deviceXs = changes.some(change => change.mqAlias === 'xs');
       this.deviceSm = changes.some(change => change.mqAlias === 'sm');
-      changes.forEach(c => console.log(c.mqAlias));
+      
 
       this.rowspan = changes.some(change => change.mqAlias === 'lg' ||  change.mqAlias === 'md') ? 1.5 : 1;
     })
