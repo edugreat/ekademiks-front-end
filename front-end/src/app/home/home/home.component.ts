@@ -2,7 +2,7 @@ import { Component, OnInit, HostListener, OnDestroy, AfterViewInit, viewChild, E
 import { MediaChange, MediaObserver } from '@angular/flex-layout';
 import { Observable, Subscription } from 'rxjs';
 import { AssessmentsService, Levels } from '../../assessment/assessments.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MediaService } from '../../media-service';
 import { HomeService } from '../home.service';
 import { observableToBeFn } from 'rxjs/internal/testing/TestScheduler';
@@ -13,6 +13,7 @@ import { observableToBeFn } from 'rxjs/internal/testing/TestScheduler';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit, OnDestroy {
+
   //Observable arrays of academic levels received from the server
   levels$: Observable<Levels[]> | undefined; 
 
@@ -39,13 +40,22 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     private assessmentService:AssessmentsService,
 
-  private router:Router){}
+  private router:Router, private activatedRoute:ActivatedRoute){}
  
 
   ngOnInit(): void {
     
-    this.getWelcomeMessages();
-    this.mediaSubscription = this.mediaAlias();
+    //if activation of this component is a result of the students wishing to take more assessment, then present them with assessment level rather than the usual welcome messages
+    if(this.activatedRoute.snapshot.params['more-assessment'] === 'true'){
+
+      this.getAcademicLevels();
+    }else{
+
+      this.goBack();
+      this.getWelcomeMessages();
+      this.mediaSubscription = this.mediaAlias();
+    }
+   
     
   }
 
@@ -84,6 +94,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   getWelcomeMessages(){
 
     this.welcomeMessages$ = this.homeService.getWelecomeMessages();
+  }
+
+  goBack() {
+    
+   this.router.navigate(['/home'])
+    
   }
 }
 

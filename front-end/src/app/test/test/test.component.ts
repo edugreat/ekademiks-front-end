@@ -1,13 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { TestService } from '../test.service';
+import { Attempt, TestService } from '../test.service';
 import { TestContent } from '../test-interface';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MediaService } from '../../media-service';
 import { MediaChange } from '@angular/flex-layout';
 import { MatDialog } from '@angular/material/dialog';
 import { InstructionDialogComponent } from '../instruction-dialog/instruction-dialog.component';
 import { ProgressBarMode } from '@angular/material/progress-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-test',
@@ -63,22 +64,33 @@ selectedOptions:any[] = [];
 smallScreen = false;
 testStarted: boolean = false; // boolean flag indicating whether the student has clicked on the start button to commence the test
 
- //imeUp = false; //shows whether test time is up or not. To be updated by the child's component event emitter
+ //if the student has submitted the test
+ testSubmitted = false;
+val='';
+ performanceSub$: Subscription | undefined; //subscription that subscribes to the performance observable to get notiied when student wishes to see their academic performance
+
+ showMyPerformace = false; 
+
+ submissionSub$:Subscription | undefined;
 
   constructor(private testService:TestService,
     private activatedRoute:ActivatedRoute,
     private mediaService:MediaService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private successSnackBar:MatSnackBar,
+    private router:Router
   ){}
 
   ngOnInit(): void {
    this.getQuestions();
    this.mediaAlias();
+   console.log(this.val)
   }
 
   ngOnDestroy(): void {
     
     this.questionSub?.unsubscribe();
+    this.submissionSub$?.unsubscribe();
   }
 
   //calls the getTest() of Test service to fetch all the questions for the given assessment
@@ -137,25 +149,80 @@ startTest() {
 }
 
 //submits the test assessment after the time elapses
-//Reminder: Reimplement to send to database after time elapses or user submits willingly
-submit(timeUp:boolean) {
 
-  if(timeUp === true){
+submit() {
 
+  
+  const attempted = this.selectedOptions.some(option => option !== null);
+  
+  if(attempted){
+    
+   let attempt:Attempt = {
 
-    const attempted = this.selectedOptions.some(option => option !== null);
+    testId:  Number(sessionStorage.getItem('testId')),
+    studentId: Number(sessionStorage.getItem('studentId')),
+    selectedOptions: this.selectedOptions
+   }
+    
   
 
-    if(attempted){
-  
-      this.selectedOptions.forEach(option => console.log(option))
-    }else {
-      console.log('No attempts made yet!')
+   //submit the student's performance to the back-end
+  this.submissionSub$ =  this.testService.submitTest(attempt).subscribe({
+    next:(value:string) =>{
       
-    }
+      console.log('submitting!')
+      this.testSubmitted = true;//sets the 'testSubitted' boolean to true so as to deactivate the submit button, so that a resubmission is not initiated 
+      this.openSnackBar(value);//open a snack bar to notify the student of successful submission
+    },
 
+      complete:() => {
+        console.log('submitted')
+        setTimeout(() => {
+          this.router.navigate(['/performance'])
+        }, 5000);
+      },
+     
+      error:() =>{
+        console.log()
+      }
+   })
+  }
+
+ 
 
   }
+
+  //automatic submission is triggered once the assessment time is up
+  autoSubmit(event:boolean){
+if(event ===true){
+
+
+  
+  const attempted = this.selectedOptions.some(option => option !== null);
+  if(attempted){
+   let attempt:Attempt = {
+
+    testId:  Number(sessionStorage.getItem('testId')),
+    studentId: Number(sessionStorage.getItem('studentId')),
+    selectedOptions: this.selectedOptions
+   }
+    
+
+   //submit the student's performance to the back-end
+   this.submissionSub$ = this.testService.submitTest(attempt).subscribe(({
+    next:(value) =>{
+      this.testSubmitted = true;//sets the 'testSubitted' boolean to true so as to deactivate the submit button, so that a resubmission is not initiated 
+      this.openSnackBar(value);//open a snack bar to notify the student of successful submission
+    },
+
+      complete:() => setTimeout(() => {
+        this.router.navigate(['/performance'])
+      }, 5000),
+     
+      error:() =>console.log()
+   }))
+  }
+}
 
   }
 
@@ -164,10 +231,9 @@ submit(timeUp:boolean) {
 
     //get the number of attempts
     const attempted:any[] = this.selectedOptions.filter(option => option !== null);
-    console.log(`attempted = ${attempted.length}`)
-    console.log(`total ${this.totalQuestions}`)
+   
     this.progress = Math.floor((attempted.length * 100)/this.totalQuestions);
-    console.log(`progress =${this.progress}`)
+    
     this.remaining = this.totalQuestions - attempted.length;
   
     this.progressBarColor = (this.progress >= 50) ? 'primary' : 'warn'; //checks if the student has attempted 50% questions or more,then changes color of the progress bar
@@ -231,4 +297,51 @@ openDialog(enterAnimationDuration:string, exitAnimationDuration:string){
  })
 }
 
+private openSnackBar(message:string){
+  this.successSnackBar.open(
+   `${message}`, '', {
+     duration: 5000, // 5 seconds
+     verticalPosition: 'top', 
+     horizontalPosition: 'center', 
+     panelClass: ['success-snackbar']
+   }
+  )
+
+ }
+
+ //
+ private showPerformance(){
+
+  this.performanceSub$ = this.testService.performanceObs$.subscribe(value => this.showMyPerformace  = value);
+ }
+
+recentAcademicPerformance(){
+
+  if(this.showMyPerformace){
+
+   //extract the correct oprtions for the particular test
+   const correctOptions = this.testContent!.questions.map(question => question.answer);
+   //get the student's recent performance
+   const recentPerformance: PerformanceObject = {
+    subjectName: this.subject,
+    testTopic: this.topic,
+    selectedOptions: this.selectedOptions,
+    correctOptions:correctOptions
+   }
+
+   this.testService.showRecentPerformance(recentPerformance);
+
+  }
+
+
+}
+}
+
+//an interface that captures the information we need to display in student's performance view component
+export interface PerformanceObject{
+
+  subjectName:string,
+  testTopic:string,
+  selectedOptions:string[],
+  correctOptions:string[]
 }

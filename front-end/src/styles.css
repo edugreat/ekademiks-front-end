@@ -54,21 +54,26 @@ input.ng-dirty.ng-valid {
   .progress-bar-container{
     align-items: center;
     justify-content: center;
-    /* position: relative;
-    display: flex;
-     */
+   
   }
 
-  /* .mat-progress-bar{
+ /* CSS for the back button */
+ #back{
 
-    flex-grow: 1;
-  } */
+  margin-top: 20px;
+  margin-bottom: 25px;
+  color: #00796b;
+  max-width: 75px;
+}
 
+
+#back a {
  
-  
-   /* .invalid-phone-number{
+  color: #00796b; 
+} 
 
-    color:  #F9A825;
-    
-   }
-    */
+
+#back mat-icon {
+  font-size: 1.5em;
+  margin-right: 0.5em; 
+}

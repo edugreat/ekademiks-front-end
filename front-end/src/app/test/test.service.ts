@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { QuestionDTO, QuestionPart, TestContent, TestContentDTO } from './test-interface';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { BehaviorSubject, Observable, map, tap } from 'rxjs';
+import { PerformanceObject } from './test/test.component';
 
 @Injectable({
   providedIn: 'root'
@@ -9,8 +10,17 @@ import { Observable, map } from 'rxjs';
 export class TestService {
 
   //routes to the backend server to fetch test based on the request parameters
- baseTestUrl = 'http://localhost:8080/tests/start';
+ private baseTestUrl = 'http://localhost:8080/tests/start';
+ private submissionUrl = 'http://localhost:8080/tests/submit';
 
+ private performanceSubject:BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);//emits true to notify subscribers that the student wishes to see their assessment performance. If it emits false, then it means the student wishes to take another assessment instead of seeing their recent performance
+
+ public performanceObs$:Observable<boolean> = this.performanceSubject.asObservable(); //for proper encapsulation of the functionality of the performanceSubject
+
+ //subject that emits student's recent performance.
+ private recentPerformanceSubject:BehaviorSubject<PerformanceObject> = new BehaviorSubject<PerformanceObject>({} as PerformanceObject);
+
+ public recentPerformanceObs$:Observable<PerformanceObject> = this.recentPerformanceSubject.asObservable();//for peoper encapsulation of the recentPerformance subject
   constructor(private http:HttpClient) { }
 
 
@@ -18,7 +28,8 @@ export class TestService {
 getTest(topic:string, category:string):Observable<TestContent>{
 
   return this.http.get<TestContentDTO>(`${this.baseTestUrl}?topic=${topic}&category=${category}`).pipe(
-    map(dto => this.convertToTestContent(dto))
+    tap(dto => sessionStorage.setItem("testId", dto.testId+"")), 
+    map(dto => this.convertToTestContent(dto)),
   )
 }
 
@@ -42,6 +53,31 @@ private convertToTestContent(dto: TestContentDTO): TestContent {
   };
 }
 
+//submit the test response to the back-end
+submitTest(attempt:Attempt):Observable<string>{
+
+  return this.http.post<string>(this.submissionUrl, attempt);
+}
+
+//emits true to subscribers to show the student want to see their recent performance. Emitting false shows the student would like to take another test
+showPerformanceOrMoreTest(value:boolean){
+
+  this.performanceSubject.next(value);
+}
+
+//emits student's recent performance to subscribers
+showRecentPerformance(recentPerformance:PerformanceObject){
+
+  this.recentPerformanceSubject.next(recentPerformance);
+}
+}
+
+//object showing id of the student who made the attempt, the id of the test and the attempts made
+export interface Attempt{
+
+  testId:number,
+  studentId:number,
+  selectedOptions:string[]
 }
 
 

@@ -38,8 +38,6 @@ export class AuthComponent {
 
     this.authService.login(email, password).subscribe({
       next:(user) => {
-        this.authService.updateUserName(user.firstName);
-
         this.router.navigate(['/home']);
       //redirect to the assessment component
       },
@@ -53,11 +51,11 @@ export class AuthComponent {
     return this.authService.isLoggedIn();
   }
 
-  //Log the current user out
-  public logout():void{
+  // //Log the current user out
+  // public logout():void{
 
-    this.authService.logout();
-  }
+  //   this.authService.logout();
+  // }
 
 
   //Toggles password visibility

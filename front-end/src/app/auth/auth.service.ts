@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Token } from '@angular/compiler';
 import { Injectable, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 
 @Injectable({
@@ -14,28 +15,36 @@ export class AuthService {
 
 
   //A subject to emit the name of the currently logged in user (initially emits the generic placeholder 'Student'). Subscribers receive up to date information
-  private currentUserName:BehaviorSubject<string> = new BehaviorSubject<string>('Student');
+  private currentUserName:BehaviorSubject<string> 
 
   //Get the observable version of the behabvior subject to ensure it only emits directly to this observable which subsequently notofies subscribers
   //The of this is to not allow subscribers directly subscribe to the Behavior subject so as not to emit unitended values by calling the subject's 'next' method upon subscription
-  public userName$: Observable<string> = this.currentUserName.asObservable();
-  constructor(private http: HttpClient) { }
+  public userName$: Observable<string> ;
+  constructor(private http: HttpClient, private router:Router) {
+
+    this.currentUserName = new BehaviorSubject<string>(sessionStorage.getItem('username')! || 'Student');
+    this.userName$= this.currentUserName.asObservable();
+    
+   }
   
 
   login(email:string, password:string):Observable<User>{
 
     
     return this.http.post<User>(this.baseUrl, {email:`${email}`, password:`${password}`}).pipe(
-      tap(user => this.saveToSession(user.token))
+      tap(user => this.saveToSession(user.token, user.id+"", user.firstName))
     )
 
 
   }
 
   //saves the just logged in user's token to the session storage
-  private saveToSession(token:string,){
+  private saveToSession(token:string, studentId:string, firstName:string){
 
     sessionStorage.setItem("token", token);
+    sessionStorage.setItem("studentId", studentId)
+    sessionStorage.setItem('username', firstName);
+    this.currentUserName.next(sessionStorage.getItem('username')!);
     
   }
 
@@ -49,14 +58,11 @@ export class AuthService {
  logout():void{
 
     sessionStorage.clear();
+    this.currentUserName.next('Student');
+   
   }
 
-  //updates the logged in user's name
-  //This method is to be called once the user successfully logs in
-  updateUserName(name:string){
-
-    this.currentUserName.next(name);
-  }
+ 
 }
 
 export interface User{

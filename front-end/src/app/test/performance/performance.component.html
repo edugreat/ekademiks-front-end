@@ -1,0 +1,21 @@
+
+<div class="radio-button-container">
+    <div id="radioBtnDIV">
+      <label id="example-radio-group-label">Select</label>
+      <mat-radio-group 
+        aria-labelledby="example-radio-group-label"
+        class="example-radio-group"
+        [(ngModel)]="option" name="_level">
+        <ng-container >
+          <mat-radio-button class="example-radio-button" [value]="true">Recent performance</mat-radio-button>
+          <mat-radio-button class="example-radio-button" [value]="false">Take more assessment</mat-radio-button>
+        </ng-container>
+      </mat-radio-group>
+  
+      <div>
+        <button id='continueBTN' (click)="performanceOrMoreTest()" [disabled]="!option"  mat-raised-button>
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>

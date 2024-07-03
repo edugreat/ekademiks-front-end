@@ -7,6 +7,7 @@ import { MathJaxDirective } from '../math-jax.directive';
 import { TimerComponent } from './timer/timer.component';
 import { TimerPipe } from './timer/timer.pipe';
 import { InstructionDialogComponent } from './instruction-dialog/instruction-dialog.component';
+import { PerformanceComponent } from './performance/performance.component';
 
 
 
@@ -17,7 +18,8 @@ import { InstructionDialogComponent } from './instruction-dialog/instruction-dia
     MathJaxDirective,
     TimerComponent,
     TimerPipe,
-    InstructionDialogComponent
+    InstructionDialogComponent,
+    PerformanceComponent
     
   ],
   

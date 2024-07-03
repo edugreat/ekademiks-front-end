@@ -99,7 +99,7 @@ export class SignUpComponent implements OnInit {
   );
 
   this.networkBusy =true;
-  this.signupService.registerUser(newUser).subscribe(({
+  this.signupService.registerUser(newUser).subscribe({
     next:(status) => {
       console.log(status);
       this.networkBusy = false;
@@ -122,7 +122,7 @@ export class SignUpComponent implements OnInit {
       },5000)//5 seconds delay to let users know account creation was successful before routing to the login page
 
     }
-  }))
+  })
   
 
   }

@@ -8,9 +8,12 @@ import { AssessmentExpansionPanelComponent } from '../assessment/assessment-expa
 import { TestComponent } from '../test/test/test.component';
 import { AuthComponent } from '../auth/auth/auth.component';
 import { SignUpComponent } from '../sign-up/sign-up.component';
+import { PerformanceComponent } from '../test/performance/performance.component';
 
 const routes:Routes = [
  {path: 'home', component: HomeComponent},
+
+ {path: 'home/:more-assessment', component: HomeComponent},
   {path: 'assessments', component: AssessmentComponent},
   {path:'assessments/:level', component: AssessmentComponent},
   {path: 'supports', component: SupportComponent},
@@ -19,6 +22,7 @@ const routes:Routes = [
   {path:'assessment-panel/:subject/:category', component: AssessmentExpansionPanelComponent},
   {path: 'start/:topic/:duration/:subject/:category', component: TestComponent},
   {path: 'sign-up', component: SignUpComponent},
+  {path:'performance', component: PerformanceComponent},
   {path: '', redirectTo: 'login', pathMatch:'full'},
   
 ]

@@ -15,8 +15,9 @@ export interface Option {
 
 }
 
-//object of test content received returned from ther server
+//object of test content returned from ther server
 export interface TestContentDTO{
+    testId:number,
     questions:QuestionDTO[],
     instructions:string[]
 

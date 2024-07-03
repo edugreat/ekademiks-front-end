@@ -1,15 +1,23 @@
+<div *ngIf="levels$"  id="back" matTooltip="Go back" 
+ matTooltipShowDelay="1000"
+ matTooltipPosition="below"
+ matTooltipHideDelay="2000" >
+    <a mat-button (click)="goBack()" >
+        <mat-icon   >arrow_back</mat-icon>
+    </a>
+</div>
+
 <div class="container" *ngIf="!levels$; else selectionMade" >
   <section style="padding-top: 1px;" class="welcome"> 
     <app-welcome [welcomeMessages]="welcomeMessages$"> 
     </app-welcome>
   </section>
-  
-  <mat-divider class="custom-divider" [vertical]="true"></mat-divider>
+ 
 
   <section class="actions">
     <mat-grid-list cols="4" rowHeight="2:1">
       <mat-grid-tile [rowspan]="rowspan" colspan="4">
-        <div class="action-item">Featured Assessment</div>
+        <div class="action-item">Featured Assessments</div>
       </mat-grid-tile>
       <mat-grid-tile [rowspan]="rowspan" colspan="4">
         <div class="action-item">
@@ -17,10 +25,14 @@
         </div>
       </mat-grid-tile>
       <mat-grid-tile [rowspan]="rowspan" colspan="4">
-        <div class="action-item">Account</div>
+        <div class="action-item">
+
+          <a mat-button routerLink="/sign-up" >Create Account</a>
+
+        </div>
       </mat-grid-tile>
       <mat-grid-tile [rowspan]="rowspan" colspan="4">
-        <div class="action-item">Recommended Assessment</div>
+        <div class="action-item">Recommended Assessments</div>
       </mat-grid-tile>
     </mat-grid-list>
   </section>
