@@ -168,15 +168,13 @@ submit() {
 
    //submit the student's performance to the back-end
   this.submissionSub$ =  this.testService.submitTest(attempt).subscribe({
-    next:(value:string) =>{
+    next:(response:{message:string}) =>{
       
-      console.log('submitting!')
       this.testSubmitted = true;//sets the 'testSubitted' boolean to true so as to deactivate the submit button, so that a resubmission is not initiated 
-      this.openSnackBar(value);//open a snack bar to notify the student of successful submission
+      this.openSnackBar(response.message);//open a snack bar to notify the student of successful submission
     },
 
       complete:() => {
-        console.log('submitted')
         setTimeout(() => {
           this.router.navigate(['/performance'])
         }, 5000);
@@ -210,9 +208,9 @@ if(event ===true){
 
    //submit the student's performance to the back-end
    this.submissionSub$ = this.testService.submitTest(attempt).subscribe(({
-    next:(value) =>{
+    next:(response:{message:string}) =>{
       this.testSubmitted = true;//sets the 'testSubitted' boolean to true so as to deactivate the submit button, so that a resubmission is not initiated 
-      this.openSnackBar(value);//open a snack bar to notify the student of successful submission
+      this.openSnackBar(response.message);//open a snack bar to notify the student of successful submission
     },
 
       complete:() => setTimeout(() => {

@@ -54,9 +54,9 @@ private convertToTestContent(dto: TestContentDTO): TestContent {
 }
 
 //submit the test response to the back-end
-submitTest(attempt:Attempt):Observable<string>{
+submitTest(attempt:Attempt):Observable<{message:string}>{
 
-  return this.http.post<string>(this.submissionUrl, attempt);
+  return this.http.post<{message:string}>(this.submissionUrl, attempt);
 }
 
 //emits true to subscribers to show the student want to see their recent performance. Emitting false shows the student would like to take another test
