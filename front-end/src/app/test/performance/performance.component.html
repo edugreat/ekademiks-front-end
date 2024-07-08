@@ -1,14 +1,14 @@
 
-<div class="radio-button-container">
+<div *ngIf="!performanceAvailable" class="radio-button-container">
     <div id="radioBtnDIV">
-      <label id="example-radio-group-label">Select</label>
+      <label id="example-radio-group-label">Select to continue</label>
       <mat-radio-group 
         aria-labelledby="example-radio-group-label"
         class="example-radio-group"
-        [(ngModel)]="option" name="_level">
+        [(ngModel)]="option" name="option">
         <ng-container >
-          <mat-radio-button class="example-radio-button" [value]="true">Recent performance</mat-radio-button>
-          <mat-radio-button class="example-radio-button" [value]="false">Take more assessment</mat-radio-button>
+          <mat-radio-button class="example-radio-button" [value]="'true'">Recent performance</mat-radio-button>
+          <mat-radio-button class="example-radio-button" [value]="'false'">Take more assessment</mat-radio-button>
         </ng-container>
       </mat-radio-group>
   
@@ -18,4 +18,9 @@
         </button>
       </div>
     </div>
+  </div>
+
+
+  <div *ngIf="performanceAvailable" >
+    <app-performance-report [performance]="recentPerformance" ></app-performance-report>
   </div>

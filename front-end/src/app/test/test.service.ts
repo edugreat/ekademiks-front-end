@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { QuestionDTO, QuestionPart, TestContent, TestContentDTO } from './test-interface';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, map, tap } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription, map, tap } from 'rxjs';
 import { PerformanceObject } from './test/test.component';
 
 @Injectable({
@@ -13,14 +13,12 @@ export class TestService {
  private baseTestUrl = 'http://localhost:8080/tests/start';
  private submissionUrl = 'http://localhost:8080/tests/submit';
 
- private performanceSubject:BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);//emits true to notify subscribers that the student wishes to see their assessment performance. If it emits false, then it means the student wishes to take another assessment instead of seeing their recent performance
-
- public performanceObs$:Observable<boolean> = this.performanceSubject.asObservable(); //for proper encapsulation of the functionality of the performanceSubject
-
+ //emits true to notify subscribers that the student wishes to see their assessment performance. If it emits false, then it means the student wishes to take another assessment instead of seeing their recent performance
+ private performanceOrMoreTestSubject:Subject<boolean> = new Subject<boolean>();
+ 
  //subject that emits student's recent performance.
- private recentPerformanceSubject:BehaviorSubject<PerformanceObject> = new BehaviorSubject<PerformanceObject>({} as PerformanceObject);
+ private recentPerformanceSubject:Subject<PerformanceObject> = new Subject<PerformanceObject>();
 
- public recentPerformanceObs$:Observable<PerformanceObject> = this.recentPerformanceSubject.asObservable();//for peoper encapsulation of the recentPerformance subject
   constructor(private http:HttpClient) { }
 
 
@@ -59,16 +57,34 @@ submitTest(attempt:Attempt):Observable<{message:string}>{
   return this.http.post<{message:string}>(this.submissionUrl, attempt);
 }
 
-//emits true to subscribers to show the student want to see their recent performance. Emitting false shows the student would like to take another test
-showPerformanceOrMoreTest(value:boolean){
+//emits true to subscribers to show the student want to see their recent performance. 
+showMyRecentPerformance(){
 
-  this.performanceSubject.next(value);
+  this.performanceOrMoreTestSubject.next(true);
+}
+
+//Emits false to show the student would like to take another test
+takeMoreTest(){
+this.performanceOrMoreTestSubject.next(false);
+
+}
+
+//provide an observable for the 'performanceOrTest' subject for proper encapsulation
+ShowMyPerformanceOrTakeMoreTestObservable():Observable<boolean>{
+
+return this.performanceOrMoreTestSubject.asObservable();
 }
 
 //emits student's recent performance to subscribers
 showRecentPerformance(recentPerformance:PerformanceObject){
 
   this.recentPerformanceSubject.next(recentPerformance);
+}
+
+//provide an observable for the 'recentPerformanceSubject' subject for proper encapsulation
+myRecentPerformanceObservable():Observable<PerformanceObject>{
+
+  return this.recentPerformanceSubject.asObservable();
 }
 }
 

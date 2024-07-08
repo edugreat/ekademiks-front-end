@@ -9,6 +9,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { InstructionDialogComponent } from '../instruction-dialog/instruction-dialog.component';
 import { ProgressBarMode } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-test',
@@ -66,8 +67,8 @@ testStarted: boolean = false; // boolean flag indicating whether the student has
 
  //if the student has submitted the test
  testSubmitted = false;
-val='';
- performanceSub$: Subscription | undefined; //subscription that subscribes to the performance observable to get notiied when student wishes to see their academic performance
+
+ //myRecentPerformanceSub$: Subscription | undefined; //subscription that subscribes to the performance observable to get notiied when student wishes to see their academic performance
 
  showMyPerformace = false; 
 
@@ -78,19 +79,25 @@ val='';
     private mediaService:MediaService,
     public dialog: MatDialog,
     private successSnackBar:MatSnackBar,
-    private router:Router
+    private router:Router,
+    private authService:AuthService
   ){}
 
   ngOnInit(): void {
+
    this.getQuestions();
    this.mediaAlias();
-   console.log(this.val)
+   this.showPerformanceorTakeMoreTest();
+   
+   
+   
   }
 
   ngOnDestroy(): void {
     
     this.questionSub?.unsubscribe();
     this.submissionSub$?.unsubscribe();
+    
   }
 
   //calls the getTest() of Test service to fetch all the questions for the given assessment
@@ -107,6 +114,8 @@ val='';
 
 
     this.testContent = testContent;//set the returned test content to the testContent property
+
+   
 
     //get the instructions for the test
     this.testInstructions = testContent.instructions;
@@ -164,14 +173,28 @@ submit() {
     selectedOptions: this.selectedOptions
    }
     
-  
 
-   //submit the student's performance to the back-end
+    //extracts this part of the test content for use in later in the student performance feedback to give a tip to the student for the questions they answers and their correct options
+    const data:{problem:string, response:string, answer:string}[] = this.testContent!.questions.map((question, index) =>({
+      problem:question.problem,
+      response:question.options.filter((option) => this.selectedOptions[index] === option.letter).map(option => option.text)[0],
+      answer: question.options.filter((option)=> option.letter === question.answer).map(option => option.text)[0]
+    }))
+
+    //persist to the session storage for later use
+    sessionStorage.setItem("testTip", JSON.stringify(data));
+
+   //check if the student is a logged in user or guest
+   const isLoggedInUser = this.authService.isLoggedIn();
+
+  if(isLoggedInUser){
+    
+     //submit the student's performance to the back-end
   this.submissionSub$ =  this.testService.submitTest(attempt).subscribe({
     next:(response:{message:string}) =>{
       
-      this.testSubmitted = true;//sets the 'testSubitted' boolean to true so as to deactivate the submit button, so that a resubmission is not initiated 
-      this.openSnackBar(response.message);//open a snack bar to notify the student of successful submission
+      this.testSubmitted = true;//sets the 'testSubitted' boolean to true so as to deactivate the submit button, so that a resubmission  cannot initiated 
+      this.openSnackBar(`${response.message} PLEASE WAIT...`);//open a snack bar to notify the student of successful submission
     },
 
       complete:() => {
@@ -184,6 +207,17 @@ submit() {
         console.log()
       }
    })
+  }else{//for guest students, do not submit to the backend, instead route to the performance page for them to see their recent performance or take more assessment
+
+    this.openSnackBar('Submitted! PLEASE WAIT ...');
+    this.testSubmitted = true;
+    setTimeout(() => {
+      this.router.navigate(['/performance'])
+    }, 5000);
+    
+  }
+
+  
   }
 
  
@@ -194,32 +228,7 @@ submit() {
   autoSubmit(event:boolean){
 if(event ===true){
 
-
-  
-  const attempted = this.selectedOptions.some(option => option !== null);
-  if(attempted){
-   let attempt:Attempt = {
-
-    testId:  Number(sessionStorage.getItem('testId')),
-    studentId: Number(sessionStorage.getItem('studentId')),
-    selectedOptions: this.selectedOptions
-   }
-    
-
-   //submit the student's performance to the back-end
-   this.submissionSub$ = this.testService.submitTest(attempt).subscribe(({
-    next:(response:{message:string}) =>{
-      this.testSubmitted = true;//sets the 'testSubitted' boolean to true so as to deactivate the submit button, so that a resubmission is not initiated 
-      this.openSnackBar(response.message);//open a snack bar to notify the student of successful submission
-    },
-
-      complete:() => setTimeout(() => {
-        this.router.navigate(['/performance'])
-      }, 5000),
-     
-      error:() =>console.log()
-   }))
-  }
+this.submit();//reuse the existing code 
 }
 
   }
@@ -307,17 +316,31 @@ private openSnackBar(message:string){
 
  }
 
- //
- private showPerformance(){
+ //subscribes to the obsrvable emitted from the TestService due to user input selection(radio button selection to view their recent performance)
+ private showPerformanceorTakeMoreTest(){
 
-  this.performanceSub$ = this.testService.performanceObs$.subscribe(value => this.showMyPerformace  = value);
+  this.testService.ShowMyPerformanceOrTakeMoreTestObservable().subscribe( value => {
+    this.showMyPerformace = value;
+    
+    if(value === true){
+
+      this.recentAcademicPerformance();//produces student's recent assessment performance
+    }else{
+
+      console.log('detected emission')
+      this.router.navigate(['/home/true'])//routes back to the component with request parameter set to true to show the student desires to take more assessment
+    }
+  }) 
  }
 
-recentAcademicPerformance(){
+ //displays users's recent performance if the 'showMyPerformance' evaluates to true due to user's input selection
+private recentAcademicPerformance(){
 
-  if(this.showMyPerformace){
+  
 
-   //extract the correct oprtions for the particular test
+   
+
+   //extract the correct options for the particular test
    const correctOptions = this.testContent!.questions.map(question => question.answer);
    //get the student's recent performance
    const recentPerformance: PerformanceObject = {
@@ -327,10 +350,9 @@ recentAcademicPerformance(){
     correctOptions:correctOptions
    }
 
-   this.testService.showRecentPerformance(recentPerformance);
+  this.testService.showRecentPerformance(recentPerformance);
 
-  }
-
+  
 
 }
 }

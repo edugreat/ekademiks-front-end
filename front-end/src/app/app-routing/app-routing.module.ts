@@ -12,17 +12,17 @@ import { PerformanceComponent } from '../test/performance/performance.component'
 
 const routes:Routes = [
  {path: 'home', component: HomeComponent},
-
- {path: 'home/:more-assessment', component: HomeComponent},
-  {path: 'assessments', component: AssessmentComponent},
+ {path: 'assessments', component: AssessmentComponent},
+ {path: 'supports', component: SupportComponent},
+ {path: 'contact', component: ContactComponent},
+ {path: 'login', component: AuthComponent},
+ {path: 'sign-up', component: SignUpComponent},
+ {path:'performance', component: PerformanceComponent},
+ {path: 'home/:more', component: HomeComponent},
   {path:'assessments/:level', component: AssessmentComponent},
-  {path: 'supports', component: SupportComponent},
-  {path: 'contact', component: ContactComponent},
-  {path: 'login', component: AuthComponent},
   {path:'assessment-panel/:subject/:category', component: AssessmentExpansionPanelComponent},
   {path: 'start/:topic/:duration/:subject/:category', component: TestComponent},
-  {path: 'sign-up', component: SignUpComponent},
-  {path:'performance', component: PerformanceComponent},
+ 
   {path: '', redirectTo: 'login', pathMatch:'full'},
   
 ]

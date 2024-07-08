@@ -1,5 +1,7 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { TestService } from '../test.service';
+import { PerformanceObject } from '../test/test.component';
+import { MatTableDataSource } from '@angular/material/table';
 
 @Component({
   selector: 'app-performance',
@@ -17,31 +19,65 @@ The emission of 'true' or 'false' is due to the student's interraction with the 
 */
 export class PerformanceComponent implements OnInit, OnDestroy {
 
+
+ 
+
   option = '';//student's selected option when interracted with the radio button
+
+  //student's recent performance placeholder, instantiated once the observable emits values
+  recentPerformance?:PerformanceObject;
+
+
+
+  //flag that detects if the student's performance is ready to be displayed
+  performanceAvailable = false;
 
   constructor(private testService: TestService){}
 
 
   ngOnInit(): void {
-    throw new Error('Method not implemented.');
+
+    this.showMyRecentAccessPerformance();
+    
+   
   }
 
   ngOnDestroy(): void {
-    throw new Error('Method not implemented.');
+   
   }
 
 
 
  performanceOrMoreTest(){
 
+  
+
   if(this.option === 'true'){
     //this.testService.showPerformanceOrMoreTest(true);
-    console.log(typeof this.option );
-  }else{
-
-    console.log(typeof this.option)
-   // this.testService.showPerformanceOrMoreTest(false);
+    this.performanceAvailable = true;
+    this.testService.showMyRecentPerformance();//notifies subscriber that the student would like to see their recent performance
+  
+  
+  }else if(this.option === 'false'){
+    console.log(`clicked for more with value = ${this.option}`)
+    this.performanceAvailable = false;
+    this.testService.takeMoreTest()//notifies subscribers that student would like to take more assessment instead
+   
   }
   
+}
+
+//Method that subscribes to observable and listens to know when student wants to see their recent assessment.
+showMyRecentAccessPerformance(){
+
+  this.testService.myRecentPerformanceObservable().subscribe( {
+  next:(performance:PerformanceObject) => {
+   
+
+   this.recentPerformance = performance;
+    this.performanceAvailable = true;
+
+  }    
+  })
 }
 }

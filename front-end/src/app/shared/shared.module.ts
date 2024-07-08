@@ -18,7 +18,8 @@ import { ProgressBarComponent } from './progress-bar/progress-bar.component';
     MaterialModule,
     CommonModule,
     ReactiveFormsModule,
-    AppRoutingModule
+    AppRoutingModule,
+    
     
   ],
   exports:[FormsModule, ReactiveFormsModule, OptionSortPipe,SortPipe,

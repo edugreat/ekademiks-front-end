@@ -44,19 +44,28 @@ export class HomeComponent implements OnInit, OnDestroy {
  
 
   ngOnInit(): void {
-    
-    //if activation of this component is a result of the students wishing to take more assessment, then present them with assessment level rather than the usual welcome messages
-    if(this.activatedRoute.snapshot.params['more-assessment'] === 'true'){
 
-      this.getAcademicLevels();
-    }else{
+    //if activation of this component is a result of the student's wish to take more assessment, then present them with assessment level rather than the usual welcome messages
+    this.activatedRoute.paramMap.subscribe(params =>{
 
-      this.goBack();
+      const param = params.get('more');
+      if(param !== null){
+
+        const more = (param === 'true');
+        if(more){
+
+          this.getAcademicLevels();
+        }else{
+          this.router.navigate(['/home'])
+        }
+      }else{
       this.getWelcomeMessages();
       this.mediaSubscription = this.mediaAlias();
-    }
-   
+
+      }
+    })
     
+
   }
 
 
@@ -98,7 +107,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   goBack() {
     
-   this.router.navigate(['/home'])
+   this.levels$ = undefined;
     
   }
 }

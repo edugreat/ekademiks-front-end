@@ -1,0 +1,55 @@
+
+/* performance assessment */
+.performance-summary-card {
+    margin: 20px;
+    padding: 20px;
+    background-color: #f0f2f5;
+  }
+  
+  .summary-icon {
+    font-size: 20px;
+    color: #3f51b5;
+    margin-right: 10px;
+  }
+  
+  .summary-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .summary-text h3 {
+    margin: 0;
+    font-size: 16px;
+  }
+  
+  .summary-text p {
+    margin: 0;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  
+  /* CSS for assessment summary */
+  table {
+    width: 100%;
+  }
+  
+  th.mat-header-cell {
+    background-color: #f5f5f5;
+    font-weight: bold;
+  }
+  
+  td.mat-cell {
+    text-align: center;
+  }
+  
+  .mat-icon {
+    color: green;
+  }
+  
+ 
+
+ 
+  

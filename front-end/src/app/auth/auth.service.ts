@@ -9,16 +9,16 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 })
 export class AuthService {
 
-  baseUrl = 'http://localhost:8080/auth/sign-in';
+  private baseUrl = 'http://localhost:8080/auth/sign-in';
 
-  jwtToken = ''; //token to be received from the database after successful authentication
+  private jwtToken = ''; //token to be received from the database after successful authentication
 
 
   //A subject to emit the name of the currently logged in user (initially emits the generic placeholder 'Student'). Subscribers receive up to date information
   private currentUserName:BehaviorSubject<string> 
 
   //Get the observable version of the behabvior subject to ensure it only emits directly to this observable which subsequently notofies subscribers
-  //The of this is to not allow subscribers directly subscribe to the Behavior subject so as not to emit unitended values by calling the subject's 'next' method upon subscription
+  //The of this is to not allow subscribers directly subscribe to the Behavior subject so as not to emit unintended values by calling the subject's 'next' method upon subscription
   public userName$: Observable<string> ;
   constructor(private http: HttpClient, private router:Router) {
 
@@ -28,7 +28,7 @@ export class AuthService {
    }
   
 
-  login(email:string, password:string):Observable<User>{
+   login(email:string, password:string):Observable<User>{
 
     
     return this.http.post<User>(this.baseUrl, {email:`${email}`, password:`${password}`}).pipe(

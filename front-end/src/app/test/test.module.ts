@@ -8,6 +8,8 @@ import { TimerComponent } from './timer/timer.component';
 import { TimerPipe } from './timer/timer.pipe';
 import { InstructionDialogComponent } from './instruction-dialog/instruction-dialog.component';
 import { PerformanceComponent } from './performance/performance.component';
+import { PerformanceReportComponent } from './performance/performance-report/performance-report.component';
+import { ToolTipDirective } from './tool-tip.directive';
 
 
 
@@ -19,7 +21,9 @@ import { PerformanceComponent } from './performance/performance.component';
     TimerComponent,
     TimerPipe,
     InstructionDialogComponent,
-    PerformanceComponent
+    PerformanceComponent,
+    PerformanceReportComponent,
+    ToolTipDirective
     
   ],
   

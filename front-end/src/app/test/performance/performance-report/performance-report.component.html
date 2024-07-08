@@ -1,0 +1,125 @@
+
+  <!-- section that shows student's recent performance -->
+
+
+  <mat-card class="performance-summary-card">
+
+    <mat-card-title style="text-align: center;" >Perfomance Summary</mat-card-title>
+
+    <mat-card-content>
+      <mat-grid-list cols="3" rowHeight="100px" gutterSize="10px" >
+        <mat-grid-tile>
+          <mat-icon matTooltip="total questions asked" class="summary-icon">assignment</mat-icon>
+          <div class="summary-text">
+            <h3>Total Questions</h3>
+            <p>{{totalQuestions}}</p>
+          </div>
+        </mat-grid-tile>
+
+        <mat-grid-tile>
+          <mat-icon matTooltip="percentage score" class="summary-icon">percent</mat-icon>
+          <div class="summary-text">
+            <h3>Score</h3>
+            <p>{{percentScore}}</p>
+          </div>
+        </mat-grid-tile>
+
+
+        <mat-grid-tile>
+          <mat-icon matTooltip="performance grade" 
+          [style.color]="(grade === 'F'|| grade === 'E' || grade === 'D') ? 'red'  : 'green'"
+          class="summary-icon">emoji_events</mat-icon>
+          <div class="summary-text">
+            <h3>Grade</h3>
+            <p [style.color]="(grade === 'F'|| grade === 'E' || grade === 'D') ? 'red'  : 'green'">{{grade}}</p>
+          </div>
+        </mat-grid-tile>
+      </mat-grid-list>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Assessment summary -->
+  <p></p>
+  <table  mat-table [dataSource]="dataSource!" class="mat-elevation-z8">
+
+    <!-- Question Number Column -->
+    <ng-container matColumnDef="questionNumber">
+      <th mat-header-cell *matHeaderCellDef> question number </th>
+      
+      <td mat-cell *matCellDef="let element; let i=index"> 
+
+        <button matPrefix mat-icon-button 
+        [matTooltip]="display[i] ? 'Hide question' : 'View question' "
+        (click)="toggleShow(i)">
+          <mat-icon *ngIf="!display[i]">visibility </mat-icon>
+          <mat-icon *ngIf="display[i]">visibility_off</mat-icon>
+        </button>
+      <span  
+      
+      [hidden]="!display[i]"
+      [innerHTML]="parsedTooltip[i] ? parsedTooltip[i].problem : '' "
+      appToolTip="{{getToolTipFor(i,'problem')}}"
+      (parsedTooltip)="onTooltipParsed(i,'problem', $event)"
+      ></span>
+     
+      {{display[i] ? '' : element.questionNumber}} 
+    </td>
+    </ng-container>
+  
+    <!-- Selected Option Column -->
+    <ng-container matColumnDef="selectedOption">
+      <th mat-header-cell *matHeaderCellDef> Selected Option </th>
+      <td mat-cell *matCellDef="let element; let i=index">
+
+        <button hidden matPrefix mat-icon-button 
+        (click)="toggleShow(i)">
+          <mat-icon  *ngIf="!display[i]">visibility </mat-icon>
+          <mat-icon *ngIf="display[i]">visibility_off</mat-icon>
+        </button>
+
+      <span 
+       [hidden]="!display[i]"
+      [innerHTML]="parsedTooltip[i] ? parsedTooltip[i].response : '' "
+      appToolTip="{{getToolTipFor(i,'response')}}"
+      (parsedTooltip)="onTooltipParsed(i,'response', $event)"
+      ></span>
+      {{ display[i] ? '' : element.selectedOption}} </td>
+    </ng-container>
+  
+    <!-- Correct Option Column -->
+    <ng-container matColumnDef="correctOption">
+      <th mat-header-cell *matHeaderCellDef> Correct Option </th>
+      <td mat-cell *matCellDef="let element; let i=index"> 
+
+        <button hidden matPrefix mat-icon-button 
+        (click)="toggleShow(i)">
+          <mat-icon *ngIf="!display[i]">visibility </mat-icon>
+          <mat-icon *ngIf="display[i]">visibility_off</mat-icon>
+        </button>
+
+    <span 
+    
+    [hidden]="!display[i]"
+      [innerHTML]="parsedTooltip[i] ? parsedTooltip[i].answer : '' "
+      appToolTip="{{getToolTipFor(i,'answer')}}"
+      (parsedTooltip)="onTooltipParsed(i,'answer', $event)">
+  
+  </span>
+
+    {{ display[i] ? '' : element.correctOption}} 
+    </td>
+    </ng-container>
+  
+    <!-- Result Column -->
+    <ng-container matColumnDef="remark">
+      <th mat-header-cell *matHeaderCellDef> Remark </th>
+      <td mat-cell *matCellDef="let element">
+        <mat-icon [style.color]="element.remark ? 'green' :'red' " [matTooltip]="element.remark ? 'Correct' : 'Incorrect'">
+          {{element.remark ? 'check_circle' : 'cancel'}}
+        </mat-icon>
+      </td>
+    </ng-container>
+  
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
