@@ -1,13 +1,14 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { PerformanceObject } from '../../test/test.component';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-performance-report',
   templateUrl: './performance-report.component.html',
   styleUrl: './performance-report.component.css'
 })
-export class PerformanceReportComponent implements OnInit, OnDestroy{
+export class PerformanceReportComponent implements OnInit, OnDestroy, AfterViewInit{
 
 
   //students's performance input received from thee parent component
@@ -25,12 +26,19 @@ export class PerformanceReportComponent implements OnInit, OnDestroy{
   grade?:string;
 
  //mat table datasource
-  dataSource?:MatTableDataSource<AssessmentSummary>;
+  dataSource!:MatTableDataSource<AssessmentSummary>;
+
+  @ViewChild(MatPaginator) paginator!:MatPaginator; //get a handle to the paginator directive
 display:boolean[] = [];
 
   ngOnInit(): void {
+
     this.performanceAnalysis();
    
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
   }
 
 
