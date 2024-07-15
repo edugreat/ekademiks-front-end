@@ -43,10 +43,10 @@
  <div *ngIf= "testStarted && hasReadInstructions" class="quiz-container">
  
      <mat-accordion>
-       <mat-expansion-panel *ngFor="let question of testContent?.questions; let i = index">
+       <mat-expansion-panel *ngFor="let question of paginatedQuestions; let i = index">
          <mat-expansion-panel-header>
            <mat-panel-title>
-             <span style="padding-right: 5px;" >{{ i + 1 }}.</span><span [appMathJax]= "question.problem"></span>
+             <span style="padding-right: 5px;" >{{ (currentPage * pageSize) + i + 1}}.</span><span [appMathJax]= "question.problem"></span>
            </mat-panel-title>
          </mat-expansion-panel-header>
          
@@ -54,8 +54,8 @@
          
          (change)="calculateProgress()"
  
-         [(ngModel)]="selectedOptions[i]" *ngIf="question.options.length">
-           <mat-radio-button *ngFor="let option of question.options | optionSort"
+         [(ngModel)]="selectedOptions[(currentPage * pageSize) + i]" *ngIf="question.options.length">
+           <mat-radio-button *ngFor="let option of paginatedQuestions![i].options| optionSort"
           
            [value]="option.letter">
              <span style="font-weight: bold;margin-right: 15px; " [appMathJax]="option.letter ">. </span> <span [appMathJax]="  option.text"></span>
@@ -64,6 +64,19 @@
        </mat-expansion-panel>
      </mat-accordion>
    
+
+     <div class="pagination-controls">
+      <button matPrefix mat-button (click)="previousPage()" [disabled]="currentPage === 0">
+
+        <mat-icon>arrow_back_ios</mat-icon>
+      </button>
+
+      <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+      <button matSuffix (click)="nextPage()" [disabled]="currentPage + 1 === totalPages">
+       <mat-icon> arrow_forward_ios</mat-icon>
+      </button>
+    </div>
+
      <button [disabled]="!submitable() || testSubmitted" mat-raised-button color="primary" (click)="submit()">Submit</button>
    </div>
 </div>

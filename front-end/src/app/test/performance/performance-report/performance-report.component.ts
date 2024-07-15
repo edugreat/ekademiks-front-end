@@ -1,7 +1,7 @@
-import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { PerformanceObject } from '../../test/test.component';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-performance-report',
@@ -11,13 +11,16 @@ import { MatPaginator } from '@angular/material/paginator';
 export class PerformanceReportComponent implements OnInit, OnDestroy, AfterViewInit{
 
 
-  //students's performance input received from thee parent component
+  details? : Details; //details of the particular assessment the student want to view when going through their performance report
+
+  sciences = ['Physics','Mathematics','Chemistry','Biology', 'Economics', 'Basic science', 'Basic tech']//for the subjects given here, when the student clicks on the visibility icon, they should be taken to the assessment detail page
+
+  //students's performance input received from thee parent component, PerformanceComponent
   @Input() performance:PerformanceObject|undefined;
 
   testTip?:{problem:string, response:string, answer:string}[]; //used to provide tips to students during assessment report, for the questions they attempted and their correct options 
     
-  //parsed object
-  parsedTooltip:{problem:string, response:string, answer:string}[] = [{problem:'', response:'',answer:''}];
+  
 
   displayedColumns: string[] = ['questionNumber', 'selectedOption', 'correctOption', 'remark'];
   totalQuestions?:number;
@@ -29,7 +32,12 @@ export class PerformanceReportComponent implements OnInit, OnDestroy, AfterViewI
   dataSource!:MatTableDataSource<AssessmentSummary>;
 
   @ViewChild(MatPaginator) paginator!:MatPaginator; //get a handle to the paginator directive
-display:boolean[] = [];
+
+  pageIndex = 0; //current page index
+
+  pageSize = 5; //number of items per page
+
+display? :boolean[];
 
   ngOnInit(): void {
 
@@ -45,7 +53,7 @@ display:boolean[] = [];
   ngOnDestroy(): void {
 
     sessionStorage.removeItem('testTip');
-    this.parsedTooltip =[];
+   
     
   }
   
@@ -57,11 +65,7 @@ private performanceAnalysis(){
 
     this.totalQuestions = this.performance.selectedOptions.length;
 
-    for (let index = 0; index < this.totalQuestions; index++) {
-      this.display[index] = false; //initialize to false 
-      
-    }
-
+  
 
   //filters all the student's selected options that match the correct options, then get the total.
   this.correctOptions = this.performance?.selectedOptions.filter((option, index)=> option === this.performance?.correctOptions[index]).length;
@@ -75,12 +79,14 @@ private performanceAnalysis(){
   const summary:AssessmentSummary[] = this.performance!.selectedOptions.map((option, index) => ({
    questionNumber:index+1,
    selectedOption:option,
-   correctOption:this.performance!.correctOptions[index],
-   remark: option === this.performance!.correctOptions[index]
+   correctOption:this.performance!.correctOptions[(this.pageIndex * this.pageSize)+index],
+   remark: option === this.performance!.correctOptions[(this.pageIndex * this.pageSize)+index]
     
 
   }))
 
+  this.display = new Array(summary.length).fill(false);//intialize each element of the array to false just to initially set visibility to off in the view
+  
   this.dataSource = new MatTableDataSource(summary);
   this.testTip = JSON.parse(sessionStorage.getItem('testTip')!);
 
@@ -92,62 +98,24 @@ private performanceAnalysis(){
 
 }
 
-getToolTipFor(index:number, option:string):string{
+toolTipFor(index:number, option:string): string{
 
-  if(this.testTip && this.testTip[index]){
+  switch (option) {
+    case 'problem':
 
-    switch(option){
-
-      case 'problem': return this.testTip[index].problem;
-
-      case 'answer': return this.testTip[index].answer;
-
-      case 'response': return this.testTip[index].response
-    }
-  }
+    return this.testTip![index].problem
+      
+     case 'response':
+      return this.testTip![index].response;
   
+
+      case 'answer':
+        return this.testTip![index].answer;
+    
+  }
+
   return '';
 }
-
-onTooltipParsed(index:number, option:string, parsedValue:string){
-
- 
-if(! this.parsedTooltip){
-  this.parsedTooltip = [{problem:'', answer:'', response:''}];
-  this.setParsedValue(index, option, parsedValue);
- 
-
-}else if(! this.parsedTooltip[index]){
-this.parsedTooltip[index] = {problem:'', answer:'', response:''};
-this.setParsedValue(index, option, parsedValue);
-
-
-}else{
-  this.setParsedValue(index, option, parsedValue);
-}
-
-}
-
-
-
-  private setParsedValue(index: number, option: string, parsedValue:string) {
-    switch (option) {
-      case 'problem':
-        this.parsedTooltip![index].problem = parsedValue;
-        
-        break;
-      case 'answer':
-        this.parsedTooltip![index].answer = parsedValue;
-        
-        break;
-      case 'response':
-        this.parsedTooltip![index].response = parsedValue;
-        
-        break;
-    }
-  }
-
-  
 
 //computes the student's grade with the provided method argument
 private computeGrade(percentScore:number):string{
@@ -172,10 +140,58 @@ private computeGrade(percentScore:number):string{
 
 }
 
-toggleShow(index:number) {
-  this.display[index] = !this.display[index];
+
+//method that updates the view when a new page is viewed
+onPageChange(page: PageEvent) {
+
+  this.pageIndex = page.pageIndex;
   
+  }
+
+isScience(){
+
+  const science = this.sciences.some((subject) => subject.substring(0,4) === this.performance?.subjectName.substring(0,4));
+ 
+  return science
 }
+
+//method that displays the details of assessment, tracked by their question numbers
+goToDetails(_index:number) {
+
+  console.log(`index clicked: ${_index}`)
+
+  if(!this.display![_index]){
+
+    const sample = this.testTip![_index];
+  
+  const details:Details = {
+
+    number:_index+1,
+    problem:sample.problem,
+    response:sample.response,
+    answer:sample.answer
+  }
+
+  this.details = details;
+  this.display![_index] = !this.display![_index];
+
+  //toggle off anyother visible icon
+  const indexToToggleOff = this.display!.findIndex((value, index) => index !== _index && value);
+  
+
+  if(indexToToggleOff >= 0){
+    console.log(`index to toggle of clicked: ${indexToToggleOff}`)
+    this.display![indexToToggleOff] = false;
+  }
+  }
+  
+  else {
+
+    this.display![_index] = !this.display![_index];
+    this.details = undefined;
+  }
+  
+  }
 }
 
 export interface AssessmentSummary{
@@ -184,4 +200,13 @@ export interface AssessmentSummary{
   selectedOption:string|null,
   correctOption:string,
   remark:boolean
+}
+
+export interface Details {
+
+  number:number,
+  problem:string,
+  response:string,
+  answer:string
+
 }

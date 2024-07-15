@@ -44,75 +44,85 @@
   <div  class="mat-elevation-z8" >
     <table  mat-table [dataSource]="dataSource" >
 
-      <!-- Question Number Column -->
+      <ng-container *ngIf="!isScience(); else science">
+
+        <!-- Question Number Column -->
       <ng-container matColumnDef="questionNumber">
         <th mat-header-cell *matHeaderCellDef> question number </th>
         
-        <td mat-cell *matCellDef="let element; let i=index"> 
+        <td mat-cell *matCellDef="let element; let i=index"
+        [matTooltip]="toolTipFor((pageIndex * pageSize)+i, 'problem')">
+       {{element.questionNumber}}
+      </td>
+      </ng-container>
+
+
+      <!-- Selected Option Column -->
+      <ng-container matColumnDef="selectedOption">
+        <th mat-header-cell *matHeaderCellDef> Selected Option </th>
+        <td mat-cell *matCellDef="let element; let i=index"
+        [matTooltip]="toolTipFor((pageIndex * pageSize)+i, 'response')">
   
-          <button matPrefix mat-icon-button 
-          [matTooltip]="display[i] ? 'Hide question' : 'View question' "
-          (click)="toggleShow(i)">
-            <mat-icon *ngIf="!display[i]">visibility </mat-icon>
-            <mat-icon *ngIf="display[i]">visibility_off</mat-icon>
-          </button>
-        <span  
-        
-        [hidden]="!display[i]"
-        [innerHTML]="parsedTooltip[i] ? parsedTooltip[i].problem : '' "
-        appToolTip="{{getToolTipFor(i,'problem')}}"
-        (parsedTooltip)="onTooltipParsed(i,'problem', $event)"
-        ></span>
+        {{  element.selectedOption}} </td>
+      </ng-container>
+
+
+      
+      <!-- Correct Option Column -->
+      <ng-container matColumnDef="correctOption">
+        <th mat-header-cell *matHeaderCellDef> Correct Option </th>
+        <td mat-cell *matCellDef="let element; let i=index"
        
-        {{display[i] ? '' : element.questionNumber}} 
+        [matTooltip]="toolTipFor((pageIndex * pageSize)+i, 'answer')"
+        > 
+  
+      {{ element.correctOption}} 
       </td>
       </ng-container>
     
+      </ng-container>
+      
+
+
+      <!-- For subjects considered as sciences  -->
+      <ng-template  #science>
+        <!-- Question Number Column -->
+      <ng-container matColumnDef="questionNumber">
+        <th mat-header-cell *matHeaderCellDef> question number </th>
+        
+        <td mat-cell *matCellDef="let element; let i=index">
+        
+          <button matTooltip="click to view details" matIconSuffix (click)="goToDetails((pageIndex * pageSize)+i)" >
+            <mat-icon *ngIf="!display![(pageIndex * pageSize)+i]" >visibility</mat-icon>
+            <mat-icon *ngIf="display![(pageIndex * pageSize)+i]" >visibility_off</mat-icon>
+          </button>
+          <span> {{element.questionNumber}} </span>
+      </td>
+      </ng-container>
+
+
       <!-- Selected Option Column -->
       <ng-container matColumnDef="selectedOption">
         <th mat-header-cell *matHeaderCellDef> Selected Option </th>
         <td mat-cell *matCellDef="let element; let i=index">
   
-          <button hidden matPrefix mat-icon-button 
-          (click)="toggleShow(i)">
-            <mat-icon  *ngIf="!display[i]">visibility </mat-icon>
-            <mat-icon *ngIf="display[i]">visibility_off</mat-icon>
-          </button>
-  
-        <span 
-         [hidden]="!display[i]"
-        [innerHTML]="parsedTooltip[i] ? parsedTooltip[i].response : '' "
-        appToolTip="{{getToolTipFor(i,'response')}}"
-        (parsedTooltip)="onTooltipParsed(i,'response', $event)"
-        ></span>
-        {{ display[i] ? '' : element.selectedOption}} </td>
+        {{ element.selectedOption}} </td>
       </ng-container>
-    
+
+
+      
       <!-- Correct Option Column -->
       <ng-container matColumnDef="correctOption">
         <th mat-header-cell *matHeaderCellDef> Correct Option </th>
         <td mat-cell *matCellDef="let element; let i=index"> 
   
-          <button hidden matPrefix mat-icon-button 
-          (click)="toggleShow(i)">
-            <mat-icon *ngIf="!display[i]">visibility </mat-icon>
-            <mat-icon *ngIf="display[i]">visibility_off</mat-icon>
-          </button>
-  
-      <span 
-      
-      [hidden]="!display[i]"
-        [innerHTML]="parsedTooltip[i] ? parsedTooltip[i].answer : '' "
-        appToolTip="{{getToolTipFor(i,'answer')}}"
-        (parsedTooltip)="onTooltipParsed(i,'answer', $event)">
-    
-    </span>
-  
-      {{ display[i] ? '' : element.correctOption}} 
+      {{ element.correctOption}} 
       </td>
       </ng-container>
     
-      <!-- Result Column -->
+      
+
+      </ng-template>
       <ng-container matColumnDef="remark">
         <th mat-header-cell *matHeaderCellDef> Remark </th>
         <td mat-cell *matCellDef="let element">
@@ -122,10 +132,21 @@
         </td>
       </ng-container>
     
+    
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+    
+
     </table>
-    <mat-paginator [pageSize]="[5]" showFirstLastButtons="true" ></mat-paginator>
+    <mat-paginator #paginator (page)="onPageChange($event)" [pageSize]="pageSize" ></mat-paginator>
   
+    
   </div>
+
+  <p>
+    <app-detail-page [details]="details" ></app-detail-page>
+ 
+  </p>
+   
  

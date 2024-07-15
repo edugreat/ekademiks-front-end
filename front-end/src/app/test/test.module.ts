@@ -10,6 +10,7 @@ import { InstructionDialogComponent } from './instruction-dialog/instruction-dia
 import { PerformanceComponent } from './performance/performance.component';
 import { PerformanceReportComponent } from './performance/performance-report/performance-report.component';
 import { ToolTipDirective } from './tool-tip.directive';
+import { DetailPageComponent } from './performance/performance-report/detail-page/detail-page.component';
 
 
 
@@ -23,7 +24,8 @@ import { ToolTipDirective } from './tool-tip.directive';
     InstructionDialogComponent,
     PerformanceComponent,
     PerformanceReportComponent,
-    ToolTipDirective
+    ToolTipDirective,
+    DetailPageComponent
     
   ],
   

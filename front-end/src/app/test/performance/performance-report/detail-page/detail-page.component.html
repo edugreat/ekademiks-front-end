@@ -1,0 +1,18 @@
+<div *ngIf="details">
+<span style="margin-right: 5px;">{{details.number}}.</span>
+<span>
+    <label style="font-weight: bold;" [appMathJax]="details.problem"></label>
+</span>
+<div>
+    <span style="margin-right: 5px;">Selected option:</span>
+    <span style="font-weight: bold;">
+        <label [appMathJax]="details.response"></label>
+    </span>
+</div>
+
+<div>
+    <span style="margin-right: 5px;">Correct option:</span>
+    <span style="font-weight: bold;"><label [appMathJax]="details.answer" ></label></span>
+</div>
+
+</div>
