@@ -2,6 +2,9 @@ import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, ViewC
 import { PerformanceObject } from '../../test/test.component';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { Router } from '@angular/router';
+import { AuthService } from '../../../auth/auth.service';
+import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 
 @Component({
   selector: 'app-performance-report',
@@ -9,6 +12,8 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
   styleUrl: './performance-report.component.css'
 })
 export class PerformanceReportComponent implements OnInit, OnDestroy, AfterViewInit{
+
+
 
 
   details? : Details; //details of the particular assessment the student want to view when going through their performance report
@@ -38,7 +43,14 @@ export class PerformanceReportComponent implements OnInit, OnDestroy, AfterViewI
   pageSize = 5; //number of items per page
 
 display? :boolean[];
+//dynamic property that shows if the student want to sign out or take more test.
+//It is controlled by the student's interraction witht the raadio button
+signoutOrMore = '';
 
+
+constructor(private router:Router, private authService:AuthService,
+  private confirmationService:ConfirmationDialogService
+){}
   ngOnInit(): void {
 
     this.performanceAnalysis();
@@ -192,6 +204,40 @@ goToDetails(_index:number) {
   }
   
   }
+
+  //handles students interraction with the radio button to decide if they should sign out or take more tests
+  moreOrSignout() {
+
+    if(!this.isLoggedIn()){
+      this.router.navigate(['/home/true']);
+    }
+    else{ //for logged in users
+      if(this.signoutOrMore === 'More'){
+        this.router.navigate(['/home/true']);
+      }else if(this.signoutOrMore === 'Out'){
+
+
+        this.confirmationService.confirmText('Do you want to logout?');
+        this.confirmationService.confirm$.subscribe((yes) =>{
+
+          if(yes){
+        this.authService.logout();
+        this.router.navigate(['login']);
+          }
+        })
+
+        
+      }
+    }
+
+    
+    }
+
+
+    isLoggedIn(): boolean {
+      
+      return this.authService.isLoggedIn();
+      }
 }
 
 export interface AssessmentSummary{

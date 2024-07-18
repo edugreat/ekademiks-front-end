@@ -3,7 +3,7 @@
  matTooltipPosition="below"
  matTooltipHideDelay="2000" >
     <a mat-button (click)="goBack()" >
-        <mat-icon   >arrow_back</mat-icon>
+        <mat-icon>arrow_back</mat-icon>
     </a>
 </div>
 
@@ -50,7 +50,7 @@
         class="example-radio-group"
         [(ngModel)]="selectedLevel" name="_level">
         <ng-container *ngFor="let level of levels$ | async">
-          <mat-radio-button class="example-radio-button" [value]="level.category">{{level.category}}</mat-radio-button>
+          <mat-radio-button color="primary" class="example-radio-button" [value]="level.category">{{level.category}}</mat-radio-button>
         </ng-container>
       </mat-radio-group>
   

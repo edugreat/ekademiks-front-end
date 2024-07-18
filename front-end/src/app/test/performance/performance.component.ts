@@ -37,6 +37,7 @@ export class PerformanceComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 
+    this.testService.submission(false)//notifies 'canDeactivate'that submission is complete. Further navigation out of the TestComponent should be checked
     this.showMyRecentAccessPerformance();
     
    

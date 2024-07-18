@@ -3,11 +3,7 @@ mat-grid-tile{
     flex-direction: column;
   }
 
-  .subject-text {
-    font-size: 1.2em; /* Increase font size */
-    font-weight: bold; /* Make the text bold */
-    color: #00796b; /* Change color to a standout green */
-  }
+ 
   
   .mat-icon-quiz {
     color: #ff9800; /* Change color to a standout orange */
@@ -33,4 +29,31 @@ mat-grid-tile{
   #back mat-icon {
     font-size: 1.5em;
     margin-right: 0.5em; 
+  }
+
+  /* Mobile styles */
+  @media(max-width:600px){
+    .mat-icon-quiz{
+      display: none !important;
+    }
+
+    .subject-text {
+      font-size: 0.8em !important; 
+      font-weight: bold !important; 
+      color: #00796b !important; 
+    }
+
+    
+  }
+
+  /* Tablet */
+  @media (min-width: 601px) and (max-width:1024px){
+
+   
+    .subject-text {
+      font-size: 0.8em !important; 
+      font-weight: bold !important; 
+      color: #00796b !important; 
+    }
+
   }

@@ -19,7 +19,16 @@ export class TestService {
  //subject that emits student's recent performance.
  private recentPerformanceSubject:Subject<PerformanceObject> = new Subject<PerformanceObject>();
 
-  constructor(private http:HttpClient) { }
+ //the submitting subject emits true or either student's or system initiated assessment submission
+ //This is to notify the 'canDeactivate' guard not to block navigation.
+ private submissionSubject = new BehaviorSubject<boolean>(false);
+
+ //boolean flag that shows when user's route navigation is due to assessment submission. This is basically to prevent the 'canDeactivate from blocking navigation
+ forSubmission = false;
+ 
+  constructor(private http:HttpClient) {
+    this.submissionSubject.asObservable().subscribe(value => this.forSubmission = value)
+   }
 
 
 
@@ -86,6 +95,13 @@ myRecentPerformanceObservable():Observable<PerformanceObject>{
 
   return this.recentPerformanceSubject.asObservable();
 }
+
+//notifies subscribers, especially the 'canDeactivate' guard that navigation should be allowed due to assessment submission
+submission(value:boolean){
+
+  this.submissionSubject.next(value)
+}
+
 }
 
 //object showing id of the student who made the attempt, the id of the test and the attempts made

@@ -14,7 +14,7 @@
 
     <span id="topMenuLoginLogout" >
         <a *ngIf="!loggedIn()" mat-button [routerLink]="['/login']" class="top-menu-item" ><mat-icon>login</mat-icon>Login</a>
-        <a (click)="logout()" *ngIf="loggedIn()"  mat-button [routerLink]="['/login']" class="top-menu-item"  ><mat-icon>logout</mat-icon>Logout</a>
+        <a (click)="logout()" *ngIf="loggedIn()"  mat-button class="top-menu-item"  ><mat-icon>logout</mat-icon>Logout</a>
         
     </span>
    
@@ -49,7 +49,7 @@
 
         
         <div >
-            <a (click)="logout()" *ngIf="loggedIn()" (click)="sidenav.close(); logout()" mat-button  routerLink="/login" class="side-menu-item"> <mat-icon>logout</mat-icon> Logout</a>
+            <a (click)="logout()" *ngIf="loggedIn()" (click)="sidenav.close()" mat-button class="side-menu-item"> <mat-icon>logout</mat-icon> Logout</a>
         </div>
     </div>
         </mat-sidenav>
@@ -61,3 +61,6 @@
 
     </mat-sidenav-content>
   </mat-sidenav-container>
+
+  <!-- Confirmation to confirm student's logout action -->
+   <app-confirmation></app-confirmation>

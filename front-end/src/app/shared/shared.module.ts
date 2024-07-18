@@ -7,12 +7,13 @@ import { SpinnerComponent } from './spinner/spinner.component';
 import { CommonModule } from '@angular/common';
 import { AppRoutingModule } from '../app-routing/app-routing.module';
 import { ProgressBarComponent } from './progress-bar/progress-bar.component';
+import { ConfirmationComponent } from './confirmation/confirmation.component';
 
 
 
 @NgModule({
   declarations: [OptionSortPipe, SortPipe, 
-    SpinnerComponent, ProgressBarComponent],
+    SpinnerComponent, ProgressBarComponent, ConfirmationComponent],
   imports: [
     FormsModule,
     MaterialModule,
@@ -24,7 +25,7 @@ import { ProgressBarComponent } from './progress-bar/progress-bar.component';
   ],
   exports:[FormsModule, ReactiveFormsModule, OptionSortPipe,SortPipe,
      SpinnerComponent, MaterialModule, AppRoutingModule,
-    ProgressBarComponent
+    ProgressBarComponent, ConfirmationComponent
     ]
 })
 export class SharedModule { }

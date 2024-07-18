@@ -126,6 +126,11 @@ mat-radio-button {
   margin: 8px 0;
 }
 
+mat-radio-button:checked{
+
+  color: green !important;
+}
+
 button {
   display: block;
   margin: 20px auto;
@@ -165,4 +170,25 @@ margin: 0 10px;
 
   font-size: 15px;
   font-weight: bold;
+}
+
+/* small screens */
+@media(max-width:600px){
+  .problem{
+    font-size: 0.8rem;
+  }
+}
+
+/* tablets screens */
+@media(min-width:601px) and (max-width:1024px){
+  .problem{
+    font-size: 1rem;
+  }
+}
+
+/* desktop screens */
+@media(min-width:1025px){
+  .problem{
+    font-size: 1.2rem;
+  }
 }

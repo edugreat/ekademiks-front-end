@@ -6,20 +6,7 @@
      </a>
  </div>
  
- <div 
-  *ngIf="hasReadInstructions && testStarted"
- class="progress-bar-fixed" >
-   <app-progress-bar [barColor]="progressBarColor"
-   [barMode]="barMode"
-   [barBufferValue]="progress" ></app-progress-bar>
-   <div class="progress-text">
-     @if (remaining > 0) {
-      <span>Remaining</span>: {{remaining}}
-     } @else if (remaining <= 0 ) {
-      <span>Completed !</span>
-     }
-   </div>
- </div>
+ 
  
  <div  class="header-container">
      <div class="header-left" 
@@ -46,7 +33,7 @@
        <mat-expansion-panel *ngFor="let question of paginatedQuestions; let i = index">
          <mat-expansion-panel-header>
            <mat-panel-title>
-             <span style="padding-right: 5px;" >{{ (currentPage * pageSize) + i + 1}}.</span><span [appMathJax]= "question.problem"></span>
+             <span style="padding-right: 5px;" >{{ (currentPage * pageSize) + i + 1}}.</span><span class="problem" [appMathJax]= "question.problem"></span>
            </mat-panel-title>
          </mat-expansion-panel-header>
          
@@ -55,7 +42,7 @@
          (change)="calculateProgress()"
  
          [(ngModel)]="selectedOptions[(currentPage * pageSize) + i]" *ngIf="question.options.length">
-           <mat-radio-button *ngFor="let option of paginatedQuestions![i].options| optionSort"
+           <mat-radio-button color="primary" *ngFor="let option of paginatedQuestions![i].options| optionSort"
           
            [value]="option.letter">
              <span style="font-weight: bold;margin-right: 15px; " [appMathJax]="option.letter ">. </span> <span [appMathJax]="  option.text"></span>
@@ -72,7 +59,7 @@
       </button>
 
       <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
-      <button matSuffix (click)="nextPage()" [disabled]="currentPage + 1 === totalPages">
+      <button mat-button matSuffix (click)="nextPage()" [disabled]="currentPage + 1 === totalPages">
        <mat-icon> arrow_forward_ios</mat-icon>
       </button>
     </div>
@@ -80,6 +67,7 @@
      <button [disabled]="!submitable() || testSubmitted" mat-raised-button color="primary" (click)="submit()">Submit</button>
    </div>
 </div>
-<!--NAVIGATE BACK-->
+<!-- Confirmation dialog -->
+<app-confirmation></app-confirmation>
 
  

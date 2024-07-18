@@ -1,7 +1,20 @@
 
+
+<!-- section where students decides to take more assessment or sign out -->
+ <mat-card class="decision-card" >
+  <mat-card-content class="decision-content">
+    <section>
+      <mat-radio-group *ngIf="isLoggedIn()" [(ngModel)]="signoutOrMore" (change)="moreOrSignout()" >
+        <mat-radio-button color="primary" class="decision-radio" value="More" >More Assessment</mat-radio-button>
+        <mat-radio-button color="warn" class="decision-radio" value="Out">Sign Out</mat-radio-button>
+      </mat-radio-group>
+      <button  (click)="moreOrSignout()" *ngIf="!isLoggedIn()" mat-stroked-button>More Assessment</button>
+    </section>
+  </mat-card-content>
+ </mat-card>
+
   <!-- section that shows student's recent performance -->
-
-
+  <p></p>
   <mat-card class="performance-summary-card">
 
     <mat-card-title style="text-align: center;" >Perfomance Summary</mat-card-title>
@@ -9,7 +22,7 @@
     <mat-card-content>
       <mat-grid-list cols="3" rowHeight="100px" gutterSize="10px" >
         <mat-grid-tile>
-          <mat-icon matTooltip="total questions asked" class="summary-icon">assignment</mat-icon>
+          <mat-icon  matTooltip="total questions asked" class="summary-icon">assignment</mat-icon>
           <div class="summary-text">
             <h3>Total Questions</h3>
             <p>{{totalQuestions}}</p>
@@ -144,9 +157,12 @@
     
   </div>
 
+  <!-- Performance dettails received as input of the 'details' property of the the parent component -->
   <p>
     <app-detail-page [details]="details" ></app-detail-page>
- 
   </p>
+
+  <!-- Confirmation dialog to confirm student's logout action -->
+   <app-confirmation></app-confirmation>
    
  

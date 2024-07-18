@@ -54,3 +54,27 @@
     margin: 1em 0; /* Space around divider */
 
   }
+
+  @media(max-width:600px){
+
+    .topic{
+
+      font-size: 0.8rem;
+    }
+    .description{
+
+      font-size: 0.6rem;
+    }
+  }
+
+  @media(min-width:601px) and (max-width){
+
+    .topic{
+
+      font-size: 0.9rem;
+    }
+    .description{
+
+      font-size: 0.8rem;
+    }
+  }

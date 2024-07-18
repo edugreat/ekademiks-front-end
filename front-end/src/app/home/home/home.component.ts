@@ -1,11 +1,10 @@
-import { Component, OnInit, HostListener, OnDestroy, AfterViewInit, viewChild, ElementRef, ViewChild, Renderer2 } from '@angular/core';
-import { MediaChange, MediaObserver } from '@angular/flex-layout';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { MediaChange } from '@angular/flex-layout';
 import { Observable, Subscription } from 'rxjs';
 import { AssessmentsService, Levels } from '../../assessment/assessments.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MediaService } from '../../media-service';
 import { HomeService } from '../home.service';
-import { observableToBeFn } from 'rxjs/internal/testing/TestScheduler';
 
 @Component({
   selector: 'app-home',
@@ -108,6 +107,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   goBack() {
     
    this.levels$ = undefined;
+   this.router.navigate(['/home'])
     
   }
 }

@@ -25,7 +25,7 @@
   <ng-template  #xsLayout>
     <mat-grid-list style="padding-left: 0px;" [cols]="col" rowHeight="100px" gutterSize="6px">
       <mat-grid-tile *ngFor="let subject of subjectNames | sort " [colspan]="1">
-        <a style="width: 180px;" mat-button [routerLink]="['/assessment-panel', subject, selectedLevel]">
+        <a  style="width: 180px; display: flex; align-items: center" mat-button [routerLink]="['/assessment-panel', subject, selectedLevel]">
       
           <mat-icon  class="mat-icon-quiz" >quiz</mat-icon>
          <span  class="subject-text" > {{subject}}</span>

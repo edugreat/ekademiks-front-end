@@ -30,7 +30,8 @@ import { NumericDirective } from './numeric.directive';
     AppComponent,
     ContactComponent,
     SignUpComponent,
-    NumericDirective
+    NumericDirective,
+   
    
    
   ],

@@ -10,6 +10,7 @@ import { InstructionDialogComponent } from '../instruction-dialog/instruction-di
 import { ProgressBarMode } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../auth/auth.service';
+import { ConfirmationDialogService } from '../../confirmation-dialog.service';
 
 @Component({
   selector: 'app-test',
@@ -86,7 +87,6 @@ testStarted: boolean = false; // boolean flag indicating whether the student has
  testSubmitted = false;
 
  //myRecentPerformanceSub$: Subscription | undefined; //subscription that subscribes to the performance observable to get notiied when student wishes to see their academic performance
-
  showMyPerformace = false; 
 
  submissionSub$:Subscription | undefined;
@@ -97,7 +97,8 @@ testStarted: boolean = false; // boolean flag indicating whether the student has
     public dialog: MatDialog,
     private successSnackBar:MatSnackBar,
     private router:Router,
-    private authService:AuthService
+    private authService:AuthService,
+    private confirmService:ConfirmationDialogService
   ){}
 
   ngOnInit(): void {
@@ -221,6 +222,7 @@ startTest() {
     //get the duration for the test converted to seconds
   this.testDuration = this.activatedRoute.snapshot.params['duration'] * 60;
   this.testStarted = true;
+  
 }
  
   
@@ -230,70 +232,79 @@ startTest() {
 
 submit() {
 
-  if(!this._autoSubmit){ //istudent initiated submission
+  if(!this._autoSubmit){ //if it is student's initiated submission
 
-    if(confirm("Are you sure to submit?")){
+    this.confirmService.confirmText('Are you sure to submit ?');
+    this.confirmService.confirm$.subscribe((response) =>{
 
-      const attempted = this.selectedOptions.some(option => option !== null);
+      //user vetoes submission
+      if(response){
+
+        const attempted = this.selectedOptions.some(option => option !== null);
   
-  if(attempted){
-    
-   let attempt:Attempt = {
-
-    testId:  Number(sessionStorage.getItem('testId')),
-    studentId: Number(sessionStorage.getItem('studentId')),
-    selectedOptions: this.selectedOptions
-   }
-    
-
-    //extracts this part of the test content for use in later in the student performance feedback to give a tip to the student for the questions they answers and their correct options
-    const data:{problem:string, response:string, answer:string}[] = this.testContent!.questions.map((question, index) =>({
-      problem:question.problem,
-      response:question.options.filter((option) => this.selectedOptions[index] === option.letter).map(option => option.text)[0],
-      answer: question.options.filter((option)=> option.letter === question.answer).map(option => option.text)[0]
-    }))
-
-    //persist to the session storage for later use
-    sessionStorage.setItem("testTip", JSON.stringify(data));
-
-   //check if the student is a logged in user or guest
-   const isLoggedInUser = this.authService.isLoggedIn();
-
-  if(isLoggedInUser){
-    
-     //submit the student's performance to the back-end
-  this.submissionSub$ =  this.testService.submitTest(attempt).subscribe({
-    next:(response:{message:string}) =>{
+        if(attempted){
+          
+         let attempt:Attempt = {
       
-      this.testSubmitted = true;//sets the 'testSubitted' boolean to true so as to deactivate the submit button, so that a resubmission  cannot initiated 
-      this.openSnackBar(`${response.message} PLEASE WAIT...`);//open a snack bar to notify the student of successful submission
-    },
-
-      complete:() => {
-        setTimeout(() => {
-          this.router.navigate(['/performance'])
-        }, 5000);
-      },
-     
-      error:() =>{
-        console.log()
+          testId:  Number(sessionStorage.getItem('testId')),
+          studentId: Number(sessionStorage.getItem('studentId')),
+          selectedOptions: this.selectedOptions
+         }
+          
+      
+          //extracts this part of the test content for use in later in the student performance feedback to give a tip to the student for the questions they answers and their correct options
+          const data:{problem:string, response:string, answer:string}[] = this.testContent!.questions.map((question, index) =>({
+            problem:question.problem,
+            response:question.options.filter((option) => this.selectedOptions[index] === option.letter).map(option => option.text)[0],
+            answer: question.options.filter((option)=> option.letter === question.answer).map(option => option.text)[0]
+          }))
+      
+          //persist to the session storage for later use
+          sessionStorage.setItem("testTip", JSON.stringify(data));
+      
+         //check if the student is a logged in user or guest
+         const isLoggedInUser = this.authService.isLoggedIn();
+      
+        if(isLoggedInUser){
+          
+           //submit the student's performance to the back-end
+        this.submissionSub$ =  this.testService.submitTest(attempt).subscribe({
+          next:(response:{message:string}) =>{
+            
+            this.testSubmitted = true;//sets the 'testSubitted' boolean to true so as to deactivate the submit button, so that a resubmission  cannot initiated 
+            this.openSnackBar(`${response.message} PLEASE WAIT...`);//open a snack bar to notify the student of successful submission
+          },
+      
+            complete:() => {
+              this.testService.submission(true)//notifies the 'canDeactivate' that navigation is intended after assessment submission has been performed 
+              
+              setTimeout(() => {
+                this.router.navigate(['/performance'])
+              }, 5000);
+            },
+           
+            error:() =>{
+              console.log()
+            }
+         })
+        }else{//for guest students, do not submit to the backend, instead route to the performance page for them to see their recent performance or take more assessment
+      
+          this.openSnackBar('Submitted! PLEASE WAIT ...');
+          this.testSubmitted = true;
+         this.testService.submission(true)
+          setTimeout(() => {
+            this.router.navigate(['/performance'])
+          }, 5000);
+          
+        }
+      
+        
+        }
+      
+        
       }
-   })
-  }else{//for guest students, do not submit to the backend, instead route to the performance page for them to see their recent performance or take more assessment
+    })
 
-    this.openSnackBar('Submitted! PLEASE WAIT ...');
-    this.testSubmitted = true;
-    setTimeout(() => {
-      this.router.navigate(['/performance'])
-    }, 5000);
-    
-  }
-
-  
-  }
-
-
-    } 
     
   }
 
@@ -335,6 +346,8 @@ submit() {
       },
   
         complete:() => {
+          this.testService.submission(true)
+         
           setTimeout(() => {
             this.router.navigate(['/performance'])
           }, 5000);
@@ -348,6 +361,8 @@ submit() {
   
       this.openSnackBar('Submitted! PLEASE WAIT ...');
       this.testSubmitted = true;
+      this.testService.submission(true)
+      
       setTimeout(() => {
         this.router.navigate(['/performance'])
       }, 5000);
