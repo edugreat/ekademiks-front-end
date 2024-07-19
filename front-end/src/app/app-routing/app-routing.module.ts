@@ -10,6 +10,7 @@ import { AuthComponent } from '../auth/auth/auth.component';
 import { SignUpComponent } from '../sign-up/sign-up.component';
 import { PerformanceComponent } from '../test/performance/performance.component';
 import { navigationGuard } from '../auth/navigation.guard';
+import { AccessDeniedComponent } from '../auth/access-denied/access-denied.component';
 
 const routes:Routes = [
  {path: 'home', component: HomeComponent},
@@ -23,6 +24,7 @@ const routes:Routes = [
   {path:'assessments/:level', component: AssessmentComponent},
   {path:'assessment-panel/:subject/:category', component: AssessmentExpansionPanelComponent},
   {path: 'start/:topic/:duration/:subject/:category', component: TestComponent, canDeactivate:[navigationGuard]},
+  {path: 'no-access/:code', component: AccessDeniedComponent},
  
   {path: '', redirectTo: 'login', pathMatch:'full'},
   

@@ -51,12 +51,7 @@ export class AuthComponent {
     return this.authService.isLoggedIn();
   }
 
-  // //Log the current user out
-  // public logout():void{
-
-  //   this.authService.logout();
-  // }
-
+  
 
   //Toggles password visibility
   toggleShowPassword(){

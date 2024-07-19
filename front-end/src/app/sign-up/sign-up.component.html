@@ -1,17 +1,12 @@
-
-@if (networkBusy) {
-
-  <div style="margin-top: 45vh; z-index: 1000;" >
-    <app-progress-bar  [barMode]="progressBarMode" ></app-progress-bar>
   
-    <div style="text-align:left; color: black; font-weight: bold;" >Loading, wait . . .</div>
-  </div>
-}
   
+
 <div *ngIf="!networkBusy" id="registrationLabel">
     <label>PLEASE CREATE ACCOUNT</label>
 </div>
-
+<div *ngIf="errorMessage" class="error">
+  <p class="error-message" >{{errorMessage}}!</p>
+</div>
 <div *ngIf="!networkBusy" class="signup-container">
     <div class="signup-form" [formGroup]="userForm">
       

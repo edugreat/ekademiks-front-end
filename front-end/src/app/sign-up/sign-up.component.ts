@@ -6,13 +6,14 @@ import { NewUser, SignUpService } from './sign-up.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { ProgressBarMode } from '@angular/material/progress-bar';
+import { HttpErrorResponse } from '@angular/common/http';
 
 
 @Component({
   selector: 'app-sign-up',
   templateUrl: './sign-up.component.html',
   styleUrl: './sign-up.component.css',
-  //encapsulation: ViewEncapsulation.None // Disable view encapsulation
+  
 })
 export class SignUpComponent implements OnInit {
 
@@ -21,7 +22,8 @@ export class SignUpComponent implements OnInit {
     private router: Router){}
 
 
-  
+  // account creation error message such 'account already exists'
+  errorMessage?:string;
 
   //Boolean flag to show if the password field and the password confirmation fields mismatch
  passwordMismatch: boolean = false;
@@ -81,9 +83,6 @@ export class SignUpComponent implements OnInit {
 
       this.chechPasswordMatch()
     });
-
-    
-    
   }
 
 
@@ -100,15 +99,11 @@ export class SignUpComponent implements OnInit {
 
   this.networkBusy =true;
   this.signupService.registerUser(newUser).subscribe({
-    next:(status) => {
-      console.log(status);
+    next:(status) => {},
+
+    error:(err: HttpErrorResponse) => {
       this.networkBusy = false;
-
-    },
-
-    error:(error) => {
-      this.networkBusy =false;
-      console.log(error)
+     this.errorMessage = err.error;
     },
 
     complete:() => {

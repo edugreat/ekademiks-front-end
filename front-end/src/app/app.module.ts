@@ -4,7 +4,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppComponent } from './app.component';
 
-import { HttpClientModule} from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import { TestModule } from './test/test.module';
 import { CommonModule } from '@angular/common';
 import { ContactComponent } from './contact/contact.component';
@@ -21,6 +21,7 @@ import { MatCardModule } from '@angular/material/card';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SignUpComponent } from './sign-up/sign-up.component';
 import { NumericDirective } from './numeric.directive';
+import { AuthInterceptor } from './auth/auth.interceptor';
 
   
 
@@ -58,7 +59,9 @@ import { NumericDirective } from './numeric.directive';
   ],
   
  exports:[AuthModule],
-  providers: [],
+  providers: [
+    {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true}
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

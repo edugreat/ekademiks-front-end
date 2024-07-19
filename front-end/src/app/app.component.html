@@ -10,6 +10,85 @@
     <a mat-button routerLink="/assessments" class="top-menu-item"><mat-icon>school</mat-icon>Assessments</a>
     <a mat-button routerLink="/supports" class="top-menu-item"><mat-icon>help</mat-icon>Help/Supports</a>
     <a mat-button routerLink="/contact" class="top-menu-item" ><mat-icon>call</mat-icon>Contact</a>
+
+    <!-- ADMIN BUTTON -->
+    <a mat-button [matMenuTriggerFor]="admins" aria-label="Example icon-button with a menu" class="top-menu-item" >
+
+        <mat-icon>lock</mat-icon>
+        Admin
+    </a>
+
+    <!-- ADMIN MENU -->
+    <mat-menu  #admins="matMenu">
+    <button mat-menu-item [matMenuTriggerFor]="assessment" >
+        <mat-icon>quiz</mat-icon>
+       Assessment
+    </button>
+    <button mat-menu-item [matMenuTriggerFor]="student" >
+        <mat-icon>person</mat-icon>
+        Student
+    </button>
+
+    <button disabled mat-menu-item>
+        <mat-icon>assignment</mat-icon>
+        Post assignment
+    </button>
+    </mat-menu>
+
+    <!-- ASSESSMENT MENU -->
+    <mat-menu #assessment="matMenu" >
+        <button mat-menu-item [matMenuTriggerFor]="test" >
+            <mat-icon>menu_book</mat-icon>
+           Test
+        </button>
+        <button mat-menu-item [matMenuTriggerFor]="bank">
+            <mat-icon>account_balance</mat-icon>
+            Question bank
+        </button>
+    </mat-menu>
+
+    <!-- TEST MENU-->
+     <mat-menu #test="matMenu">
+        <button mat-menu-item [mat-menu-trigger-for]="upload">
+            <mat-icon>upload</mat-icon>
+            Upload
+        </button>
+
+        
+        <button mat-menu-item [mat-menu-trigger-for]="fetch" >
+            <mat-icon>download</mat-icon>
+          Fetch
+        </button>
+     </mat-menu>
+
+     <!-- Test uploads -->
+      <mat-menu #upload >
+       <button mat-menu-item>Test</button>
+        <button mat-menu-item>Subject</button>
+        <button mat-menu-item>Category</button>
+      </mat-menu>
+
+      <!-- Fetch test -->
+      <mat-menu #fetch >
+        <button mat-menu-item>Test</button>
+         <button mat-menu-item>Subject</button>
+         <button mat-menu-item>Category</button>
+         <button mat-menu-item>Topic</button>
+       </mat-menu>
+
+     <!-- QUESTION BANK MENU -->
+      <mat-menu #bank="matMenu">
+        <button mat-menu-item>Set Questions</button>
+        <button mat-menu-item>Set Options</button>
+      </mat-menu>
+
+<!-- STUDENT MENU -->
+    <mat-menu #student="matMenu">
+    <button mat-menu-item disabled></button>
+    </mat-menu>
+
+
+
     <span id="user" >  <mat-icon>person</mat-icon> Hi {{userName | uppercase}} </span>
 
     <span id="topMenuLoginLogout" >
@@ -20,7 +99,7 @@
    
   </mat-toolbar>
  
-  
+  <!-- SIDE NAVIGATION BAR -->
   
   <mat-sidenav-container>
     <mat-sidenav #sidenav [fixedInViewport]="true" [fixedTopGap]="60" mode="side">
@@ -50,6 +129,16 @@
         
         <div >
             <a (click)="logout()" *ngIf="loggedIn()" (click)="sidenav.close()" mat-button class="side-menu-item"> <mat-icon>logout</mat-icon> Logout</a>
+        </div>
+
+        <div>
+            <a  mat-button (click)="sidenav.close()" [matMenuTriggerFor]="admins" aria-label="Example icon-button with a menu" class="side-menu-item" >
+
+                <mat-icon >lock</mat-icon>
+                
+                Admin
+            </a>
+
         </div>
     </div>
         </mat-sidenav>
