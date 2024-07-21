@@ -3,6 +3,7 @@ import { AuthService } from './auth/auth.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { ConfirmationDialogService } from './confirmation-dialog.service';
+import { ActivityService } from './activity.service';
 
 @Component({
   selector: 'app-root',
@@ -17,7 +18,8 @@ export class AppComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private confirmationService: ConfirmationDialogService
+    private confirmationService: ConfirmationDialogService,
+    private activityService:ActivityService
   ) {}
 
   ngOnInit(): void {
@@ -48,6 +50,9 @@ export class AppComponent implements OnInit, OnDestroy {
       if (yes) {
         //reset the user to the generic 'Student' placeholder name
         this.authService.logout();
+
+        //this is important incase the user wants to logout in the middle of assessment taking
+       this.activityService.currentAction('logout');
         this.router.navigate(['login'])
       }
     });

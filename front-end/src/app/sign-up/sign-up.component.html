@@ -1,13 +1,13 @@
   
   
 
-<div *ngIf="!networkBusy" id="registrationLabel">
+<div *ngIf="!wait" id="registrationLabel">
     <label>PLEASE CREATE ACCOUNT</label>
 </div>
 <div *ngIf="errorMessage" class="error">
   <p class="error-message" >{{errorMessage}}!</p>
 </div>
-<div *ngIf="!networkBusy" class="signup-container">
+<div *ngIf="!wait" class="signup-container">
     <div class="signup-form" [formGroup]="userForm">
       
         <!-- First name input field -->

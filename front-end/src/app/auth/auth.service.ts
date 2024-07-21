@@ -28,22 +28,23 @@ export class AuthService {
    }
   
 
-   login(email:string, password:string):Observable<User>{
+   login(email:string, password:string, role:string):Observable<User>{
 
     
-    return this.http.post<User>(this.baseUrl, {email:`${email}`, password:`${password}`}).pipe(
-      tap(user => this.saveToSession(user.token, user.id+"", user.firstName))
+    return this.http.post<User>(`${this.baseUrl}?role=${role}`, {email:`${email}`, password:`${password}`}).pipe(
+      tap(user => this.saveToSession(user))
     )
 
 
   }
 
   //saves the just logged in user's token to the session storage
-  private saveToSession(token:string, studentId:string, firstName:string){
-
-    sessionStorage.setItem("token", token);
-    sessionStorage.setItem("studentId", studentId)
-    sessionStorage.setItem('username', firstName);
+  private saveToSession(user:User){
+  
+    sessionStorage.setItem("token", user.token);
+    sessionStorage.setItem("studentId", `${user.id}`)
+    sessionStorage.setItem('username', user.firstName);
+    sessionStorage.setItem('roles', JSON.stringify(user.roles));
     this.currentUserName.next(sessionStorage.getItem('username')!);
     
   }

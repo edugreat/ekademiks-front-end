@@ -11,6 +11,7 @@ import { ProgressBarMode } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../auth/auth.service';
 import { ConfirmationDialogService } from '../../confirmation-dialog.service';
+import { ActivityService } from '../../activity.service';
 
 @Component({
   selector: 'app-test',
@@ -98,7 +99,8 @@ testStarted: boolean = false; // boolean flag indicating whether the student has
     private successSnackBar:MatSnackBar,
     private router:Router,
     private authService:AuthService,
-    private confirmService:ConfirmationDialogService
+    private confirmService:ConfirmationDialogService,
+    private activityService:ActivityService
   ){}
 
   ngOnInit(): void {
@@ -187,7 +189,7 @@ this.totalPages = this.totalQuestions/this.pageSize;
 //handles user request for next page
 nextPage(){
 
-  console.log(`current page: ${this.currentPage} total page size: ${this.totalPages}`)
+  
 
   if(this.currentPage < this.totalPages){
     this.currentPage++; //increment current page by 1 if it is less the total page viewable
@@ -276,22 +278,23 @@ submit() {
           },
       
             complete:() => {
-              this.testService.submission(true)//notifies the 'canDeactivate' that navigation is intended after assessment submission has been performed 
+              this.activityService.currentAction('submission')//notifies the 'canDeactivate' that navigation is intended after assessment submission has been performed 
               
               setTimeout(() => {
                 this.router.navigate(['/performance'])
               }, 5000);
             },
            
-            error:() =>{
-              console.log()
+            error:(error) =>{
+              console.log(error)
             }
          })
         }else{//for guest students, do not submit to the backend, instead route to the performance page for them to see their recent performance or take more assessment
       
           this.openSnackBar('Submitted! PLEASE WAIT ...');
           this.testSubmitted = true;
-         this.testService.submission(true)
+          //notifies the 'canDeactivate' that navigation is intended after assessment submission has been performed 
+          this.activityService.currentAction('submission');
           setTimeout(() => {
             this.router.navigate(['/performance'])
           }, 5000);
@@ -346,7 +349,9 @@ submit() {
       },
   
         complete:() => {
-          this.testService.submission(true)
+
+          //notifies the 'canDeactivate' that navigation is intended after assessment submission has been performed 
+         this.activityService.currentAction('submission');
          
           setTimeout(() => {
             this.router.navigate(['/performance'])
@@ -361,7 +366,9 @@ submit() {
   
       this.openSnackBar('Submitted! PLEASE WAIT ...');
       this.testSubmitted = true;
-      this.testService.submission(true)
+
+      //notifies the 'canDeactivate' that navigation is intended after assessment submission has been performed 
+      this.activityService.currentAction('submission');
       
       setTimeout(() => {
         this.router.navigate(['/performance'])
@@ -371,16 +378,9 @@ submit() {
   
     
     }
-  
-
-
-
 
   }
   
-  
- 
-
   }
 
   //automatic submission is triggered once the assessment time is up
@@ -488,7 +488,7 @@ private openSnackBar(message:string){
       this.recentAcademicPerformance();//produces student's recent assessment performance
     }else{
 
-      console.log('detected emission')
+     
       this.router.navigate(['/home/true'])//routes back to the component with request parameter set to true to show the student desires to take more assessment
     }
   }) 

@@ -1,6 +1,19 @@
 
 <div><label id="signInLabel" >Please Sign In</label></div>
 
+<div class="hidden"  id="error">
+
+  <button (click)="hideError()"  style="padding-bottom: 6px; color: red; "  mat-icon-button >
+   <mat-icon matSuffix >close</mat-icon>
+  </button>
+  
+  <span class="error-message" >{{signInErrorMessage}}</span>
+</div>
+
+<div id="success" class="hidden">
+  <mat-icon [ngStyle]="{'opacity':opacity}" >check</mat-icon>
+</div>
+
 <div class="login-container">
   <div class="login-form" [formGroup]="form">
     <div>
@@ -32,11 +45,18 @@
       </mat-form-field>
     </div>
     
-    <div>
-      <button (click)="login(form.get('email')!.value, form.get('password')!.value)" mat-raised-button 
+    <div style="display: flex; flex-direction: row;">
+      
+        <button (click)="login(form.get('email')!.value, form.get('password')!.value)" mat-raised-button 
       [disabled]="form.invalid" color="primary" type="submit">
         Login
       </button>
+
+        <span style="margin-left: 2px; display: flex; flex-direction: row;">
+          <mat-checkbox color="primary" style="margin-right: 0px;"  ></mat-checkbox>
+          <span style="margin-top: 8px;">admin</span>
+        </span>
+      
     </div>
   </div>
 </div>
@@ -56,3 +76,4 @@
     <a [routerLink]="['/home']" >Continue instead</a>
   </div>
 
+ 

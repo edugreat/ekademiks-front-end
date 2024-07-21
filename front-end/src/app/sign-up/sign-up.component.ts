@@ -40,7 +40,7 @@ export class SignUpComponent implements OnInit {
  accountCreated = false; //shows if the new account creation is successul or not
 
  
- networkBusy = false;//shows if the network is busy or, for the purpose of spinner
+ wait = false;//waits for some time before routing for the user to read the account creation success message
 
  //deviceSm = false; //true if users device is small screen
 
@@ -97,18 +97,18 @@ export class SignUpComponent implements OnInit {
     this.userForm.get('mobileNumber')?.value,
   );
 
-  this.networkBusy =true;
+  this.wait =true;
   this.signupService.registerUser(newUser).subscribe({
     next:(status) => {},
 
     error:(err: HttpErrorResponse) => {
-      this.networkBusy = false;
+      this.wait = false;
      this.errorMessage = err.error;
     },
 
     complete:() => {
       this.userForm.reset();
-      this.networkBusy = true;//take a while to let user know their account creation was successful by setting timeout
+      this.wait = true;//take a while to let user know their account creation was successful by setting timeout
       this.openSnackBar();//shows the account creation success message
 
       setTimeout(() =>{

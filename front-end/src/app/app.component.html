@@ -48,7 +48,7 @@
     </mat-menu>
 
     <!-- TEST MENU-->
-     <mat-menu #test="matMenu">
+     <mat-menu  #test="matMenu">
         <button mat-menu-item [mat-menu-trigger-for]="upload">
             <mat-icon>upload</mat-icon>
             Upload
@@ -62,7 +62,7 @@
      </mat-menu>
 
      <!-- Test uploads -->
-      <mat-menu #upload >
+      <mat-menu yPosition="above" #upload >
        <button mat-menu-item>Test</button>
         <button mat-menu-item>Subject</button>
         <button mat-menu-item>Category</button>
