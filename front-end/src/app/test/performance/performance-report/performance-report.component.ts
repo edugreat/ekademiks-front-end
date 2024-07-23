@@ -1,10 +1,11 @@
-import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { PerformanceObject } from '../../test/test.component';
+import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { PerformanceObject } from '../../test.component';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../auth/auth.service';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-performance-report',
@@ -37,6 +38,8 @@ export class PerformanceReportComponent implements OnInit, OnDestroy, AfterViewI
   dataSource!:MatTableDataSource<AssessmentSummary>;
 
   @ViewChild(MatPaginator) paginator!:MatPaginator; //get a handle to the paginator directive
+
+
 
   pageIndex = 0; //current page index
 
@@ -195,7 +198,7 @@ goToDetails(_index:number) {
   
 
   if(indexToToggleOff >= 0){
-    console.log(`index to toggle of clicked: ${indexToToggleOff}`)
+    
     this.display![indexToToggleOff] = false;
   }
   }
@@ -222,12 +225,14 @@ goToDetails(_index:number) {
 
 
         this.confirmationService.confirmText('Do you want to logout?');
-        this.confirmationService.confirm$.subscribe((yes) =>{
+        this.confirmationService.confirm$.pipe(take(1)).subscribe((yes) =>{
 
           if(yes){
         this.authService.logout();
        
         this.router.navigate(['/login']);
+          }else{//if user decides to not sign out again, uncheck previous check
+            this.signoutOrMore = '';//uncheck previous check
           }
         })
 

@@ -4,8 +4,8 @@
  <mat-card class="decision-card" >
   <mat-card-content class="decision-content">
     <section>
-      <mat-radio-group *ngIf="isLoggedIn()" [(ngModel)]="signoutOrMore" (change)="moreOrSignout()" >
-        <mat-radio-button color="primary" class="decision-radio" value="More" >More Assessment</mat-radio-button>
+      <mat-radio-group  *ngIf="isLoggedIn()" [(ngModel)]="signoutOrMore" (change)="moreOrSignout()" >
+        <mat-radio-button  color="primary" class="decision-radio" value="More" >More Assessment</mat-radio-button>
         <mat-radio-button color="warn" class="decision-radio" value="Out">Sign Out</mat-radio-button>
       </mat-radio-group>
       <button  (click)="moreOrSignout()" *ngIf="!isLoggedIn()" mat-stroked-button>More Assessment</button>

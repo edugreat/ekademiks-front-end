@@ -1,10 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MediaChange } from '@angular/flex-layout';
 import { Observable, Subscription } from 'rxjs';
-import { AssessmentsService, Levels } from '../../assessment/assessments.service';
+import { AssessmentsService, Levels } from '../assessment/assessments.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MediaService } from '../../media-service';
-import { HomeService } from '../home.service';
+import { MediaService } from '../media-service';
+import { HomeService } from './home.service';
 
 @Component({
   selector: 'app-home',

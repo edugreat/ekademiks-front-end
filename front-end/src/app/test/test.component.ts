@@ -1,17 +1,17 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Attempt, TestService } from '../test.service';
-import { Option, TestContent } from '../test-interface';
+import { Attempt, TestService } from './test.service';
+import { Option, TestContent } from './test-interface';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { MediaService } from '../../media-service';
+import { Subscription, take } from 'rxjs';
+import { MediaService } from '../media-service';
 import { MediaChange } from '@angular/flex-layout';
 import { MatDialog } from '@angular/material/dialog';
-import { InstructionDialogComponent } from '../instruction-dialog/instruction-dialog.component';
+import { InstructionDialogComponent } from './instruction-dialog.component';
 import { ProgressBarMode } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AuthService } from '../../auth/auth.service';
-import { ConfirmationDialogService } from '../../confirmation-dialog.service';
-import { ActivityService } from '../../activity.service';
+import { AuthService } from '../auth/auth.service';
+import { ConfirmationDialogService } from '../confirmation-dialog.service';
+import { ActivityService } from '../activity.service';
 
 @Component({
   selector: 'app-test',
@@ -105,7 +105,7 @@ testStarted: boolean = false; // boolean flag indicating whether the student has
 
   ngOnInit(): void {
 
-    console.log('Test component')
+   
    this.getQuestions();
    this.mediaAlias();
    this.showPerformanceorTakeMoreTest();
@@ -238,7 +238,7 @@ submit() {
   if(!this._autoSubmit){ //if it is student's initiated submission
 
     this.confirmService.confirmText('Are you sure to submit ?');
-    this.confirmService.confirm$.subscribe((response) =>{
+    this.confirmService.confirm$.pipe(take(1)).subscribe((response) =>{
 
       //user vetoes submission
       if(response){
@@ -273,18 +273,19 @@ submit() {
            //submit the student's performance to the back-end
         this.submissionSub$ =  this.testService.submitTest(attempt).subscribe({
           next:(response:{message:string}) =>{
-            console.log('test submission for logged in user')
+            
             this.testSubmitted = true;//sets the 'testSubitted' boolean to true so as to deactivate the submit button, so that a resubmission  cannot initiated 
             this.openSnackBar(`${response.message} PLEASE WAIT...`);//open a snack bar to notify the student of successful submission
           },
       
             complete:() => {
               this.activityService.currentAction('submission')//notifies the 'canDeactivate' that navigation is intended after assessment submission has been performed 
-              console.log('test submitted for logged in user completed')
+              
               setTimeout(() => {
                 
-                this.router.navigate(['/performance'],{relativeTo: this.activatedRoute})
+                this.router.navigate(['/performance'])
               }, 5000);
+             
             },
            
             error:(error) =>{
@@ -293,6 +294,7 @@ submit() {
          })
         }else{//for guest students, do not submit to the backend, instead route to the performance page for them to see their recent performance or take more assessment
       
+         
           this.openSnackBar('Submitted! PLEASE WAIT ...');
           this.testSubmitted = true;
           //notifies the 'canDeactivate' that navigation is intended after assessment submission has been performed 
@@ -347,7 +349,7 @@ submit() {
       next:(response:{message:string}) =>{
         
         this.testSubmitted = true;//sets the 'testSubitted' boolean to true so as to deactivate the submit button, so that a resubmission  cannot initiated 
-        this.openSnackBar(`${response.message} PLEASE WAIT...`);//open a snack bar to notify the student of successful submission
+        //this.openSnackBar(`${response.message} PLEASE WAIT...`);//open a snack bar to notify the student of successful submission
     
         
       },
@@ -357,17 +359,18 @@ submit() {
           //notifies the 'canDeactivate' that navigation is intended after assessment submission has been performed 
          this.activityService.currentAction('submission');
          
-          setTimeout(() => {
-            this.router.navigate(['/performance'])
-          }, 5000);
+          // setTimeout(() => {
+          //   this.router.navigate(['/performance'])
+          // }, 5000);
+          this.router.navigate(['/performance']);
         },
        
-        error:() =>{
-          console.log()
+        error:(err) =>{
+          console.log(err.error)
         }
      })
     }else{//for guest students, do not submit to the backend, instead route to the performance page for them to see their recent performance or take more assessment
-  
+ 
       this.openSnackBar('Submitted! PLEASE WAIT ...');
       this.testSubmitted = true;
 

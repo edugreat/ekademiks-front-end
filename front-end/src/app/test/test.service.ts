@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { QuestionDTO, QuestionPart, TestContent, TestContentDTO } from './test-interface';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, Subject, Subscription, map, tap } from 'rxjs';
-import { PerformanceObject } from './test/test.component';
+import { PerformanceObject } from './test.component';
 
 @Injectable({
   providedIn: 'root'

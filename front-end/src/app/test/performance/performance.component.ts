@@ -1,7 +1,6 @@
-import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TestService } from '../test.service';
-import { PerformanceObject } from '../test/test.component';
-import { MatTableDataSource } from '@angular/material/table';
+import { PerformanceObject } from '../test.component';
 
 @Component({
   selector: 'app-performance',

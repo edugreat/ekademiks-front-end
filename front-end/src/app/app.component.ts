@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthService } from './auth/auth.service';
-import { Subscription } from 'rxjs';
+import { Subscription, take } from 'rxjs';
 import { Router } from '@angular/router';
 import { ConfirmationDialogService } from './confirmation-dialog.service';
 import { ActivityService } from './activity.service';
@@ -46,7 +46,7 @@ export class AppComponent implements OnInit, OnDestroy {
   //log out the user by clearing the session storage
   logout() {
     this.confirmationService.confirmText('Do you want to logout?');
-    this.confirmationService.confirm$.subscribe((yes) => {
+    this.confirmationService.confirm$.pipe(take(1)).subscribe((yes) => {
       if (yes) {
         //reset the user to the generic 'Student' placeholder name
         this.authService.logout();

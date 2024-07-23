@@ -1,8 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { AssessmentsService } from '../assessments.service';
+import { AssessmentsService } from './assessments.service';
 import { Observable, Subscription, finalize } from 'rxjs';
-import { MediaService } from '../../media-service';
+import { MediaService } from '../media-service';
 import { MediaChange } from '@angular/flex-layout';
 
 @Component({

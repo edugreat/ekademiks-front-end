@@ -2,12 +2,12 @@
 import { CanDeactivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
-import { TestComponent } from '../test/test/test.component';
+import { TestComponent } from './test.component';
 import { ActivityService } from '../activity.service';
 
 
 //Thi navigation guard basically monitors students routing
-export const navigationGuard: CanDeactivateFn<TestComponent> = () => {
+export const testGuard: CanDeactivateFn<TestComponent> = () => {
 
   //injects the test service to get notification on the test commencement status
   const activityService = inject(ActivityService);

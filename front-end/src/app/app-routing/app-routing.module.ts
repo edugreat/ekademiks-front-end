@@ -1,15 +1,15 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { HomeComponent } from '../home/home/home.component';
-import { AssessmentComponent } from '../assessment/assessment/assessment.component';
+import { HomeComponent } from '../home/home.component';
+import { AssessmentComponent } from '../assessment/assessment.component';
 import { SupportComponent } from '../support/support/support.component';
 import { ContactComponent } from '../contact/contact.component';
 import { AssessmentExpansionPanelComponent } from '../assessment/assessment-expansion-panel/assessment-expansion-panel.component';
-import { TestComponent } from '../test/test/test.component';
-import { AuthComponent } from '../auth/auth/auth.component';
+import { TestComponent } from '../test/test.component';
+import { AuthComponent } from '../auth/auth.component';
 import { SignUpComponent } from '../sign-up/sign-up.component';
 import { PerformanceComponent } from '../test/performance/performance.component';
-import { navigationGuard } from '../auth/navigation.guard';
+import { testGuard } from '../test/test.guard';
 import { AccessDeniedComponent } from '../auth/access-denied/access-denied.component';
 import { adminGuard } from '../admin/admin.guard';
 
@@ -32,7 +32,7 @@ const routes: Routes = [
   {
     path: 'start/:topic/:duration/:subject/:category',
     component: TestComponent,
-    canDeactivate: [navigationGuard],
+    canDeactivate: [testGuard],
   },
   { path: 'no-access/:code', component: AccessDeniedComponent },
 

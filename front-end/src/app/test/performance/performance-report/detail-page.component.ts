@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Details } from '../performance-report.component';
+import { Details } from './performance-report.component';
 
 @Component({
   selector: 'app-detail-page',
