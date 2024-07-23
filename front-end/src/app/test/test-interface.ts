@@ -26,18 +26,18 @@ export interface TestContentDTO{
 
 // a data transfer object for easy communication between the backend and front end
 export interface QuestionDTO{
-    questionNumber:number,
-    text:string,
-    answer:string,
-    options:Option[]
+    questionNumber:number,//numeric value
+    text:string,//text representing the problem to attempt
+    answer:string,//one character string value 'A-E' showing the correct option
+    options:Option[]//option interface
     }
 
     
-//Portion of the Question DTO without the instructions
+//Question received from the backend displayable on the front-end. The only change is in the field name where dto's 'questionNumber' is mapped to 'number' field name
 export interface QuestionPart{
-    number:number,
-    problem:string,
-    answer:string,
-    options:Option[]
+    number:number,//numeric value
+    problem:string,//text representing the problem to attempt
+    answer:string,//one character string value 'A-E' showing the correct option
+    options:Option[]//option interface
   
   }

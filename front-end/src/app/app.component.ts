@@ -57,4 +57,10 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  //checks if the current user is an admin
+  isAdmin(){
+
+    return this.authService.isAdmin();
+  }
 }

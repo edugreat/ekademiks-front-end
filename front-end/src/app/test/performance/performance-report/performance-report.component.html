@@ -54,7 +54,9 @@
   <!-- Assessment summary -->
   <p></p>
 
-  <div  class="mat-elevation-z8" >
+  
+
+  <div *ngIf="testTip; else noRecord" class="mat-elevation-z8" >
     <table  mat-table [dataSource]="dataSource" >
 
       <ng-container *ngIf="!isScience(); else science">
@@ -156,6 +158,14 @@
   
     
   </div>
+
+  <!-- the student has no recent assessment -->
+   <ng-template  #noRecord >
+    <div id="noRecord" >
+      <h3 >Please take an assessment</h3>
+    </div>
+  
+   </ng-template>
 
   <!-- Performance dettails received as input of the 'details' property of the the parent component -->
   <p>

@@ -1,0 +1,44 @@
+<div *ngIf="parameter === 'upload'" class="action">
+  <a mat-button [matMenuTriggerFor]="upload">
+    <mat-icon>upload</mat-icon>
+    Upload What ?
+  </a>
+</div>
+
+<div *ngIf="parameter === 'fetch'" class="action">
+  <a mat-button [matMenuTriggerFor]="fetch">
+    <mat-icon>download</mat-icon>
+    Fetch What ?
+  </a>
+</div>
+
+<div *ngIf="parameter === 'banks' " class="action">
+  <a mat-button [matMenuTriggerFor]="bank"
+    >Open to Continue
+    <mat-icon>account_balance</mat-icon>
+  </a>
+</div>
+
+<!--uploads -->
+<mat-menu yPosition="below" #upload>
+  <button #uploadTest  (click)="action ='u/test'; process()" mat-menu-item>Test</button>
+  <button #uploadSubject (click)="action ='u/subject'; process()" mat-menu-item>Subject</button>
+  <button #uploadCategory (click)="action ='u/category'; process()" mat-menu-item>Category</button>
+</mat-menu>
+
+<!-- Fetch test -->
+<mat-menu yPosition="below" #fetch>
+  <button fetchTest (click)="action ='f/test'; process()" mat-menu-item>Test</button>
+  <button #fetchSubject (click)="action ='f/subject'; process()" mat-menu-item>Subject</button>
+  <button #fetchCategory (click)="action ='f/category'; process()" mat-menu-item>Category</button>
+  <button #fetchTopic (click)="action ='f/topic'; process()" mat-menu-item>Topic</button>
+</mat-menu>
+
+<!-- QUESTION BANK MENU -->
+<mat-menu #bank="matMenu">
+  <button mat-menu-item>Set Questions</button>
+  <button mat-menu-item>Set Options</button>
+</mat-menu>
+
+
+<router-outlet></router-outlet>

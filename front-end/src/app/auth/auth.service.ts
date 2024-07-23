@@ -1,6 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Token } from '@angular/compiler';
-import { Injectable, OnInit } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 
@@ -13,6 +12,13 @@ export class AuthService {
 
   private jwtToken = ''; //token to be received from the database after successful authentication
 
+
+  private _currentUserRoles: string[] = [];
+
+
+  
+  
+  
 
   //A subject to emit the name of the currently logged in user (initially emits the generic placeholder 'Student'). Subscribers receive up to date information
   private currentUserName:BehaviorSubject<string> 
@@ -44,9 +50,20 @@ export class AuthService {
     sessionStorage.setItem("token", user.token);
     sessionStorage.setItem("studentId", `${user.id}`)
     sessionStorage.setItem('username', user.firstName);
-    sessionStorage.setItem('roles', JSON.stringify(user.roles));
+    this.currentUserRoles = user.roles;
     this.currentUserName.next(sessionStorage.getItem('username')!);
+
+    this.currentUserRoles.forEach(r => console.log(`role: ${r}`))
     
+  }
+
+  
+  public set currentUserRoles(value: string[]) {
+    this._currentUserRoles = value;
+  }
+
+  public get currentUserRoles(): string[] {
+    return this._currentUserRoles;
   }
 
   //checks if the current user is a logged in user user
@@ -59,10 +76,19 @@ export class AuthService {
  logout():void{
 
     sessionStorage.clear();
+    //clears the user roles stored in memory once the user logs out
+    this.currentUserRoles = [];
     this.currentUserName.next('Student');
    
   }
 
+  //checks if the current user is an admin
+  isAdmin():boolean{
+
+    
+
+    return  (this.currentUserRoles.some(role => role.toLowerCase() === 'admin'))
+  }
  
 }
 

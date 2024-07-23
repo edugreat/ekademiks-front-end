@@ -20,6 +20,7 @@ import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatTableModule} from '@angular/material/table';
 import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatCheckboxModule} from '@angular/material/checkbox';
+import { MatSelectModule } from '@angular/material/select';
 
 
 
@@ -45,7 +46,12 @@ const materials = [
   MatProgressBarModule,
   MatTableModule,
   MatPaginatorModule,
-  MatCheckboxModule
+  MatCheckboxModule,
+  MatCardModule,
+  MatInputModule,
+  MatSelectModule,
+  MatRadioModule,
+  MatButtonModule
   
 ]
 

@@ -105,6 +105,7 @@ testStarted: boolean = false; // boolean flag indicating whether the student has
 
   ngOnInit(): void {
 
+    console.log('Test component')
    this.getQuestions();
    this.mediaAlias();
    this.showPerformanceorTakeMoreTest();
@@ -254,7 +255,7 @@ submit() {
          }
           
       
-          //extracts this part of the test content for use in later in the student performance feedback to give a tip to the student for the questions they answers and their correct options
+          //extracts this part of the test content for use later in the student performance feedback to give a tip to the student for the questions they answers and their correct options
           const data:{problem:string, response:string, answer:string}[] = this.testContent!.questions.map((question, index) =>({
             problem:question.problem,
             response:question.options.filter((option) => this.selectedOptions[index] === option.letter).map(option => option.text)[0],
@@ -272,16 +273,17 @@ submit() {
            //submit the student's performance to the back-end
         this.submissionSub$ =  this.testService.submitTest(attempt).subscribe({
           next:(response:{message:string}) =>{
-            
+            console.log('test submission for logged in user')
             this.testSubmitted = true;//sets the 'testSubitted' boolean to true so as to deactivate the submit button, so that a resubmission  cannot initiated 
             this.openSnackBar(`${response.message} PLEASE WAIT...`);//open a snack bar to notify the student of successful submission
           },
       
             complete:() => {
               this.activityService.currentAction('submission')//notifies the 'canDeactivate' that navigation is intended after assessment submission has been performed 
-              
+              console.log('test submitted for logged in user completed')
               setTimeout(() => {
-                this.router.navigate(['/performance'])
+                
+                this.router.navigate(['/performance'],{relativeTo: this.activatedRoute})
               }, 5000);
             },
            
@@ -346,6 +348,8 @@ submit() {
         
         this.testSubmitted = true;//sets the 'testSubitted' boolean to true so as to deactivate the submit button, so that a resubmission  cannot initiated 
         this.openSnackBar(`${response.message} PLEASE WAIT...`);//open a snack bar to notify the student of successful submission
+    
+        
       },
   
         complete:() => {
@@ -372,7 +376,7 @@ submit() {
       
       setTimeout(() => {
         this.router.navigate(['/performance'])
-      }, 5000);
+      }, 5001);
       
     }
   

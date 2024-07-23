@@ -12,7 +12,7 @@
     <a mat-button routerLink="/contact" class="top-menu-item" ><mat-icon>call</mat-icon>Contact</a>
 
     <!-- ADMIN BUTTON -->
-    <a mat-button [matMenuTriggerFor]="admins" aria-label="Example icon-button with a menu" class="top-menu-item" >
+    <a *ngIf="isAdmin()" mat-button [matMenuTriggerFor]="admins" aria-label="Example icon-button with a menu" class="top-menu-item" >
 
         <mat-icon>lock</mat-icon>
         Admin
@@ -41,7 +41,7 @@
             <mat-icon>menu_book</mat-icon>
            Test
         </button>
-        <button mat-menu-item [matMenuTriggerFor]="bank">
+        <button routerLink="/admin/banks" mat-menu-item >
             <mat-icon>account_balance</mat-icon>
             Question bank
         </button>
@@ -49,38 +49,19 @@
 
     <!-- TEST MENU-->
      <mat-menu  #test="matMenu">
-        <button mat-menu-item [mat-menu-trigger-for]="upload">
+        <button   mat-menu-item routerLink="/admin/upload" >
             <mat-icon>upload</mat-icon>
             Upload
         </button>
 
-        
-        <button mat-menu-item [mat-menu-trigger-for]="fetch" >
+
+        <button mat-menu-item routerLink="/admin/fetch"  >
             <mat-icon>download</mat-icon>
           Fetch
         </button>
+        
      </mat-menu>
 
-     <!-- Test uploads -->
-      <mat-menu yPosition="above" #upload >
-       <button mat-menu-item>Test</button>
-        <button mat-menu-item>Subject</button>
-        <button mat-menu-item>Category</button>
-      </mat-menu>
-
-      <!-- Fetch test -->
-      <mat-menu #fetch >
-        <button mat-menu-item>Test</button>
-         <button mat-menu-item>Subject</button>
-         <button mat-menu-item>Category</button>
-         <button mat-menu-item>Topic</button>
-       </mat-menu>
-
-     <!-- QUESTION BANK MENU -->
-      <mat-menu #bank="matMenu">
-        <button mat-menu-item>Set Questions</button>
-        <button mat-menu-item>Set Options</button>
-      </mat-menu>
 
 <!-- STUDENT MENU -->
     <mat-menu #student="matMenu">
@@ -132,7 +113,7 @@
         </div>
 
         <div>
-            <a  mat-button (click)="sidenav.close()" [matMenuTriggerFor]="admins" aria-label="Example icon-button with a menu" class="side-menu-item" >
+            <a *ngIf="isAdmin()"  mat-button (click)="sidenav.close()" [matMenuTriggerFor]="admins" aria-label="Example icon-button with a menu" class="side-menu-item" >
 
                 <mat-icon >lock</mat-icon>
                 

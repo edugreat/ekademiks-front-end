@@ -13,15 +13,12 @@ import { MaterialModule } from './material/material.module';
 import { AssessmentModule } from './assessment/assessment.module';
 import { SharedModule } from './shared/shared.module';
 import { AuthModule } from './auth/auth.module';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSelectModule } from '@angular/material/select';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatCardModule } from '@angular/material/card';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SignUpComponent } from './sign-up/sign-up.component';
 import { NumericDirective } from './numeric.directive';
 import { AuthInterceptor } from './auth/auth.interceptor';
+import { AdminModule } from './admin/admin.module';
+import { AppRoutingModule } from './app-routing/app-routing.module';
 
   
 
@@ -40,7 +37,6 @@ import { AuthInterceptor } from './auth/auth.interceptor';
   imports: [
     
     CommonModule,
-    
     BrowserModule,
     BrowserAnimationsModule,
     HttpClientModule,
@@ -50,11 +46,7 @@ import { AuthInterceptor } from './auth/auth.interceptor';
     AssessmentModule,
     TestModule,
     AuthModule,
-    MatInputModule,
-    MatButtonModule,
-    MatSelectModule,
-    MatRadioModule,
-    MatCardModule,
+    AppRoutingModule,
     ReactiveFormsModule
   ],
   

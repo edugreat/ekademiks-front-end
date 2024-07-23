@@ -11,28 +11,41 @@ import { SignUpComponent } from '../sign-up/sign-up.component';
 import { PerformanceComponent } from '../test/performance/performance.component';
 import { navigationGuard } from '../auth/navigation.guard';
 import { AccessDeniedComponent } from '../auth/access-denied/access-denied.component';
+import { adminGuard } from '../admin/admin.guard';
 
-const routes:Routes = [
- {path: 'home', component: HomeComponent},
- {path: 'assessments', component: AssessmentComponent},
- {path: 'supports', component: SupportComponent},
- {path: 'contact', component: ContactComponent},
- {path: 'login', component: AuthComponent},
- {path: 'sign-up', component: SignUpComponent},
- {path:'performance', component: PerformanceComponent},
- {path: 'home/:more', component: HomeComponent},
-  {path:'assessments/:level', component: AssessmentComponent},
-  {path:'assessment-panel/:subject/:category', component: AssessmentExpansionPanelComponent},
-  {path: 'start/:topic/:duration/:subject/:category', component: TestComponent, canDeactivate:[navigationGuard]},
-  {path: 'no-access/:code', component: AccessDeniedComponent},
- 
-  {path: '', redirectTo: 'login', pathMatch:'full'},
-  
-]
+
+
+const routes: Routes = [
+  { path: 'home', component: HomeComponent },
+  { path: 'assessments', component: AssessmentComponent },
+  { path: 'supports', component: SupportComponent },
+  { path: 'contact', component: ContactComponent },
+  { path: 'login', component: AuthComponent },
+  { path: 'sign-up', component: SignUpComponent },
+  { path: 'performance', component: PerformanceComponent },
+  { path: 'home/:more', component: HomeComponent },
+  { path: 'assessments/:level', component: AssessmentComponent },
+  {
+    path: 'assessment-panel/:subject/:category',
+    component: AssessmentExpansionPanelComponent,
+  },
+  {
+    path: 'start/:topic/:duration/:subject/:category',
+    component: TestComponent,
+    canDeactivate: [navigationGuard],
+  },
+  { path: 'no-access/:code', component: AccessDeniedComponent },
+
+  {path: 'admin/:parameter',
+    canMatch:[adminGuard],
+    loadChildren:() => import  ('../admin/admin.module').then(m => m.AdminModule)
+  },
+
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+];
 
 @NgModule({
-  imports:[RouterModule.forRoot(routes)],
-   exports:[RouterModule]
-  
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

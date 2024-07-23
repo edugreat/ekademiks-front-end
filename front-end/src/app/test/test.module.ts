@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { TestComponent } from './test/test.component';
-import { MaterialModule } from '../material/material.module';
 import { SharedModule } from '../shared/shared.module';
 import { CommonModule } from '@angular/common';
 import { MathJaxDirective } from '../math-jax.directive';
@@ -9,7 +8,6 @@ import { TimerPipe } from './timer/timer.pipe';
 import { InstructionDialogComponent } from './instruction-dialog/instruction-dialog.component';
 import { PerformanceComponent } from './performance/performance.component';
 import { PerformanceReportComponent } from './performance/performance-report/performance-report.component';
-import { ToolTipDirective } from './tool-tip.directive';
 import { DetailPageComponent } from './performance/performance-report/detail-page/detail-page.component';
 
 
@@ -24,7 +22,6 @@ import { DetailPageComponent } from './performance/performance-report/detail-pag
     InstructionDialogComponent,
     PerformanceComponent,
     PerformanceReportComponent,
-    ToolTipDirective,
     DetailPageComponent
     
   ],

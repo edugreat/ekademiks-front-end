@@ -4,6 +4,7 @@ import { AssessmentComponent } from './assessment/assessment.component';
 import { AssessmentExpansionPanelComponent } from './assessment-expansion-panel/assessment-expansion-panel.component';
 import { SharedModule } from '../shared/shared.module';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 
 
@@ -17,7 +18,8 @@ import { FormsModule } from '@angular/forms';
     imports: [
         CommonModule,
         SharedModule ,
-        FormsModule,  
+        FormsModule, 
+        RouterModule 
         
     ]
 })

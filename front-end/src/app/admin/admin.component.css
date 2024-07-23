@@ -1,0 +1,15 @@
+.action{
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10vh;
+    font-family: Arial, sans-serif;
+    background-color: #abb4c2;
+    border-radius: 5px;
+}
+
+ 

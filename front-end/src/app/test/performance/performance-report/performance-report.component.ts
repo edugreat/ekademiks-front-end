@@ -58,13 +58,16 @@ constructor(private router:Router, private authService:AuthService,
   }
 
   ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
+    if(this.performance){
+      this.dataSource.paginator = this.paginator;
+    }
   }
 
 
   ngOnDestroy(): void {
 
     sessionStorage.removeItem('testTip');
+    this.performance = undefined;
    
     
   }
@@ -209,6 +212,7 @@ goToDetails(_index:number) {
   moreOrSignout() {
 
     if(!this.isLoggedIn()){
+     
       this.router.navigate(['/home/true']);
     }
     else{ //for logged in users
@@ -222,7 +226,8 @@ goToDetails(_index:number) {
 
           if(yes){
         this.authService.logout();
-        this.router.navigate(['login']);
+       
+        this.router.navigate(['/login']);
           }
         })
 

@@ -10,7 +10,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
   templateUrl: './auth.component.html',
   styleUrl: './auth.component.css'
 })
-export class AuthComponent implements OnDestroy {
+export class AuthComponent implements OnDestroy, OnInit {
 
   
 
@@ -50,6 +50,9 @@ export class AuthComponent implements OnDestroy {
     clearInterval(this.timer)
   }
 
+  ngOnInit(): void {
+    console.log('entered log in component')
+  }
 
   //logs a user in
   public login(email:string,password:string):void{
@@ -94,12 +97,6 @@ export class AuthComponent implements OnDestroy {
         }
       }
     })
-  }
-
-  //if the current user is logged in
-  public loggedIn():boolean{
-
-    return this.authService.isLoggedIn();
   }
 
   
