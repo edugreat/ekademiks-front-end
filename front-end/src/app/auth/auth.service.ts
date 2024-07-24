@@ -13,11 +13,6 @@ export class AuthService {
   private jwtToken = ''; //token to be received from the database after successful authentication
 
 
-  private _currentUserRoles: string[] = [];
-
-
-  
-  
   
 
   //A subject to emit the name of the currently logged in user (initially emits the generic placeholder 'Student'). Subscribers receive up to date information
@@ -50,21 +45,15 @@ export class AuthService {
     sessionStorage.setItem("token", user.token);
     sessionStorage.setItem("studentId", `${user.id}`)
     sessionStorage.setItem('username', user.firstName);
-    this.currentUserRoles = user.roles;
+   sessionStorage.setItem('roles', JSON.stringify(user.roles));
     this.currentUserName.next(sessionStorage.getItem('username')!);
 
-    this.currentUserRoles.forEach(r => console.log(`role: ${r}`))
-    
   }
 
   
-  public set currentUserRoles(value: string[]) {
-    this._currentUserRoles = value;
-  }
+  
 
-  public get currentUserRoles(): string[] {
-    return this._currentUserRoles;
-  }
+   
 
   //checks if the current user is a logged in user user
   isLoggedIn():boolean{
@@ -77,17 +66,18 @@ export class AuthService {
 
     sessionStorage.clear();
     //clears the user roles stored in memory once the user logs out
-    this.currentUserRoles = [];
+   sessionStorage.clear();
     this.currentUserName.next('Student');
    
   }
 
   //checks if the current user is an admin
   isAdmin():boolean{
+    const roles:string[] = (sessionStorage.getItem('roles') ? JSON.parse(sessionStorage.getItem('roles')!)  : [])
+   
+    return roles.some(role => role.toLowerCase() === 'admin');
 
-    
-
-    return  (this.currentUserRoles.some(role => role.toLowerCase() === 'admin'))
+   
   }
  
 }

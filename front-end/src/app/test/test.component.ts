@@ -349,7 +349,7 @@ submit() {
       next:(response:{message:string}) =>{
         
         this.testSubmitted = true;//sets the 'testSubitted' boolean to true so as to deactivate the submit button, so that a resubmission  cannot initiated 
-        //this.openSnackBar(`${response.message} PLEASE WAIT...`);//open a snack bar to notify the student of successful submission
+        this.openSnackBar(`${response.message} PLEASE WAIT...`);//open a snack bar to notify the student of successful submission
     
         
       },
@@ -359,9 +359,9 @@ submit() {
           //notifies the 'canDeactivate' that navigation is intended after assessment submission has been performed 
          this.activityService.currentAction('submission');
          
-          // setTimeout(() => {
-          //   this.router.navigate(['/performance'])
-          // }, 5000);
+          setTimeout(() => {
+            this.router.navigate(['/performance'])
+          }, 5000);
           this.router.navigate(['/performance']);
         },
        

@@ -1,13 +1,14 @@
 
-import { CanDeactivateFn, Router } from '@angular/router';
+import { CanActivateFn, CanDeactivateFn, CanMatchFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
 import { TestComponent } from './test.component';
 import { ActivityService } from '../activity.service';
+import { AuthService } from '../auth/auth.service';
 
 
 //Thi navigation guard basically monitors students routing
-export const testGuard: CanDeactivateFn<TestComponent> = () => {
+export const testDeactivateGuard: CanDeactivateFn<TestComponent> = () => {
 
   //injects the test service to get notification on the test commencement status
   const activityService = inject(ActivityService);
@@ -45,3 +46,22 @@ export const testGuard: CanDeactivateFn<TestComponent> = () => {
 
  
 };
+
+//inhibits admin user from accessing component guarded by by this guard
+export const testGuard: CanActivateFn | CanMatchFn = () => {
+
+const authService = inject(AuthService);
+const router = inject(Router);
+
+if(! authService.isAdmin()){
+
+  return true;
+}else{
+
+  authService.logout();
+  router.navigate(['/login']);
+
+  return false;
+}
+
+}

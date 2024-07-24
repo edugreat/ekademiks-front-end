@@ -22,7 +22,7 @@ export class AuthInterceptor implements HttpInterceptor{
 
           //check if the error is access denied error
           if(error.status === HttpStatusCode.Unauthorized || error.status === HttpStatusCode.Forbidden){
-           router.navigate(['error', error.status]);
+           router.navigate(['/no-access', error.status]);
 
            return EMPTY;
           }

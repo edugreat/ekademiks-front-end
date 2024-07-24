@@ -9,7 +9,7 @@ import { TestComponent } from '../test/test.component';
 import { AuthComponent } from '../auth/auth.component';
 import { SignUpComponent } from '../sign-up/sign-up.component';
 import { PerformanceComponent } from '../test/performance/performance.component';
-import { testGuard } from '../test/test.guard';
+import { testDeactivateGuard, testGuard } from '../test/test.guard';
 import { AccessDeniedComponent } from '../auth/access-denied/access-denied.component';
 import { adminGuard } from '../admin/admin.guard';
 
@@ -31,8 +31,11 @@ const routes: Routes = [
   },
   {
     path: 'start/:topic/:duration/:subject/:category',
+    canDeactivate: [testDeactivateGuard],
+    canActivate:[testGuard],
+    canMatch:[testGuard],
     component: TestComponent,
-    canDeactivate: [testGuard],
+    
   },
   { path: 'no-access/:code', component: AccessDeniedComponent },
 
