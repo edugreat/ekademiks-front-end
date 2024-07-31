@@ -13,5 +13,5 @@ export class ProgressBarComponent {
   @Input() barColor = 'primary';//progress bar color
   @Input() barBufferValue = 25; //progress bar buffer value
 
-  @Input() value = 0; //if the mode is set to 'dterminate', then the value property is used to set progress instead of the bufferValue property
+  @Input() value = 0; //if the mode is set to 'determinate', then the value property is used to set progress instead of the bufferValue property
 }

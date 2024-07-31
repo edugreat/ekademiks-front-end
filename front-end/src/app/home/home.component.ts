@@ -5,6 +5,7 @@ import { AssessmentsService, Levels } from '../assessment/assessments.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MediaService } from '../media-service';
 import { HomeService } from './home.service';
+import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -12,6 +13,7 @@ import { HomeService } from './home.service';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit, OnDestroy {
+
 
   //Observable arrays of academic levels received from the server
   levels$: Observable<Levels[]> | undefined; 
@@ -39,7 +41,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     private assessmentService:AssessmentsService,
 
-  private router:Router, private activatedRoute:ActivatedRoute){}
+  private router:Router, private activatedRoute:ActivatedRoute,
+private authService:AuthService
+){}
  
 
   ngOnInit(): void {
@@ -110,5 +114,19 @@ export class HomeComponent implements OnInit, OnDestroy {
    this.router.navigate(['/home'])
     
   }
+
+  isAdmin(): boolean {
+    return this.authService.isAdmin();
+    }
+
+    isLoggedIn():boolean{
+
+      return this.authService.isLoggedIn()
+    }
+
+    isGuestUser():boolean{
+
+      return !this.authService.isLoggedIn();
+    }
 }
 

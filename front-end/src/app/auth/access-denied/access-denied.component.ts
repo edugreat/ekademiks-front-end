@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -6,17 +6,26 @@ import { ActivatedRoute } from '@angular/router';
   templateUrl: './access-denied.component.html',
   styleUrl: './access-denied.component.css'
 })
-export class AccessDeniedComponent implements OnInit{
+export class AccessDeniedComponent implements OnInit, OnDestroy{
   
   //error message to show to the user
   errorMessage?:string;
+
+  //error progress bar value initially set 100
+  barValue = 100;
+
+  //timer that decreases progress bar value every second
+  timer:any;
   constructor(private activatedRoute: ActivatedRoute){}
   
   ngOnInit(): void {
     this.displayErrorMessage();
+    this.decreaseBarValue();
   }
   
-
+ngOnDestroy(): void {
+  clearInterval(this.timer);
+}
   private displayErrorMessage(){
 
     //error status code received from the backend
@@ -28,7 +37,7 @@ export class AccessDeniedComponent implements OnInit{
       setTimeout(() => {
         this.hide();
         window.history.back();
-      }, 5000);
+      }, 6000);
     }else if(errorCode === 403){
 
       this.errorMessage = 'Access Denied!';
@@ -36,7 +45,7 @@ export class AccessDeniedComponent implements OnInit{
       setTimeout(() => {
         this.hide();
         window.history.back();
-      }, 5000);
+      }, 6000);
     }
 
     
@@ -58,5 +67,13 @@ private hide(){
   if(element){
     element.classList.add('hide')
   }
+}
+
+private decreaseBarValue(){
+
+  this.timer = setInterval(() =>{
+    //decreases progress bar value by 20 every second
+   this.barValue -=20;
+  },1000)
 }
 }

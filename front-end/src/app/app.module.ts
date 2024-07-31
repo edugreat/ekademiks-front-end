@@ -15,10 +15,10 @@ import { SharedModule } from './shared/shared.module';
 import { AuthModule } from './auth/auth.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SignUpComponent } from './sign-up/sign-up.component';
-import { NumericDirective } from './numeric.directive';
 import { AuthInterceptor } from './auth/auth.interceptor';
 import { AdminModule } from './admin/admin.module';
 import { AppRoutingModule } from './app-routing/app-routing.module';
+import { NumericDirective } from './shared/numeric.directive';
 
   
 
@@ -28,7 +28,7 @@ import { AppRoutingModule } from './app-routing/app-routing.module';
     AppComponent,
     ContactComponent,
     SignUpComponent,
-    NumericDirective,
+   //NumericDirective
    
    
    
@@ -47,7 +47,8 @@ import { AppRoutingModule } from './app-routing/app-routing.module';
     TestModule,
     AuthModule,
     AppRoutingModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    AdminModule
   ],
   
  exports:[AuthModule],

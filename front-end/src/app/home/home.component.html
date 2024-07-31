@@ -1,65 +1,138 @@
-<div *ngIf="levels$"  id="back" matTooltip="Go back" 
- matTooltipShowDelay="1000"
- matTooltipPosition="below"
- matTooltipHideDelay="2000" >
-    <a mat-button (click)="goBack()" >
-        <mat-icon>arrow_back</mat-icon>
-    </a>
+
+
+<div
+  *ngIf="levels$"
+  id="back"
+  matTooltip="Go back"
+  matTooltipShowDelay="1000"
+  matTooltipPosition="below"
+  matTooltipHideDelay="2000"
+>
+  <a mat-button (click)="goBack()">
+    <mat-icon>arrow_back</mat-icon>
+  </a>
 </div>
 
-<div class="container" *ngIf="!levels$; else selectionMade" >
-  <section style="padding-top: 1px;" class="welcome"> 
-    <app-welcome [welcomeMessages]="welcomeMessages$"> 
-    </app-welcome>
+<div class="container" *ngIf="!levels$; else selectionMade">
+  <section style="padding-top: 1px" class="welcome">
+    <app-welcome [welcomeMessages]="welcomeMessages$"> </app-welcome>
   </section>
- 
 
   <section class="actions">
     <mat-grid-list cols="4" rowHeight="2:1">
       <mat-grid-tile [rowspan]="rowspan" colspan="4">
-        <div class="action-item">Featured Assessments</div>
-      </mat-grid-tile>
-      <mat-grid-tile [rowspan]="rowspan" colspan="4">
-        <div class="action-item">
-          <a mat-button (click)="getAcademicLevels()">Take Assessment</a>
+        <!-- Click to take part in a featured assignment -->
+        <div *ngIf="!isAdmin()" >
+          <a disabled style="font-size: 0.8rem;" mat-button>Featured Assessments</a>
         </div>
-      </mat-grid-tile>
-      <mat-grid-tile [rowspan]="rowspan" colspan="4">
-        <div class="action-item">
-
-          <a mat-button [routerLink]='["/sign-up"]' >Create Account</a>
-
+        <mat-divider *ngIf="!isAdmin()"  vertical="true" style="height: 0.9rem; width: 0.1rem; background-color: #4E342E; " ></mat-divider>
+        <!-- Click to take choice assessments -->
+        <div *ngIf="!isAdmin()" >
+          <a style="font-size: 0.8rem;" mat-button (click)="getAcademicLevels()">Take Assessments</a>
         </div>
+
+        <!-- Admin cam post assignments -->
+        <div  *ngIf="isAdmin()">
+          <mat-icon>ios_share</mat-icon>
+          <a disabled style="margin-right: 25px;" mat-button>Post Assignment</a>
+        </div>
+        <!--  -->
       </mat-grid-tile>
       <mat-grid-tile [rowspan]="rowspan" colspan="4">
-        <div class="action-item">Recommended Assessments</div>
+        
+      
+
+        <!-- Click to view most recently posted assigments -->
+        <div *ngIf="!isAdmin()" >
+          <mat-icon *ngIf="isGuestUser()" >schedule</mat-icon>
+          <a disabled style="font-size: 0.8rem;" mat-button >Recent Assignments</a>
+        </div>
+       
+        <mat-divider *ngIf="!isAdmin() && !isGuestUser()"  vertical="true" style="height: 0.9rem; width: 0.1rem; background-color: #4E342E; " ></mat-divider>
+
+        <!-- Click to review your recent your recent assessment performance, for non guest users -->
+        <div *ngIf="!isAdmin() && !isGuestUser()" >
+          <a disabled style="font-size: 0.8rem;" mat-button >Recent Performance</a>
+        </div>
+
+          <!--Admin can send notifications -->
+          <div *ngIf="isAdmin()" >
+            <mat-icon  >notifications</mat-icon>
+            <a disabled style="margin-right: 20px;" mat-button>Send Notifications</a>
+          </div>
+          <!--  -->
+      </mat-grid-tile>
+      <mat-grid-tile [rowspan]="rowspan" colspan="4">
+
+        <!-- Click to view your past performance analytics. For non guest users -->
+        <div  *ngIf="!isAdmin() && !isGuestUser()" >
+          <mat-icon>bar_chart</mat-icon>
+          <a disabled mat-button >Performance Analytics</a>
+        </div>
+        <!-- Click to create account, for guest users -->
+        <div style="margin-right: 20px;" *ngIf="isGuestUser()" >
+          <mat-icon>person</mat-icon>
+          <a mat-button [routerLink]="['/sign-up']">Create Account</a>
+        </div>
+
+        
+
+        <!-- ADMIN FUNCTIONALITY -->
+        <div *ngIf="isAdmin()" >
+          <mat-icon>print</mat-icon>
+          <a disabled mat-button>Assessment Reports</a>
+        </div>
+
+        <!--  -->
+      </mat-grid-tile>
+      <mat-grid-tile [rowspan]="rowspan" colspan="4">
+        <!-- non guest users can set their accounts here -->
+        <div style="margin-right: 35px;" *ngIf="!isAdmin() && !isGuestUser()" >
+          <mat-icon>settings</mat-icon>
+          <a disabled mat-button>Account Settings</a>
+        </div>
+        <!-- ADMIN FUNCTIONALITY -->
+        <div *ngIf="isAdmin()" >
+          <mat-icon>settings</mat-icon>
+          <a  disabled style="margin-right: 20px;" mat-button>Account Settings</a>
+        </div>
+        <!--  -->
       </mat-grid-tile>
     </mat-grid-list>
   </section>
 </div>
 
-
-
-
 <ng-template #selectionMade>
   <div class="radio-button-container">
     <div id="radioBtnDIV">
       <label id="example-radio-group-label">Assessment level</label>
-      <mat-radio-group 
+      <mat-radio-group
         aria-labelledby="example-radio-group-label"
         class="example-radio-group"
-        [(ngModel)]="selectedLevel" name="_level">
+        [(ngModel)]="selectedLevel"
+        name="_level"
+      >
         <ng-container *ngFor="let level of levels$ | async">
-          <mat-radio-button color="primary" class="example-radio-button" [value]="level.category">{{level.category}}</mat-radio-button>
+          <mat-radio-button
+            color="primary"
+            class="example-radio-button"
+            [value]="level.category"
+            >{{ level.category }}</mat-radio-button
+          >
         </ng-container>
       </mat-radio-group>
-  
+
       <div>
-        <button id='continueBTN' (click)="handleSelection()" [disabled]="!selectedLevel"  mat-raised-button>
+        <button
+          id="continueBTN"
+          (click)="handleSelection()"
+          [disabled]="!selectedLevel"
+          mat-raised-button
+        >
           <mat-icon>arrow_forward</mat-icon>
         </button>
       </div>
     </div>
   </div>
-  
 </ng-template>
+

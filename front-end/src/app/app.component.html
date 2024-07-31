@@ -87,9 +87,9 @@
     <div class="side-nav-items">
 
         <div>
-            <a (click)="sidenav.close()" mat-button routerLink="/" class="side-menu-item"> <mat-icon>home</mat-icon> Home</a>
+            <a (click)="sidenav.close()" mat-button routerLink="/home" class="side-menu-item"> <mat-icon>home</mat-icon> Home</a>
         </div>
-      <div>
+      <div *ngIf="!isAdmin()" >
         <a (click)="sidenav.close()" mat-button routerLink="/assessments"class="side-menu-item"> <mat-icon>school</mat-icon> Assessments</a>
       </div>
         <div>

@@ -6,7 +6,20 @@
      </a>
  </div>
  
- 
+ <div 
+ *ngIf="hasReadInstructions && testStarted"
+class="progress-bar-fixed" >
+  <app-progress-bar [barColor]="progressBarColor"
+  [barMode]="barMode"
+  [barBufferValue]="progress" ></app-progress-bar>
+  <div class="progress-text">
+    @if (remaining > 0) {
+     <span>Remaining</span>: {{remaining}}
+    } @else if (remaining <= 0 ) {
+     <span>Completed !</span>
+    }
+  </div>
+</div>
  
  <div  class="header-container">
      <div class="header-left" 

@@ -9,12 +9,13 @@
     justify-content: center;
     align-items: center;
     flex-direction: column; 
-    z-index: 1000;
+    z-index: 100;
   }
   
   .warning {
     font-size: 24px; 
     margin-bottom: 10px; 
+    margin-top: 150px;
     color: red;
   }
   

@@ -13,6 +13,7 @@ import { OptionsBankComponent } from './bank/options-bank.component';
 import { SharedModule } from '../shared/shared.module';
 import { AdminRoutingModule } from './admin-routing.module';
 import { AdminComponent } from './admin.component';
+import { NumericDirective } from '../shared/numeric.directive';
 
 const uploadComponents = [
  
@@ -26,6 +27,7 @@ const fetchComponents = [
   SubjectFetchComponent,
   CategoryFetchComponent,
   TopicFetchComponent,
+  
 ];
 
 const bankComponents = [QuestionBankComponent, OptionsBankComponent];
