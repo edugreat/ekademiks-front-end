@@ -72,9 +72,17 @@
                 <mat-label>total ?</mat-label>
                 <input placeholder="Total Questions" appNumeric formControlName="total" matInput>
             </mat-form-field>
-          <span id="addRange" >
-            <button mat-button matTooltip="Add number of questions" >
+          <span *ngIf="nonEditable" id="addRange" >
+            <button (click)="addOrEdit()" [disabled]="questionForm.get('total')?.value === undefined || !questionForm.get('total')?.value?.length"
+            
+            mat-button matTooltip="Add number of questions" >
                 <mat-icon>add</mat-icon>
+            </button>
+          </span>
+
+          <span *ngIf="! nonEditable" id="addRange" >
+            <button [disabled]="disableOnCompletion()" (click)="addOrEdit()" [disabled]="questionForm.get('total')?.value === undefined" mat-button >
+                <mat-icon>edit</mat-icon>
             </button>
           </span>
     
@@ -107,8 +115,8 @@
             <mat-label>Answer</mat-label>
            <mat-select formControlName="answer"  >
             <mat-option class="indicator">Indicate Answer</mat-option>
-            <mat-option *ngFor="let option of options" [value]="option" >
-                {{option}}
+            <mat-option *ngFor="let answer of answers" [value]="answer" >
+                {{answer}}
             </mat-option>
            </mat-select>
         </mat-form-field>
@@ -141,9 +149,20 @@
             </mat-form-field>
          </div>
 
-         <div>
-            <button matTooltip="Click to add" style="background-color: #dfdcdc;" mat-button >
+         <div >
+            <button  [disabled]="optionForm.get('text')!.value == undefined || !optionForm.get('text')?.value?.length"
+            
+            *ngIf="!readyToSubmit || !readyToSubmit()" (click)="processAddition()"
+            
+            matTooltip="Add current option" style="background-color: #dfdcdc; width: 210px; " mat-button >
                 <mat-icon>add</mat-icon>
+            </button>
+
+            <!-- UPLOAD BUTTON APPEARS ONCE THE INDICATED NUMBER OF QUESTIONS HAVE BEEN PROVIDED -->
+            <button (click)="preview()" *ngIf="readyToSubmit()"
+           
+            matTooltip="Preview Now" style="background-color: #dfdcdc; width: 210px; color: rgb(55, 143, 55); " mat-button >
+                <mat-icon>preview</mat-icon>
             </button>
         
         </div>
@@ -151,5 +170,3 @@
  
     </div>
   </div>
-
- 
