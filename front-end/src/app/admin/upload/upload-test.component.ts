@@ -53,7 +53,7 @@ export class UploadTestComponent implements OnInit {
   nonEditable = true;
 
   // declare an object of TestDTO and initialize to undefined
-  private testDTO?: TestDTO;
+ testDTO?: TestDTO;
 
   // signal that signals the number of options already provided for a particular question number
   // Once the number of options have reached five ie [A-E], that current question number is removed from view
@@ -65,6 +65,10 @@ export class UploadTestComponent implements OnInit {
 
   // indicates when the test is ready to get updated(when all the number of indicated question have been set)
   readyToSubmit: Signal<boolean> = computed(() => this.counter() === 0);
+
+
+  // boolean flag for previewing the test
+  previewTest = false;
 
   // Signals that froms should be reset on task completions
   disableOnCompletion: Signal<boolean> = computed(() => {
@@ -442,6 +446,8 @@ export class UploadTestComponent implements OnInit {
   }
 
   preview() {
+
+  this.previewTest = true;
     console.log(JSON.stringify(this.testDTO, null, 2));
   }
 }

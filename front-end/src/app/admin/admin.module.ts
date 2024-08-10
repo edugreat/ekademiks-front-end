@@ -13,7 +13,7 @@ import { OptionsBankComponent } from './bank/options-bank.component';
 import { SharedModule } from '../shared/shared.module';
 import { AdminRoutingModule } from './admin-routing.module';
 import { AdminComponent } from './admin.component';
-import { NumericDirective } from '../shared/numeric.directive';
+import { PreviewTestComponent } from './upload/preview-test.component';
 
 const uploadComponents = [
  
@@ -33,7 +33,7 @@ const fetchComponents = [
 const bankComponents = [QuestionBankComponent, OptionsBankComponent];
 
 @NgModule({
-  declarations: [ AdminComponent, uploadComponents, fetchComponents, bankComponents],
+  declarations: [ AdminComponent, uploadComponents, fetchComponents, bankComponents, PreviewTestComponent],
   imports: [CommonModule, SharedModule, AdminRoutingModule],
 })
 export class AdminModule {}
