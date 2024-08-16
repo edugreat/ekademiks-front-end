@@ -415,9 +415,10 @@ export class UploadTestComponent implements OnInit {
       this.numberRange!.splice(this.numberRange!.indexOf(currentNumber), 1);
       this.optionCounter.set(0);
 
-      //resets the and disable index form control
-      this.questionForm.get('index')!.reset();
-      this.questionForm.get('index')!.disable();
+      // Reset both the value of the current question number
+      this.questionForm.get('index')?.reset();
+     
+     
     }
   }
 
@@ -448,6 +449,6 @@ export class UploadTestComponent implements OnInit {
   preview() {
 
   this.previewTest = true;
-    console.log(JSON.stringify(this.testDTO, null, 2));
+   // console.log(JSON.stringify(this.testDTO, null, 2));
   }
 }

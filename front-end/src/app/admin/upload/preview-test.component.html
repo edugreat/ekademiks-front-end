@@ -1,1 +1,114 @@
-<p>preview-test works!</p>
+<div *ngIf="preview">
+  <h5 class="info">Please preview before uploading</h5>
+
+  <div class="container">
+
+    <div class="form" [formGroup]="testForm!">
+
+      <div class="parent">
+
+        <div class="description">
+         <span>
+          <label for="category">Category</label>
+         </span>
+          <mat-form-field appearance="outline">
+            <input id="category" matInput type="text" formControlName="category">
+          </mat-form-field>
+        </div>
+       
+        <div class="description">
+         <span>
+          <label for="subject">Subject</label>
+         </span>
+          <mat-form-field appearance="outline">
+            <input id="subject" matInput type="text" formControlName="subjectName">
+          </mat-form-field>
+        </div>
+
+       <div class="description">
+         <span>
+          <label for="title">Title</label>
+         </span>
+          <mat-form-field appearance="outline">
+            <input id="title" matInput type="text" formControlName="testName">
+          </mat-form-field>
+       </div>
+
+      <div class="description">
+        <span>
+          <label for="duration">Duration</label>
+        </span>
+        <mat-form-field appearance="outline">
+          <input id="duration" matInput type="text" formControlName="duration">
+        </mat-form-field>
+      </div>
+        
+      </div>
+
+      <div class="parent" formArrayName="questions">
+        <h4 class="info">Questions</h4>
+
+        <div *ngFor="let question of questionsArray.controls; let i = index" [formGroupName]="i">
+         <div class="description">
+          <span  >
+            <label for="questionNumber{{i}}" >No: {{i+1}}</label>
+          </span>
+          <mat-form-field appearance="outline">
+            <input id="questionNumber{{i}}" type="text" matInput formControlName="questionNumber">
+          </mat-form-field>
+
+          <span>
+            <label for="question{{i}}">Question </label>
+          </span>
+          <mat-form-field appearance="outline">
+            <textarea id="question{{i}}" matInput formControlName="text"></textarea>
+          </mat-form-field>
+         </div>
+
+         <div class="description">
+          <span>
+            <label for="answer{{i}}">Answer</label>
+          </span>
+          <mat-form-field>
+            <textarea matInput formControlName="answer" id="answer{{i}}"></textarea>
+          </mat-form-field>
+         </div>
+
+         <h4 class="info">Options</h4>
+
+          <div class="info">
+            <div class="options" formArrayName="options">
+              <div *ngFor="let option of getOptionsArray(i).controls; let j = index" [formGroupName]="j">
+  
+                <div class="description">
+                 <mat-form-field appearance="outline">
+                  <mat-select id="letter" formControlName="letter">
+                    <mat-option [value]="option.get('letter')?.value">{{ option.get('letter')?.value }}</mat-option>
+                  </mat-select>
+                 </mat-form-field>
+
+                 
+                 <mat-form-field appearance="outline">
+                  <input  formControlName="text" matInput type="text">
+                 </mat-form-field>
+                </div>
+  
+              </div>
+              <p>
+                <button>
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <button mat-button (click)="uploadNow()">Upload Now</button>
+    </div>
+
+  </div>
+
+</div>
