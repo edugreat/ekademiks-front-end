@@ -19,7 +19,7 @@ const isAdmin = () =>{
   if((authService.isAdmin())){
     return true
   }else{
-    console.log('not admin')
+  
     authService.logout();
     router.navigate(['login']);
   }

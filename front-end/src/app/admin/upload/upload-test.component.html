@@ -1,5 +1,6 @@
 
-<div *ngIf="!previewTest; else prevTest" >
+<!-- <div *ngIf="!previewTest" > -->
+    <div *ngIf="!previewTest; else prevTest" >
 
 
     <h5 class="info">Fill The Test Form</h5>
@@ -150,17 +151,18 @@
              <div >
                 <button  [disabled]="optionForm.get('text')!.value == undefined || !optionForm.get('text')?.value?.length"
                 
-                *ngIf="!readyToSubmit || !readyToSubmit()" (click)="processAddition()"
+                *ngIf="!taskCompleted()" (click)="processAddition()"
                 
                 matTooltip="Add current option" style="background-color: #dfdcdc; width: 210px; " mat-button >
                     <mat-icon>add</mat-icon>
                 </button>
     
                 <!-- PREVIEW BUTTON APPEARS ONCE THE INDICATED NUMBER OF QUESTIONS HAVE BEEN PROVIDED -->
-                <button (click)="preview()" *ngIf="readyToSubmit()"
+                <button (click)="preview()" *ngIf="taskCompleted()"
                
                 matTooltip="Preview Now" style="background-color: #dfdcdc; width: 210px; color: rgb(55, 143, 55); " mat-button >
-                    <mat-icon>preview</mat-icon>
+                   <mat-icon> preview</mat-icon>
+                   Preview
                 </button>
             
             </div>
@@ -172,7 +174,9 @@
 
 </div>
 
-<ng-template #prevTest>
+<!-- Preview assessment test -->
+<ng-template #prevTest >
     <app-preview-test [preview]="testDTO" ></app-preview-test>
+     <!-- <app-preview-test ></app-preview-test> -->
+
 </ng-template>
-   

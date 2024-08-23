@@ -1,8 +1,23 @@
-<div *ngIf="parameter === 'upload'" class="action">
+
+<div *ngIf="parameter === 'upload'"  class="action">
+  <div class="milestone">
+    <mat-horizontal-stepper #stepper [linear]="true" [disableRipple]="true" >
+      <mat-step [editable]="false" label="upload" [completed]="milestone >= 1" >
+        
+      </mat-step>
+      
+      <mat-step [editable]="false" label="instructions" [completed]="milestone >= 2">
+       
+      </mat-step>
+    </mat-horizontal-stepper>
+    
+  </div>
   <a mat-button [matMenuTriggerFor]="upload">
     <mat-icon>upload</mat-icon>
     Upload What ?
   </a>
+  
+  
 </div>
 
 <div *ngIf="parameter === 'fetch'" class="action">

@@ -176,7 +176,7 @@ isScience(){
 //method that displays the details of assessment, tracked by their question numbers
 goToDetails(_index:number) {
 
-  console.log(`index clicked: ${_index}`)
+ 
 
   if(!this.display![_index]){
 

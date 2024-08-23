@@ -1,4 +1,4 @@
-<div *ngIf="preview">
+<div *ngIf="preview && !hasUploaded; else instructions">
   <h5 class="info">Please preview before uploading</h5>
 
   <div class="container">
@@ -48,29 +48,30 @@
       <div class="parent" formArrayName="questions">
         <h4 class="info">Questions</h4>
 
-        <div *ngFor="let question of questionsArray.controls; let i = index" [formGroupName]="i">
+        <div [formGroup]="paginatedQuestion!" >
+          
          <div class="description">
           <span  >
-            <label for="questionNumber{{i}}" >No: {{i+1}}</label>
+            <label for="index" >No: {{currentPageIndex+1}}</label>
           </span>
           <mat-form-field appearance="outline">
-            <input id="questionNumber{{i}}" type="text" matInput formControlName="questionNumber">
+            <input id="index" type="text" matInput formControlName="questionNumber">
           </mat-form-field>
 
           <span>
-            <label for="question{{i}}">Question </label>
+            <label for="question">Question </label>
           </span>
           <mat-form-field appearance="outline">
-            <textarea id="question{{i}}" matInput formControlName="text"></textarea>
+            <textarea id="question" matInput formControlName="text"></textarea>
           </mat-form-field>
          </div>
 
          <div class="description">
           <span>
-            <label for="answer{{i}}">Answer</label>
+            <label for="answer">Answer</label>
           </span>
-          <mat-form-field>
-            <textarea matInput formControlName="answer" id="answer{{i}}"></textarea>
+          <mat-form-field >
+            <textarea matInput formControlName="answer" id="answer"></textarea>
           </mat-form-field>
          </div>
 
@@ -78,12 +79,14 @@
 
           <div class="info">
             <div class="options" formArrayName="options">
-              <div *ngFor="let option of getOptionsArray(i).controls; let j = index" [formGroupName]="j">
+              <div *ngFor="let option of getOptionsArrayFor(currentPageIndex).controls; let j = index" [formGroupName]="j">
   
+               
                 <div class="description">
                  <mat-form-field appearance="outline">
-                  <mat-select id="letter" formControlName="letter">
-                    <mat-option [value]="option.get('letter')?.value">{{ option.get('letter')?.value }}</mat-option>
+                  <mat-select   id="letter" formControlName="letter">
+                    <mat-option  [value]="option.get('letter')?.value">{{ option.get('letter')?.value }}</mat-option>
+                    <mat-option *ngFor="let _option of optionsContainer![j]; let _index = index" [value]="_option" >{{_option}}</mat-option>
                   </mat-select>
                  </mat-form-field>
 
@@ -94,11 +97,18 @@
                 </div>
   
               </div>
-              <p>
-                <button>
+              <div id="editDiv" >
+                <button *ngIf="!editMode" mat-flat-button (click)="edit()" >
                   <mat-icon>edit</mat-icon>
+                  Edit
                 </button>
-              </p>
+
+                <button [disabled]="hasError()"  (click)="saveChanges()" mat-flat-button  *ngIf="editMode">
+
+                  <mat-icon>save</mat-icon>
+                  Save Changes
+                </button>
+              </div>
             </div>
           </div>
 
@@ -106,9 +116,32 @@
 
       </div>
 
-      <button mat-button (click)="uploadNow()">Upload Now</button>
+     <div id="paginate" >
+      <div class="pagination-controls">
+        <button (click)="previousPage()" matPrefix mat-raised-button [disabled]="currentPageIndex === 0 || editMode">
+  
+          <mat-icon>arrow_back_ios</mat-icon>
+        </button>
+  
+        <span>Page {{ currentPageIndex + 1 }} of {{ totalPageIndex }}</span>
+        <button mat-raised-button matSuffix  (click)="nextPage()" [disabled]="(currentPageIndex + 1) === totalPageIndex || editMode">
+         <mat-icon> arrow_forward_ios</mat-icon>
+        </button>
+      </div>
+
+      <button [disabled]="(totalPageIndex- currentPageIndex ) > 1 || editMode || hasError()" mat-raised-button (click)="uploadNow()">Upload Now</button>
+     </div>
+
+    
     </div>
 
   </div>
 
 </div>
+
+<!-- Sets the instructions for the assessment once assessment is successfully uploaded -->
+ <ng-template #instructions >
+  <app-instructions></app-instructions>
+ </ng-template>
+
+

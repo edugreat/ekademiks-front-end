@@ -2,14 +2,25 @@
 
     display: flex;
     justify-content: center;
+    flex-direction: column;
     align-items: center;
     width: fit-content;
     margin-left: auto;
     margin-right: auto;
     margin-top: 10vh;
     font-family: Arial, sans-serif;
-    background-color: #abb4c2;
+    
     border-radius: 5px;
 }
 
- 
+.action .milestone{
+    pointer-events: none;
+    
+    
+}
+.action a{
+     background-color: #abb4c2; 
+     margin-top: 2px;
+}
+
+

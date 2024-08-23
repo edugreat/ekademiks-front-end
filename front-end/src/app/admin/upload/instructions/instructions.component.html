@@ -1,0 +1,65 @@
+
+
+
+<div class="info">
+   
+    <button  mat-flat-button >
+        <mat-icon>task_alt</mat-icon>
+    </button>
+  
+   <h3 class="info">Now provide instructions</h3>
+</div>
+   
+
+    
+        <div class="form" [formGroup]="instructionForm!" >
+
+            <div formArrayName="instructions" >
+
+                <div *ngFor="let instruction of formArray.controls; let i = index" >
+                    <div class="instruction">
+                       
+                        <label for="{{i+1}}">{{i+1}}</label>
+                        <mat-form-field>
+                            <textarea name="{{i+1}}" id="{{i+1}}" matInput  [formControlName]="i" ></textarea>
+                        </mat-form-field>
+
+                        <button id="delete" mat-flat-button (click)="deletInstruction(i)">
+                            <mat-icon matTooltip="Delete instruction" >delete</mat-icon>
+                        </button>
+                    
+                        
+
+                    </div>
+
+
+                </div>
+
+                <div id="moreInstructions">
+
+                                            
+                    <button mat-flat-button (click)="addInstruction()">
+                        <mat-icon matTooltip="More instruction" >add</mat-icon>
+                    </button>
+                
+
+                    
+                        <button [disabled]="hasError"  mat-button (click)="upload()" >
+                            <mat-icon>upload</mat-icon>
+                            Upload
+                        </button>
+
+                    
+
+                    
+                </div>
+            </div>
+
+
+        </div>
+    
+
+
+
+
+

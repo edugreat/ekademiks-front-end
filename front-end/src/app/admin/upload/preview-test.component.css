@@ -50,13 +50,50 @@
 
 }
 
-span{
+.description span{
 
     display: flex; 
     align-items: center; 
     justify-content: center;
     text-align: center;
 }
+
+
+.pagination-controls{
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 15px;
+  
+  }
+  .pagination-controls button{
+  margin: 0 10px;
+  
+  }
+  
+  .pagination-controls span{
+  
+    font-size: 15px;
+    font-weight: bold;
+  }
+
+  .pagination-controls button{
+    background-color: transparent;
+  }
+
+  #paginate{
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  #paginate  button{
+ margin-bottom: 5px;
+
+  }
 
 /* Additional styling for mat-form-field */
 mat-form-field {
@@ -96,6 +133,16 @@ button[mat-button] {
     cursor: pointer;
     margin-top: 20px;
     border-radius: 5px;
+}
+
+#editDiv{
+   
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+
 }
 
 /* Responsive adjustments */

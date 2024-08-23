@@ -10,8 +10,10 @@ export class AuthInterceptor implements HttpInterceptor{
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const router = inject(Router)
     //gets the authorization token from the local storage
-    const token  = localStorage.getItem('token');
+    const token  = sessionStorage.getItem('token');
+   
     if(token){
+     
 
       const Authorization = `Bearer ${token}`;
       
@@ -22,6 +24,7 @@ export class AuthInterceptor implements HttpInterceptor{
 
           //check if the error is access denied error
           if(error.status === HttpStatusCode.Unauthorized || error.status === HttpStatusCode.Forbidden){
+           
            router.navigate(['/no-access', error.status]);
 
            return EMPTY;

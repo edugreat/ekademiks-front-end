@@ -1,0 +1,65 @@
+.info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    padding: 10px;
+    margin: 5px 0;
+}
+.info button{
+
+    color: green;
+    background-color: transparent;
+   
+    pointer-events: none;
+    
+
+}
+
+ 
+
+.form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /* background-color: #d0d0d0; */
+    padding: 15px;
+    margin-left: 50px;
+   
+    
+}
+
+.instruction{
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 5px 0;
+}
+
+.instruction label{
+    margin-right: 2px;
+    font-size: medium;
+}
+
+.instruction #delete{
+    background-color: transparent;
+    color: red;
+    margin-left: 3px;
+}
+
+#moreInstructions{
+
+    display: flex;
+    margin-top: 5px;
+    
+   
+}
+
+#moreInstructions button:nth-child(1){
+    margin-left: 45px;
+    margin-right: 18px;
+    background-color: transparent;
+}
