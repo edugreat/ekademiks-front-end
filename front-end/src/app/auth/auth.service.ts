@@ -10,7 +10,12 @@ export class AuthService {
 
   private baseUrl = 'http://localhost:8080/auth/sign-in';
 
-  private jwtToken = ''; //token to be received from the database after successful authentication
+  
+
+  // Login event that is used at the app.compoent to trigger connection to the server's notification channel upon student's login ;
+  private studentLoginSubject = new BehaviorSubject<boolean>(this.isLoggedInStudent());
+
+  studentLoginObs$ = this.studentLoginSubject.asObservable();
 
 
   
@@ -47,7 +52,10 @@ export class AuthService {
     sessionStorage.setItem('username', user.firstName);
    sessionStorage.setItem('roles', JSON.stringify(user.roles));
     this.currentUserName.next(sessionStorage.getItem('username')!);
+    if(this.isLoggedInStudent()){
+      this.studentLoginSubject.next(true);//send browser reload notification once a user successfully logs
 
+    }
   }
 
   
@@ -68,6 +76,7 @@ export class AuthService {
     //clears the user roles stored in memory once the user logs out
    sessionStorage.clear();
     this.currentUserName.next('Student');
+    this.studentLoginSubject.next(false);
    
   }
 
@@ -79,7 +88,19 @@ export class AuthService {
 
    
   }
+
+  // Checks if the current user is a logged in student
+   isLoggedInStudent():boolean{
+
+    const roles:string[] = (sessionStorage.getItem('roles') ? JSON.parse(sessionStorage.getItem('roles')!)  : [])
+   
+    return roles.some(role => role.toLowerCase() === 'student');
+  }
  
+  get studentId():number{
+
+    return Number(sessionStorage.getItem('studentId')!);
+  }
 }
 
 export interface User{

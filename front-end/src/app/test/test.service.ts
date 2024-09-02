@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { QuestionDTO, QuestionPart, TestContent, TestContentDTO } from './test-interface';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, Subject, Subscription, map, tap } from 'rxjs';
 import { PerformanceObject } from './test.component';
 
@@ -102,6 +102,12 @@ submission(value:boolean){
   this.submissionSubject.next(value)
 }
 
+// Method that retrieves an object whose key is the subject name and value is the category using the given test id
+subjectAndCategory(testId:number):Observable<HttpResponse<{[key:string]:string}>>{
+
+  return this.http.get<{[key:string]:string}>(`http://localhost:8080/tests/subject_category?testId=${testId}`, {observe:'response'})
+}
+
 }
 
 //object showing id of the student who made the attempt, the id of the test and the attempts made
@@ -111,5 +117,4 @@ export interface Attempt{
   studentId:number,
   selectedOptions:string[]
 }
-
 

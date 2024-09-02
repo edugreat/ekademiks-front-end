@@ -19,6 +19,7 @@ import { AuthInterceptor } from './auth/auth.interceptor';
 import { AdminModule } from './admin/admin.module';
 import { AppRoutingModule } from './app-routing/app-routing.module';
 import { NumericDirective } from './shared/numeric.directive';
+import { NotificationDetailComponent } from './notification-detail/notification-detail.component';
 
   
 
@@ -28,6 +29,7 @@ import { NumericDirective } from './shared/numeric.directive';
     AppComponent,
     ContactComponent,
     SignUpComponent,
+    NotificationDetailComponent,
    //NumericDirective
    
    

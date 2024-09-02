@@ -1,0 +1,53 @@
+
+.container{
+
+    margin-left: auto;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #e0e0e0;
+    padding: 10px;
+
+}
+
+.notificationForm{
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 5px;
+}
+
+.no-action{
+
+    pointer-events: none;
+    margin-bottom: 5px;
+    
+}
+.audience{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+
+}
+
+.audience #checkbox{
+
+    margin-left: 0px !important;
+    display: flex;
+    flex-direction: column;
+    
+}
+.audience #checkbox span{
+    margin-left: 10px;
+}
+
+
+

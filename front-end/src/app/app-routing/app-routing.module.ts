@@ -12,11 +12,18 @@ import { PerformanceComponent } from '../test/performance/performance.component'
 import { testDeactivateGuard, testGuard } from '../test/test.guard';
 import { AccessDeniedComponent } from '../auth/access-denied/access-denied.component';
 import { adminGuard } from '../admin/admin.guard';
+import { NotificationDetailComponent } from '../notification-detail/notification-detail.component';
+import { notificationGuard } from '../notification.guard';
 
 
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent },
+  {path: 'notifications', component:NotificationDetailComponent,
+
+    canActivate:[notificationGuard],
+    canMatch:[notificationGuard]
+  },
   { path: 'assessments', component: AssessmentComponent },
   { path: 'supports', component: SupportComponent },
   { path: 'contact', component: ContactComponent },
@@ -25,6 +32,7 @@ const routes: Routes = [
   { path: 'performance', component: PerformanceComponent },
   { path: 'home/:more', component: HomeComponent },
   { path: 'assessments/:level', component: AssessmentComponent },
+ 
   {
     path: 'assessment-panel/:subject/:category',
     component: AssessmentExpansionPanelComponent,

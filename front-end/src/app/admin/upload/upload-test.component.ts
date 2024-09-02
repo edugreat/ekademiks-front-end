@@ -36,7 +36,7 @@ export class UploadTestComponent implements OnInit {
 
   //an array of test subject received from the server.
   // This is used to prepopulate the category selection input so admin can make a choice that subsequently instantiate the necessary form control
-  subjects: string[] = [];
+  subjectNames: string[] = [];
 
   //An array of number used to prepopulate the duration input selection
   durations = [20, 25, 30, 35, 40, 45, 50, 55, 60];
@@ -182,6 +182,9 @@ export class UploadTestComponent implements OnInit {
     
     this.fetchTestUploadInfo();
     this.adjustFormStatus();
+    // Set current task description to 'upload'
+    // This event is received by the AdminComponet to trigger mat-stepper progress for the 'upload' task
+    this.adminService.taskDescription('upload-test');
   }
 
   //get the data required for test upload. Such data include the test category and the subject for which the Test is intended
@@ -189,9 +192,10 @@ export class UploadTestComponent implements OnInit {
     this.adminService.fetchCategory().subscribe(  {
      next:(data: CategoryObject)=>{
 
-      //assign the the array of levels returnd from this server call to the category property
+      //assign the array of levels returnd from this server call to the 'category' property
       this.categories = data._embedded.levels.map((level) => level.category);
 
+      // get link to the subject for the given category(level)
       const urls: string[] = data._embedded.levels.map(
         (level) => level._links.subjects.href
       );
@@ -206,13 +210,52 @@ export class UploadTestComponent implements OnInit {
   private fetchSubject(url: string) {
     return this.adminService
       .fetchSubjects(url)
-      .subscribe((data: SubjectObject) => {
-        //assign to the subject array property, the returned subject name array of this server
+
+      .subscribe({
+        next:(data:SubjectObject)=>{
+
+           //assign to the subject array property, the returned subject name array of this server
         const subject: string[] = data._embedded.subjects.map(
-          (subject) => subject.subjectName
+          (subjectName) => subjectName.subjectName
         );
-        this.subjects.push(...subject);
-      });
+        this.subjectNames.push(...subject);
+        },
+
+        error:(err) => console.log(err),
+
+        complete:() => this.removeDuplicateSubjectNames(this.subjectNames.sort(this.sortSubjectList))
+      })
+     
+
+     
+  }
+  
+  // Since we're storing subjects for both senior & junior into a single array, there's need to remove duplicates if any exists.
+   removeDuplicateSubjectNames(subjectNames: string[]) {
+    
+   
+    let size = subjectNames.length;
+    for (let index = 0; (index + 1 ) < size; index++) {
+     
+     
+      if(subjectNames[index  + 1].toLowerCase() === subjectNames[index].toLowerCase()){
+        subjectNames.splice(index, 1);
+        --size;
+      }
+
+
+      
+    }
+  }
+  // Sorts subject list in asceding alphabetical order
+
+  private sortSubjectList(x:string, y:string):number{
+  const x1 = x.toLowerCase();
+  const x2 = y.toLowerCase();
+
+    if(x1 < x2) return -1;
+    else if(x1 > x2) return 1;
+    else return 0;
   }
 
   //populate the numberRange array
@@ -515,3 +558,5 @@ export class UploadTestComponent implements OnInit {
 
   
 }
+
+

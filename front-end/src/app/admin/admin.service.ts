@@ -1,7 +1,8 @@
-import { HttpClient, HttpHeaders, HttpStatusCode} from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse, HttpStatusCode} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { TestDTO } from './upload/upload-test.component';
+import { NotificationDTO } from './upload/notifications/notifications.component';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +12,8 @@ export class AdminService {
   private setTestUrl = 'http://localhost:8080/admins/test';
 
   private levelUrl = 'http://localhost:8080/learning/levels'; //HATEOAS LINK
+
+  private notificationUrl = 'http://localhost:8080/admins/notify';
 
   // Observable that emits the number of tasks completed
   // This is itended to use in a mat-stepper to indicate progress on tasks such as assessment upload, result uploads tasks etc
@@ -23,6 +26,9 @@ export class AdminService {
   private task = new BehaviorSubject<string>('');
 
   taskObs$ = this.task.asObservable();
+
+  // Tasks milestone initialized to zero
+  private _milestone = 0;
 
 
 
@@ -43,25 +49,26 @@ export class AdminService {
   }
 
   // method that posts new created assessment to the server
-  postAssessment(test:TestDTO):Observable<HttpStatusCode>{
+  postAssessment(test:TestDTO):Observable<HttpResponse<number>>{
 
-    return this.http.post<HttpStatusCode>(this.setTestUrl, test);
+    return this.http.post<HttpStatusCode>(this.setTestUrl, test,{observe:'response'});
 
 
   }
 
   // post or associate instructional guide to a just posted assessment
-  setInstruction(instruction: {instructions:[]}):Observable<any>{
+  uploadInstructions(instruction: {instructions:[]}, id:number):Observable<any>{
 
-    return this.http.patch(this.setTestUrl, instruction)
+    return this.http.patch(`${this.setTestUrl}?id=${id}`, instruction)
 
 
   }
 
-  // Sets step(ie the milestone reached so far) of the task that have been completed so far
-   setTaskMilestone(milestone:number):void{
+  // set task's milestone to the current value
+   setTaskMilestone(value:number):void{
 
-    this.taskMilestone.next(milestone);
+
+    this.taskMilestone.next(value);
   }
 
   // Sets description about the task at hand
@@ -69,6 +76,19 @@ export class AdminService {
 
     this.task.next(name);
   }
+
+ 
+  // This is used to reset task's milestone after each task completion
+  resetMilestone(){
+ this.taskMilestone.next(0);
+
+ }
+
+// sends notifications to the students
+sendNotifications(notification:NotificationDTO):Observable<HttpResponse<void>>{
+
+  return this.http.post<void>(this.notificationUrl, notification,{observe:'response'});
+}
 
 }
 

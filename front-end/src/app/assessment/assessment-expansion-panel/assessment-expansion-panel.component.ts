@@ -24,18 +24,20 @@ export class AssessmentExpansionPanelComponent implements OnInit{
 
 
   ngOnInit(): void {
-    this.getTopicsAndTime();
+    this.getTopicAndDuration();
 
   }
 
-  private getTopicsAndTime(){
+  // get the assessment topic and its duration
+  private getTopicAndDuration(){
 
      this.subject = this.activatedRoute.snapshot.params['subject'];
      this.category = this.activatedRoute.snapshot.params['category'];
     
     if(this.subject && this.category){
 
-      this.topicsAndDurations$ = this.assessmentService.getTopics(this.subject, this.category);
+      this.topicsAndDurations$ = this.assessmentService.getTopicsAndDurations(this.subject, this.category);
+      // converts to lowercase case except the initial letter
       this.level =  this.category.substring(0, 1)+''+(this.category.substring(1)).toLowerCase()
 
      

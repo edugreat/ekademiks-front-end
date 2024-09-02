@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { AdminService } from '../../admin.service';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { HttpStatusCode } from '@angular/common/http';
+import { ActivatedRoute, Router } from '@angular/router';
 
 // This component is the assessment instructions guides which the student taking the assessment is expected to adhere to
 @Component({
@@ -18,8 +20,22 @@ export class InstructionsComponent implements OnInit{
   // signals form error
   hasError = true;
 
+  // The id of the assessment (just uploaded) whose instructional guide is to be set and uploaded
+  @Input()
+   uploadedAssessmentId?:number;
+  
+  //  The 'type' field represents the type of task currently on process
+  // Since the InstructionsComponent is the last stage of the test upload task,
+  // The 'taskType' is set to 'assessment upload' which is forwarded to the server via notification endpoint
+    taskType = 'upload';
 
-  constructor(private adminService:AdminService, private fb:FormBuilder){
+  //  Determines if instructional guides for the assessment has successfully been uploaded
+  // When set to true, then the admin can proceed with sending notifications
+   hasUploadedInstructions = false;
+
+
+  constructor(private adminService:AdminService, private fb:FormBuilder
+  ){
 
   }
   
@@ -92,7 +108,17 @@ export class InstructionsComponent implements OnInit{
 
    
 
-    this.adminService.setInstruction(this.instructionForm?.value).subscribe(value =>{
+    this.adminService.uploadInstructions(this.instructionForm?.value, this.uploadedAssessmentId!).subscribe((status:HttpStatusCode) =>{
+
+      // set task's milestone to 2 if upload was successful
+      if(status = HttpStatusCode.Ok){
+        this.adminService.setTaskMilestone(2);
+        
+        // sets the boolean flag to true so admin can proceed with sending notificationa
+        this.hasUploadedInstructions = true;
+
+       
+      }
     
     })
     

@@ -22,6 +22,7 @@ import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import {MatStepperModule} from '@angular/material/stepper'; 
+import {MatBadgeModule} from '@angular/material/badge'; 
 
 
 
@@ -53,7 +54,9 @@ const materials = [
   MatSelectModule,
   MatRadioModule,
   MatButtonModule,
-  MatStepperModule
+  MatStepperModule,
+  MatBadgeModule
+
   
 ]
 

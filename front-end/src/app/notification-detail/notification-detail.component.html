@@ -1,0 +1,18 @@
+
+<div class="container">
+    <div *ngIf="unreadNotifications?.length" id="top">
+        <h4>Notifications</h4>
+    </div>
+   
+    <div  *ngFor="let notification of unreadNotifications" class="description" (click)="btn.click()" >
+    <span  >{{notification.type}} - {{notification.message}}</span>
+    <span  class="date">{{notification.createdAt | date}}</span>
+    <button #btn (click)="processSelection(notification.metadata)" ></button>
+    </div>
+    
+    <div *ngIf="unreadNotifications?.length === 0" class="no-new-notification">  
+        <span class="notification-icon">🔔</span>  
+        No new notifications  
+    </div>
+
+</div>

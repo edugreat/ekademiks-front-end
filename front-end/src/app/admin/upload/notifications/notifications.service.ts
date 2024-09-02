@@ -1,0 +1,183 @@
+import { Injectable, NgZone } from '@angular/core';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { AuthService } from '../../../auth/auth.service';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class NotificationsService {
+
+  // Delivers the notifications counts to subscribes
+  // This is used to update the number of unread notifications at the app-component
+  private unreaNotificationsCount = new BehaviorSubject<number>(0);
+
+  notificationCount$ = this.unreaNotificationsCount.asObservable();
+
+  // emits all received notifications to subscriber. This is initialized to all notifications received upon login
+  private unreadNotifications = new BehaviorSubject<Notification[] >(this.notifications)
+
+  unreadNotifications$ = this.unreadNotifications.asObservable();
+
+  
+  private eventSource?:EventSource
+
+  // server notification url
+  private notificationUrl = 'http://localhost:8080/notice/notify_me';
+
+  // An array that stores all received notifications
+  private _notifications: Notification[] = [];
+  
+  
+  
+  
+
+  // Timeout for reconnection to sse notification event 
+  private reconnectionTiming:any;
+
+
+  constructor(private zone:NgZone, private authService:AuthService) { 
+
+    // subscribe to get notified on student's log in . If a student has logged in, connect to server's notification
+    authService.studentLoginObs$.subscribe(isLoggedIn =>{
+
+      if(isLoggedIn){
+
+        this.connectToNotifications();
+      }else{
+
+        // disconnect from receiving notification if a student has logged out
+        this.disconnectFromNotifications();
+      }
+
+    })
+  }
+
+
+  // return all unread notifications
+  public get notifications(): Notification[] {
+    return this._notifications;
+  }
+ 
+  
+ 
+  // Updates the count of unread notifications
+  updateNotificationsCounts(unread:number){
+
+    this.unreaNotificationsCount.next(unread);
+  }
+
+
+  
+  private connectToNotifications(){
+
+    // Close previous event source before connecting to avoid cyclic issues
+    if(this.eventSource) this.eventSource.close();
+
+    // create a new event source passing the sse notification api
+    this.eventSource = new EventSource(`${this.notificationUrl}?studentId=${this.authService.studentId}`);
+
+    this.eventSource.addEventListener('notifications',(event:MessageEvent<any>) =>{
+
+      this.zone.run(() =>{
+
+        // check if there is notification
+        if(event){
+
+        
+          // Parses the received object to its correct json object
+          const notification:Notification = JSON.parse(event.data);
+          
+         
+          this.addToNotifications(notification);
+        }
+      })
+    })
+
+    // executes once there is error suc as timeout of the server connection etc
+    this.eventSource.onerror =() =>{
+
+      // close the event source for error, then reconnect after some timing
+      this.reconnectionTiming = setTimeout(() => {
+        
+        // connect back to notification
+        this.connectToNotifications();
+      }, 5000);
+   
+    }
+
+    
+  }
+
+
+  
+  // Disconnects  from the notification
+  private disconnectFromNotifications(){
+    // check if connection had been made before
+    if(this.eventSource){
+    
+      this.eventSource.close();
+      clearTimeout(this.reconnectionTiming)
+    }
+    
+    
+          
+      }
+      // Add the just arriving notification if has not been received till not
+      private addToNotifications(newNotification:Notification){
+    
+        
+     
+        // pushes the first notification to the notifications array
+        if(this.notifications.length === 0){
+
+         this._notifications.push(newNotification);
+         this.unreadNotifications.next(this.notifications);
+         
+          // emits the size of unread notifications so that subscriber can update notifications counts
+          this.unreaNotificationsCount.next(this.notifications.length)
+         
+        
+       }else{
+
+        // check if the notification is already pushed
+        const index = this._notifications.findIndex(x => x.id === newNotification.id);
+       
+        if(index < 0) {
+          this._notifications.push(newNotification);
+
+          this.unreadNotifications.next(this.notifications)
+          
+          // emits the size of unread notifications so that subscriber can update notifications counts
+          this.unreaNotificationsCount.next(this.notifications.length)
+          console.log(JSON.stringify(newNotification, null, 2))
+        
+        
+        }
+
+       }
+       
+       
+
+         
+      
+    
+        
+
+      
+      }
+}
+
+
+
+
+// An object representing the notifications logged in user receive.
+// Notification can be for new assessment upload, resut release etc
+export type Notification = {
+  id:number,
+  type:string,
+  metadata:number,
+  message:string,
+  createdAt:string
+
+}
+

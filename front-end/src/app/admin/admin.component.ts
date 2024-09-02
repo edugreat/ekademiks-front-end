@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdminService } from './admin.service';
-import { Subscription } from 'rxjs';
+import { Subscription, timeout } from 'rxjs';
 import { MatStepper } from '@angular/material/stepper';
 
 @Component({
@@ -28,7 +28,7 @@ export class AdminComponent implements OnInit, AfterViewInit, OnDestroy {
   milestoneSub?:Subscription;
 
   // subscribes and unsubscribes to task description event
-  taskDesriptionSub?:Subscription;
+  taskDescriptionSub?:Subscription;
 
   // Get handle to the mat-stepper directive 
   @ViewChild('stepper') stepper?:MatStepper;
@@ -39,6 +39,9 @@ export class AdminComponent implements OnInit, AfterViewInit, OnDestroy {
   // checks if the whole tasks have been completed
   taskCompleted = false;
 
+  // timeout that resets the stepper directive once the task is complete
+  stepperResetTimeout:any;
+
 
   constructor(private activatedRoute: ActivatedRoute, private router: Router, private adminService:AdminService) {}
   
@@ -48,22 +51,27 @@ export class AdminComponent implements OnInit, AfterViewInit, OnDestroy {
       (params) => (this.parameter = params.get('parameter'))
     );
 
-  
-    
     this.trackTaskDescription();
     this.trackMilestone();
+    clearTimeout(this.stepperResetTimeout)
+   
   }
 
   ngAfterViewInit(): void {
-    this.stepper!.selectedIndex = 1;
+   // this.stepper!.selectedIndex = 0;
     this.numberOfSteps = this.stepper!.steps.length;
    
+    
 
     
   }
 
   ngOnDestroy(): void {
-    throw new Error('Method not implemented.');
+
+   
+   this.taskDescriptionSub?.unsubscribe();
+   this.milestoneSub?.unsubscribe();
+   this.adminService.setTaskMilestone(0);
   }
 
 
@@ -75,28 +83,59 @@ export class AdminComponent implements OnInit, AfterViewInit, OnDestroy {
   // Track task completion milestone
   private trackMilestone(){
 
-    // If task description is established, then start tracking the task's milestone
-  if(this.description){
+    // then start tracking the task's milestone
+ 
     this.milestoneSub = this.adminService.taskMilestoneObs$.subscribe(milestone => {
+     
 
+      if(this.description){
+
+        
       this.milestone = milestone;
+     
       // Moves to the next step once the current step has been completed, also check against array index out of bounds error
-      if(milestone > 0 && this.stepper!.selectedIndex < this.numberOfSteps - 1){
-       this.stepper?.next();
-      }if(this.numberOfSteps - milestone === 1) this.taskCompleted = true;
+      if(this.milestone > 0 && this.stepper!.selectedIndex < this.numberOfSteps - 1){
+
+        // Mark as completed the task for that milestone. steppers are zero base indexed
+        this.stepper!.steps.get(milestone - 1)!.completed = true
+      this.stepper?.next();
+
+      //  Task is completed once the milestone is the number of tasks at hand
+      }if(this.numberOfSteps - milestone - 1 === 0) {
+       
+        // reset the stepper after some timeout 
+        this.stepperResetTimeout =setTimeout(() => {
+        
+          this.stepper?.reset();
+        this.adminService.resetMilestone();
+        this.adminService.taskDescription('');
+        
+        // route back the user to the admin page for more uploads 
+        this.router.navigate(['/admin/upload'])
+        }, 10000);
+       
+      }
+      }
     });
-  }
+
+   
+ 
 
   }
 
   // Tracks description of the task at hand
   private trackTaskDescription(){
 
-    this.taskDesriptionSub = this.adminService.taskObs$.subscribe(description => this.description = description)
+    this.taskDescriptionSub = this.adminService.taskObs$.subscribe(description =>{ 
+    
+      this.description = description;
+    
+    })
 
 
   }
 
+ 
  
   }
 

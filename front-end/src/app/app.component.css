@@ -31,6 +31,16 @@
     margin-top: 20px;
 }
 
+#notifications{
+
+    background-color: #3F51B5;
+ margin-left: 51px;
+ border: none;
+ color: white;
+ cursor: pointer;
+   }
+
+  
 
 @media(min-width:900px){
 
@@ -46,6 +56,7 @@
 
         margin-left: 50px;
     }
+
 }
 
 .main-content{
@@ -62,9 +73,30 @@
         display: none;
     }
 
+    #menuTitle{
+
+        margin-right: 25px;
+    }
+
     #user{
         margin-left: 0px;
     }
+
+    #notifications{
+
+        margin-left: 20px;
+       padding-top: 4px;
+       
+    }
+
+
+
+    #notifications mat-icon{
+
+        font-size: 1rem;
+      
+    }
+
 }
 
 @media(max-width:480px){

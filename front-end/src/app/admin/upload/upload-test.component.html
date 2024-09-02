@@ -29,7 +29,7 @@
                     <mat-label>Subject</mat-label>
                     <mat-select  formControlName="subject"  >
                         <mat-option class="indicator" >Set Subject</mat-option>
-                        <mat-option *ngFor="let subject of subjects" [value]="subject" >
+                        <mat-option *ngFor="let subject of subjectNames" [value]="subject" >
                             {{subject}}
                         </mat-option>
                     </mat-select>
@@ -65,7 +65,7 @@
     <!-- Question container -->
      <div class="container"  >
     
-        <div class="form" [formGroup] ="questionForm">
+        <div  class="form" [formGroup] ="questionForm">
             <div  class="total-range">
                 <mat-form-field appearance="outline"   >
                     <mat-label>total ?</mat-label>
@@ -128,7 +128,7 @@
     
      <h5 class="info">Fill The Options Form</h5>
      <!-- Option container -->
-      <div class="container" >
+      <div style="display: flex; justify-content: center;" >
         <div class="form" [formGroup]="optionForm">
             <!-- Option -->
             <div>

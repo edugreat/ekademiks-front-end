@@ -9,7 +9,7 @@ export class AssessmentsService {
 
   baseUrl = `http://localhost:8080/learning/levels`;
   subjectNameUrl = `http://localhost:8080/tests/level`;
-  topicUrl = `http://localhost:8080/tests`
+  testUrl = `http://localhost:8080/tests`
 
   constructor(private http:HttpClient) { }
 
@@ -40,14 +40,24 @@ export class AssessmentsService {
   }
 
   //fetches from the server test topics and durations for the given subject and category
-  getTopics(subjectName:string, category:string):Observable<TopicAndDuration[]>{
+  getTopicsAndDurations(subjectName:string, category:string):Observable<TopicAndDuration[]>{
 
-    return this.http.get<Array<{testName:string, duration:number}>>(`${this.topicUrl}?subject=${subjectName}&category=${category}`).pipe(
+    return this.http.get<Array<{testName:string, duration:number}>>(`${this.testUrl}?subject=${subjectName}&category=${category}`).pipe(
       map((results) => results.map(result =>{
 
         return {topic:result.testName, duration:result.duration}
       }))
     );
+  }
+
+  // fetches from the server test topic and category for a given test id
+  getTopicAndDuration(testId:number):Observable<TopicAndDuration>{
+
+    return this.http.get<{testName:string, duration:number}>(`${this.testUrl}/info?testId=${testId}`).pipe(
+      map((result) =>{
+        return {topic:result.testName, duration: result.duration}
+      })
+    )
   }
 }
 

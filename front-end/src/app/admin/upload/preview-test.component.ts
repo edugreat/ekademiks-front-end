@@ -3,7 +3,7 @@ import { Option, Question, TestDTO } from './upload-test.component';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { AdminService } from '../admin.service';
-import { HttpStatusCode } from '@angular/common/http';
+import { HttpResponse, HttpStatusCode } from '@angular/common/http';
 
 @Component({
   selector: 'app-preview-test',
@@ -50,6 +50,9 @@ export class PreviewTestComponent implements OnInit, OnDestroy{
   // This serves to notify the system to trigger assessment instruction upload
   hasUploaded = false;
  
+  // The id for a just uploaded assessmetn as received from the server
+  // This is included in the notification upload forwarded to the server
+  uploadedAssessmentId?:number;
  
   
  
@@ -402,13 +405,19 @@ nextPage() {
 // Uploads assessment
 uploadNow() {
   
- 
-  
-
   this.adminService.postAssessment(this.testForm!.value).subscribe({
 
-    next:(status:HttpStatusCode)=>{
-     if(status = HttpStatusCode.Ok) this.hasUploaded = true;
+    next:(response:HttpResponse<number>)=>{
+    
+      // If the response status is 'OK' and we actually got a respone body(typically an id)
+     if(response.status == HttpStatusCode.Ok && response.body) {
+      this.hasUploaded = true;
+      this.uploadedAssessmentId = response.body;
+      // Announce a task completion milestone of 1 to indicate a milestone has been reached so far
+      // This event is received at the AdminComponent to update the mat-stepper step progress
+    
+      this.adminService.setTaskMilestone(1);
+     }
     },
 
     error:(err) => console.log(err)

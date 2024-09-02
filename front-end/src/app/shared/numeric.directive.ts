@@ -19,10 +19,10 @@ export class NumericDirective {
    if(isNaN(Number(key))){
 
     event.preventDefault();
-    targetEl.classList.add('invalid-phone-number')
+    targetEl.classList.add('invalid-number')
    }else{
 
-    targetEl.classList.remove('invalid-phone-number')
+    targetEl.classList.remove('invalid-number')
    }
 
     

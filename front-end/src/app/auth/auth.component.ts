@@ -1,9 +1,10 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { AuthService, User } from './auth.service';
+import { Component, OnDestroy, OnInit, Type, ViewChild } from '@angular/core';
+import { AuthService } from './auth.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatCheckbox } from '@angular/material/checkbox';
+
 
 @Component({
   selector: 'app-auth',
@@ -54,6 +55,13 @@ export class AuthComponent implements OnDestroy {
 
   //logs a user in
   public login(email:string,password:string):void{
+
+    // First, log the user out if already logged in
+    if(this.isLoggedIn()){
+
+      this.authService.logout();
+
+    }
 
     //determine if the user wishes to login as an admin or student
     const role = this.adminCheckbox.checked ? 'admin' : 'student'
@@ -133,4 +141,9 @@ export class AuthComponent implements OnDestroy {
     }
     }
     
+    // calls the authentication service isLoggeIn method 
+    private isLoggedIn(){
+
+      return this.authService.isLoggedIn();
+    }
 }
