@@ -13,7 +13,7 @@
                   </button>
             </span>
             <mat-form-field appearance="outline">
-                <input  placeholder="Notification message" type="text" matInput formControlName="message">
+                <input [disabled]="disableFields" placeholder="Notification message" type="text" matInput formControlName="message">
               </mat-form-field>
 
               <span>
@@ -25,17 +25,17 @@
              <div class="audience">
 
               <mat-form-field >
-                <textarea appNumeric id="text-area" placeholder="number or space separated numbers" matInput formControlName="audience"></textarea>
+                <textarea appNumeric [disabled]="disableFields" id="text-area" placeholder="number or space separated numbers" matInput formControlName="audience"></textarea>
               </mat-form-field>
 
               <span id="checkbox" >
-                <mat-checkbox #audienceCheck color="primary" [disableRipple]="true" ></mat-checkbox>
+                <mat-checkbox [disabled]="disableFields" #audienceCheck color="primary" [disableRipple]="true" ></mat-checkbox>
                 <span>All</span>
               </span>
              
              </div>
              
-              <button #notifyBtn [disabled]="!canSubmit()" (click)="notify()" mat-raised-button>
+              <button #notifyBtn [disabled]="!canSubmit() || disbaleFields" (click)="notify()" mat-raised-button>
               
                 <mat-icon style="color: green;" >send</mat-icon>
                 Notify

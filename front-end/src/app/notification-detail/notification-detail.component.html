@@ -4,13 +4,13 @@
         <h4>Notifications</h4>
     </div>
    
-    <div  *ngFor="let notification of unreadNotifications" class="description" (click)="btn.click()" >
-    <span  >{{notification.type}} - {{notification.message}}</span>
+    <div  *ngFor="let notification of unreadNotifications; let i = index" class="description" (click)="btn.click()" >
+    <span  ><b> {{notification.type | uppercase}}</b> - {{notification.message}}</span>
     <span  class="date">{{notification.createdAt | date}}</span>
-    <button #btn (click)="processSelection(notification.metadata)" ></button>
+    <button #btn (click)="processSelection(notification.metadata, i, notification.id)" ></button>
     </div>
     
-    <div *ngIf="unreadNotifications?.length === 0" class="no-new-notification">  
+    <div *ngIf="unreadNotifications?.length === 0 || !unreadNotifications" class="no-new-notification">  
         <span class="notification-icon">🔔</span>  
         No new notifications  
     </div>

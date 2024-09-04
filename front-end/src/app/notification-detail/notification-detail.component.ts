@@ -51,8 +51,8 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
     })
   }
 
-  // Extracts 'testId' and fetches assessment information using it
-  processSelection(id:number) {
+  // Extracts 'metadata' and fetches assessment information using it, remove the current notification from the notifications array
+  processSelection(metadata:number, index:number, notificationId:number) {
 
     // Basic asssessment information(subject name, category, topic and duration)
   let category = '';
@@ -62,7 +62,7 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
    
     // Get information about the subject name and category for the given testId.
     // Server call returns a map object(where key is subject name & value is category name)
-   this.testService.subjectAndCategory(id).subscribe({
+   this.testService.subjectAndCategory(metadata).subscribe({
     next:(response:HttpResponse<{[key:string]:string}>) =>{
 
       
@@ -78,13 +78,36 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
     }
 
     },
-   complete:() => this.getTopicAndDuration(id, topic, duration,subjectName,category)
+   complete:() => {
+
+    
+    // remove the current notification from the notifcations array
+    this.unreadNotifications?.splice(index, 1);
+
+    // update unread notification count so that subscribers can be notification about the update
+    this.notificationService.updateNotificationsCounts(this.unreadNotifications!.length);
+
+    // get the student's id
+    const studentId = Number(sessionStorage.getItem('studentId')!);
+    
+    // make a server call to notifying that the notification has been read
+    // This enables the server keep track of read notification so as not to serve stale notification subsequently
+    this.notificationService.notificationIsRead(notificationId, studentId).subscribe({
+
+      next:() => console.log('emits notthing'),
+
+      complete:() =>  this.getTopicAndDuration(metadata, topic, duration,subjectName,category)
+    })
+
+   
+   }
    })
     }
 
     // gets the assessment topic and its duration
     private getTopicAndDuration(testId:number, topic:string, duration:number, subjectName:string, category:string){
     
+      // Make a a get request to the server to retrieve both the 'tpic' and 'duration' for the assessment referenced by the given 'testId'
       this.topicAndDurationSub$ = this.assessmentService.getTopicAndDuration(testId).subscribe({
    
         next:(result) =>{

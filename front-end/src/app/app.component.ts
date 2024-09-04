@@ -14,6 +14,7 @@ import { NotificationsService } from './admin/upload/notifications/notifications
   styleUrl: './app.component.css',
 })
 export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
+
   userName = 'Student'; //If the user's name remains Student as initially emitted from the authentication service, then it's a guest user otherwise, it is a logged in user
 
   userSub?: Subscription; //subscription that receives the currently logged in user's name (their first name)
@@ -80,6 +81,12 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     });
   }
+
+  // returns true if the current user is a guest
+  isGuestUser() {
+    
+    return !this.authService.isLoggedIn();
+    }
 
   // Checks if the user is a looged in student
   isLoggedInStudent(){

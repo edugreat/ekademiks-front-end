@@ -1,6 +1,7 @@
 import { Injectable, NgZone } from '@angular/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { AuthService } from '../../../auth/auth.service';
+import { HttpBackend, HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -14,36 +15,36 @@ export class NotificationsService {
   notificationCount$ = this.unreaNotificationsCount.asObservable();
 
   // emits all received notifications to subscriber. This is initialized to all notifications received upon login
-  private unreadNotifications = new BehaviorSubject<Notification[] >(this.notifications)
+  private unreadNotifications = new BehaviorSubject<Notification[]>(this.notifications)
 
   unreadNotifications$ = this.unreadNotifications.asObservable();
 
-  
-  private eventSource?:EventSource
+
+  private eventSource?: EventSource
 
   // server notification url
   private notificationUrl = 'http://localhost:8080/notice/notify_me';
 
   // An array that stores all received notifications
   private _notifications: Notification[] = [];
-  
-  
-  
-  
+
+
+
+
 
   // Timeout for reconnection to sse notification event 
-  private reconnectionTiming:any;
+  private reconnectionTiming: any;
 
 
-  constructor(private zone:NgZone, private authService:AuthService) { 
+  constructor(private zone: NgZone, private authService: AuthService, private http:HttpClient) {
 
     // subscribe to get notified on student's log in . If a student has logged in, connect to server's notification
-    authService.studentLoginObs$.subscribe(isLoggedIn =>{
+    authService.studentLoginObs$.subscribe(isLoggedIn => {
 
-      if(isLoggedIn){
+      if (isLoggedIn) {
 
         this.connectToNotifications();
-      }else{
+      } else {
 
         // disconnect from receiving notification if a student has logged out
         this.disconnectFromNotifications();
@@ -57,114 +58,115 @@ export class NotificationsService {
   public get notifications(): Notification[] {
     return this._notifications;
   }
- 
-  
- 
+
+
+
   // Updates the count of unread notifications
-  updateNotificationsCounts(unread:number){
+  updateNotificationsCounts(unread: number) {
 
     this.unreaNotificationsCount.next(unread);
   }
 
 
-  
-  private connectToNotifications(){
+
+  private connectToNotifications() {
 
     // Close previous event source before connecting to avoid cyclic issues
-    if(this.eventSource) this.eventSource.close();
+    if (this.eventSource) this.eventSource.close();
 
     // create a new event source passing the sse notification api
     this.eventSource = new EventSource(`${this.notificationUrl}?studentId=${this.authService.studentId}`);
 
-    this.eventSource.addEventListener('notifications',(event:MessageEvent<any>) =>{
+    this.eventSource.addEventListener('notifications', (event: MessageEvent<any>) => {
 
-      this.zone.run(() =>{
+      this.zone.run(() => {
 
         // check if there is notification
-        if(event){
+        if (event) {
 
-        
+
           // Parses the received object to its correct json object
-          const notification:Notification = JSON.parse(event.data);
-          
-         
+          const notification: Notification = JSON.parse(event.data);
+
+
           this.addToNotifications(notification);
         }
       })
     })
 
     // executes once there is error suc as timeout of the server connection etc
-    this.eventSource.onerror =() =>{
+    this.eventSource.onerror = () => {
 
       // close the event source for error, then reconnect after some timing
       this.reconnectionTiming = setTimeout(() => {
-        
+
         // connect back to notification
         this.connectToNotifications();
       }, 5000);
-   
+
     }
 
-    
+
   }
 
 
-  
+
   // Disconnects  from the notification
-  private disconnectFromNotifications(){
+  private disconnectFromNotifications() {
     // check if connection had been made before
-    if(this.eventSource){
-    
+    if (this.eventSource) {
+
       this.eventSource.close();
       clearTimeout(this.reconnectionTiming)
     }
-    
-    
-          
+
+
+
+  }
+  // Add the just arriving notification if has not been received till not
+  private addToNotifications(newNotification: Notification) {
+
+
+
+    // pushes the first notification to the notifications array
+    if (this.notifications.length === 0) {
+
+      this._notifications.push(newNotification);
+      this.unreadNotifications.next(this.notifications);
+
+      // emits the size of unread notifications so that subscriber can update notifications counts
+      this.unreaNotificationsCount.next(this.notifications.length)
+
+
+    } else {
+
+      // check if the notification is already pushed
+      const index = this._notifications.findIndex(x => x.id === newNotification.id);
+
+      if (index < 0) {
+        this._notifications.push(newNotification);
+
+        this.unreadNotifications.next(this.notifications)
+
+        // emits the size of unread notifications so that subscriber can update notifications counts
+        this.unreaNotificationsCount.next(this.notifications.length)
+       
+
+
       }
-      // Add the just arriving notification if has not been received till not
-      private addToNotifications(newNotification:Notification){
-    
-        
-     
-        // pushes the first notification to the notifications array
-        if(this.notifications.length === 0){
 
-         this._notifications.push(newNotification);
-         this.unreadNotifications.next(this.notifications);
-         
-          // emits the size of unread notifications so that subscriber can update notifications counts
-          this.unreaNotificationsCount.next(this.notifications.length)
-         
-        
-       }else{
+    }
 
-        // check if the notification is already pushed
-        const index = this._notifications.findIndex(x => x.id === newNotification.id);
-       
-        if(index < 0) {
-          this._notifications.push(newNotification);
 
-          this.unreadNotifications.next(this.notifications)
-          
-          // emits the size of unread notifications so that subscriber can update notifications counts
-          this.unreaNotificationsCount.next(this.notifications.length)
-          console.log(JSON.stringify(newNotification, null, 2))
-        
-        
-        }
+  }
 
-       }
-       
-       
+  // communicates to the server to delete this notifcation for the particular student id = "studentId".
+  // This is to avoid serving stale notification after they have alerad read the notification
+  notificationIsRead(notificationId:number, studentId:number):Observable<void>{
 
-         
-      
-    
-        
+    return this.http.patch<void>(`http://localhost:8080/notice/read?studentId=${studentId}`, notificationId);
 
-      
-      }
+  }
 }
 
 
@@ -173,11 +175,11 @@ export class NotificationsService {
 // An object representing the notifications logged in user receive.
 // Notification can be for new assessment upload, resut release etc
 export type Notification = {
-  id:number,
-  type:string,
-  metadata:number,
-  message:string,
-  createdAt:string
+  id: number,
+  type: string,
+  metadata: number,
+  message: string,
+  createdAt: string
 
 }
 

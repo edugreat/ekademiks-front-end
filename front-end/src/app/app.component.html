@@ -70,8 +70,9 @@
 
 
 
-    <span id="user" > ✋ Hi {{userName | uppercase}} </span>
-    <button routerLink="/notifications" *ngIf="unreadNotifications === 0"  id="notifications" ><mat-icon   >notifications</mat-icon></button>
+    <span *ngIf="isGuestUser()" id="user" > 👋 Hi {{userName | uppercase}} </span>
+    <span *ngIf="isLoggedInStudent()" id="user" > <mat-icon>person</mat-icon> Hi {{userName | uppercase}} </span>
+    <button routerLink="/notifications" *ngIf="unreadNotifications === 0 && isLoggedInStudent()"  id="notifications" ><mat-icon   >notifications</mat-icon></button>
     <button  routerLink="/notifications" *ngIf="isLoggedInStudent() &&  unreadNotifications > 0"  id="notifications"  ><mat-icon aria-hidden="false" [matBadge]="unreadNotifications" matBadgePosition="above after" matBadgeSize="small" matBadgeColor="warn" >notifications_active</mat-icon></button>
     <span id="topMenuLoginLogout" >
         <a *ngIf="!loggedIn()" mat-button [routerLink]="['/login']" class="top-menu-item" ><mat-icon>login</mat-icon>Login</a>

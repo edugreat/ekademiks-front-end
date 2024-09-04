@@ -34,6 +34,9 @@ export class NotificationsComponent implements OnInit, AfterViewInit{
 
   @ViewChild('audienceCheck') audienceCheck?:MatCheckbox;
 
+// Used to disable the input fields during form submission to avoid re-submission 
+  disableFields = false;
+
  
 
   public constructor(private adminService:AdminService, private fb:FormBuilder){}
@@ -155,6 +158,9 @@ this.audienceInputChange();
     // processess the inputs received
     private processInput(){
 
+      // sets disableFields to true just to disable the input fields to avoid form re-submission
+      this.disableFields = true;
+
       // get the value for audience
       this.newNotification!.message = this.notificationForm?.get('message')!.value;
       
@@ -164,7 +170,7 @@ this.audienceInputChange();
         // Non zero leading numerical values regex
       const regexp = /([1-9]\d*)/g;
 
-      // return an array containing just the numerical value while the white spaces
+      // return an array containing just the numerical value without the white spaces
       const audience:string[] | null = (this.notificationForm!.get('audience')!.value as string).match(regexp);
 
       // if audience was actually provided, fill the 'newNotification' audience property with it.

@@ -9,7 +9,6 @@ import { TopicFetchComponent } from './fetch/topic-fetch.component';
 import { CategoryUploadComponent } from './upload/category.upload.component';
 import { UploadTestComponent } from './upload/upload-test.component';
 import { adminGuard } from './admin.guard';
-import { NotificationsComponent } from './upload/notifications/notifications.component';
 
 const routes: Routes = [
   {
