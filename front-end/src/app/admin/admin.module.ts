@@ -16,6 +16,8 @@ import { AdminComponent } from './admin.component';
 import { PreviewTestComponent } from './upload/preview-test.component';
 import { InstructionsComponent } from './upload/instructions/instructions.component';
 import { NotificationsComponent } from './upload/notifications/notifications.component';
+import { StudentListComponent } from './fetch/student-list/student-list.component';
+import { StudentDetailsPageComponent } from './fetch/student-list/student-details-page/student-details-page.component';
 
 const uploadComponents = [
  
@@ -35,7 +37,7 @@ const fetchComponents = [
 const bankComponents = [QuestionBankComponent, OptionsBankComponent];
 
 @NgModule({
-  declarations: [ AdminComponent, uploadComponents, fetchComponents, bankComponents, PreviewTestComponent, InstructionsComponent, NotificationsComponent],
+  declarations: [ AdminComponent, uploadComponents, fetchComponents, bankComponents, PreviewTestComponent, InstructionsComponent, NotificationsComponent, StudentListComponent, StudentDetailsPageComponent],
   imports: [CommonModule, SharedModule, AdminRoutingModule],
 })
 export class AdminModule {}

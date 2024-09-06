@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpResponse, HttpStatusCode} from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import { TestDTO } from './upload/upload-test.component';
 import { NotificationDTO } from './upload/notifications/notifications.component';
 
@@ -11,9 +11,13 @@ export class AdminService {
 
   private setTestUrl = 'http://localhost:8080/admins/test';
 
-  private levelUrl = 'http://localhost:8080/learning/levels'; //HATEOAS LINK
+  // HATEOAS LINK
+  private levelUrl = 'http://localhost:8080/learning/levels'; 
 
   private notificationUrl = 'http://localhost:8080/admins/notify';
+
+  // HATEOAS LINK
+  private  studenListUrl = 'http://localhost:8080/learning/students';
 
   // Observable that emits the number of tasks completed
   // This is itended to use in a mat-stepper to indicate progress on tasks such as assessment upload, result uploads tasks etc
@@ -48,6 +52,15 @@ export class AdminService {
     return this.http.get<SubjectObject>(url);
   }
 
+  // fetches a paginated view of student list sorting the list by student's first name and last name all in ascending order 
+  fetchStudentList(page:number, pageSize:number):Observable<StudentInfo>{
+
+    return this.http.get<StudentInfo>(`${this.studenListUrl}?page=${page}&size=${pageSize}&sort=firstName,asc&sort=lastName,asc`)
+    
+    
+  }
+
+ 
   // method that posts new created assessment to the server
   postAssessment(test:TestDTO):Observable<HttpResponse<number>>{
 
@@ -90,6 +103,7 @@ sendNotifications(notification:NotificationDTO):Observable<HttpResponse<void>>{
   return this.http.post<void>(this.notificationUrl, notification,{observe:'response'});
 }
 
+
 }
 
 //an object of the 'levelUrl' HATEAOS
@@ -117,4 +131,29 @@ type  links =
     }
   }
 
+  // Student information returned by the hateos link
+  export interface StudentInfo{
+
+    _embedded:{
+
+      students:Array<Student>
+
+      },
+      page:{
+        size:number,
+        totalElements:number,
+        totalPages:number,
+        number:number
+    }
+  } 
+export interface Student{
+
+  firstName:string,
+  lastName:string,
+  email:string,
+  mobileNumber:string,
+  accountCreationDate:string
+}
+
+ 
 

@@ -24,9 +24,9 @@
         <mat-icon>quiz</mat-icon>
        Assessment
     </button>
-    <button mat-menu-item [matMenuTriggerFor]="student" >
+    <button routerLink="/admin/students" mat-menu-item >
         <mat-icon>person</mat-icon>
-        Student
+        Students
     </button>
 
     <button disabled mat-menu-item>
@@ -63,16 +63,15 @@
      </mat-menu>
 
 
-<!-- STUDENT MENU -->
-    <mat-menu #student="matMenu">
-    <button mat-menu-item disabled></button>
-    </mat-menu>
+
+   
+
 
 
 
     <span *ngIf="isGuestUser()" id="user" > 👋 Hi {{userName | uppercase}} </span>
-    <span *ngIf="isLoggedInStudent()" id="user" > <mat-icon>person</mat-icon> Hi {{userName | uppercase}} </span>
-    <button routerLink="/notifications" *ngIf="unreadNotifications === 0 && isLoggedInStudent()"  id="notifications" ><mat-icon   >notifications</mat-icon></button>
+    <span *ngIf="isLoggedInStudent() || isAdmin()" id="user" > <mat-icon>person</mat-icon> Hi {{userName | uppercase}} </span>
+    <button routerLink="/notifications" *ngIf="isLoggedInStudent() && unreadNotifications === 0 "  id="notifications" ><mat-icon   >notifications</mat-icon></button>
     <button  routerLink="/notifications" *ngIf="isLoggedInStudent() &&  unreadNotifications > 0"  id="notifications"  ><mat-icon aria-hidden="false" [matBadge]="unreadNotifications" matBadgePosition="above after" matBadgeSize="small" matBadgeColor="warn" >notifications_active</mat-icon></button>
     <span id="topMenuLoginLogout" >
         <a *ngIf="!loggedIn()" mat-button [routerLink]="['/login']" class="top-menu-item" ><mat-icon>login</mat-icon>Login</a>

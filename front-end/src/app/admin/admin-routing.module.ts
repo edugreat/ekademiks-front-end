@@ -9,6 +9,7 @@ import { TopicFetchComponent } from './fetch/topic-fetch.component';
 import { CategoryUploadComponent } from './upload/category.upload.component';
 import { UploadTestComponent } from './upload/upload-test.component';
 import { adminGuard } from './admin.guard';
+import { StudentListComponent } from './fetch/student-list/student-list.component';
 
 const routes: Routes = [
   {
@@ -24,7 +25,8 @@ const routes: Routes = [
       { path: 'f/test', component: TestFetchComponent },
       { path: 'f/subject', component: SubjectFetchComponent },
       { path: 'f/category', component: CategoryFetchComponent },
-      { path: 'f/topic', component: TopicFetchComponent }
+      { path: 'f/topic', component: TopicFetchComponent },
+      {path:'students-list', component: StudentListComponent}
     ],
   },
 

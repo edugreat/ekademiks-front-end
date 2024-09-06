@@ -1,0 +1,35 @@
+
+<div class="container">
+    <h1>Students List</h1>
+
+    <div class="page-list">
+
+        <div *ngFor="let student of students; let i = index; let lastIndex = last" class="student">
+            <div #detailDiv (click)="details(i)" class="student-info"><strong>Full Name:</strong>{{student.firstName}} {{student.lastName}}</div>
+            <div (click)="detailDiv.click()" class="student-info"><strong>Email:</strong> {{student.email}}</div>
+
+            <div *ngIf="!lastIndex" class="separator"></div>
+        </div>
+
+        <div class="pagination">
+
+            <button (click)="previousPage()" [disabled]="pagination!.currentPage + 1 === 1" class="pagination-button" mat-raised-button>
+                <mat-icon>arrow_back_ios</mat-icon>
+
+            </button  >
+            <span style="margin-top: 6px;">Page {{pagination!.currentPage + 1}} of {{pagination!.totalPages}}</span>
+            <button style="margin-right: 40px;" (click)="nextPage()" [disabled]="(pagination!.currentPage + 1)  === pagination!.totalPages" class="pagination-button" mat-raised-button matSuffix >
+                <mat-icon> arrow_forward_ios</mat-icon>
+            </button>
+
+            <span id="stat">
+                <label>Total: {{pagination?.totalElements}} students</label>
+            </span>
+        </div>
+    </div>
+
+    <a (click)="goBack()" mat-flat-button class="back-button">Back</a>  
+</div>
+
+
+    <app-student-details-page [student]="selectedStudent" ></app-student-details-page>

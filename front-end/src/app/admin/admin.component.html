@@ -37,6 +37,15 @@
   </a>
 </div>
 
+
+<div  *ngIf="parameter === 'students' " class="students">
+  <a mat-button [matMenuTriggerFor]="students"
+    >Open to Continue
+    <mat-icon>groups</mat-icon>
+  </a>
+</div>
+
+
 <!--uploads -->
 <mat-menu yPosition="below" #upload>
   <button #uploadTest  (click)="action ='u/test'; process()" mat-menu-item>Test</button>
@@ -56,6 +65,12 @@
 <mat-menu #bank="matMenu">
   <button mat-menu-item>Set Questions</button>
   <button mat-menu-item>Set Options</button>
+</mat-menu>
+
+<!-- Student -->
+<mat-menu #students="matMenu">
+<button  (click)="action = 'students-list'; process()" mat-menu-item>Fetch Student list</button>
+<button disabled mat-menu-item>Register a Student</button>
 </mat-menu>
 
 

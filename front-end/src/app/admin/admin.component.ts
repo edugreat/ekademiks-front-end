@@ -48,12 +48,22 @@ export class AdminComponent implements OnInit, AfterViewInit, OnDestroy {
   
   ngOnInit(): void {
     this.activatedRoute.paramMap.subscribe(
-      (params) => (this.parameter = params.get('parameter'))
+      (params) => {
+
+        
+        (this.parameter = params.get('parameter'))
+      
+      }
     );
 
     this.trackTaskDescription();
     this.trackMilestone();
-    clearTimeout(this.stepperResetTimeout)
+    clearTimeout(this.stepperResetTimeout);
+
+    if(this.description){
+
+      
+    }
    
   }
 
