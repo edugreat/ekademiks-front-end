@@ -1,11 +1,10 @@
-import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { AuthService } from '../auth/auth.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Notification, NotificationsService } from '../admin/upload/notifications/notifications.service';
 import { TestService } from '../test/test.service';
 import { HttpResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { AssessmentsService, TopicAndDuration } from '../assessment/assessments.service';
+import { AssessmentsService } from '../assessment/assessments.service';
 
 
 @Component({
@@ -14,6 +13,7 @@ import { AssessmentsService, TopicAndDuration } from '../assessment/assessments.
   styleUrl: './notification-detail.component.css'
 })
 export class NotificationDetailComponent implements OnInit, OnDestroy{
+
 
 
   // unread notifications initialized to an empty array
@@ -94,7 +94,7 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
     // This enables the server keep track of read notification so as not to serve stale notification subsequently
     this.notificationService.notificationIsRead(notificationId, studentId).subscribe({
 
-      next:() => console.log('emits notthing'),
+     
 
       complete:() =>  this.getTopicAndDuration(metadata, topic, duration,subjectName,category)
     })
@@ -125,4 +125,9 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
       })
 
     }
+
+    goBack() {
+      
+      window.history.back()
+      }
 }

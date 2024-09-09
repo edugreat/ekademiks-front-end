@@ -18,8 +18,9 @@ import { SignUpComponent } from './sign-up/sign-up.component';
 import { AuthInterceptor } from './auth/auth.interceptor';
 import { AdminModule } from './admin/admin.module';
 import { AppRoutingModule } from './app-routing/app-routing.module';
-import { NumericDirective } from './shared/numeric.directive';
 import { NotificationDetailComponent } from './notification-detail/notification-detail.component';
+
+
 
   
 
@@ -30,7 +31,7 @@ import { NotificationDetailComponent } from './notification-detail/notification-
     ContactComponent,
     SignUpComponent,
     NotificationDetailComponent,
-   //NumericDirective
+   
    
    
    
@@ -50,7 +51,7 @@ import { NotificationDetailComponent } from './notification-detail/notification-
     AuthModule,
     AppRoutingModule,
     ReactiveFormsModule,
-    AdminModule
+    AdminModule,
   ],
   
  exports:[AuthModule],

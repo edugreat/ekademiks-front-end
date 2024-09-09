@@ -1,0 +1,90 @@
+body {  
+    font-family: Arial, sans-serif;  
+    background-color: #f0f4f8;  
+    margin: 0;  
+    padding: 20px;  
+}  
+
+.container {  
+    max-width: 600px;  
+    margin: auto;  
+    background: white;  
+    padding: 20px;  
+    border-radius: 8px;  
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);  
+}  
+
+h1 {  
+    text-align: center;  
+    color: #333;  
+}  
+
+.assessment {  
+    margin-bottom: 15px;  
+    padding: 10px;  
+    border: 1px solid #e5e7eb;  
+    border-radius: 5px;  
+}  
+
+.assessment-title {  
+    text-align: center;  
+    font-weight: bold;  
+    margin-bottom: 10px;  
+}  
+
+.button-group {  
+    display: flex;  
+    justify-content: space-between;  
+}  
+
+.nav-link {  
+    margin-bottom: 20px;  
+    display: inline-block;  
+    color: #1d4ed8;  
+    text-decoration: none;  
+    font-weight: bold;  
+}  
+
+.nav-link:hover {  
+    text-decoration: underline;  
+}  
+
+canvas {  
+    max-width: 100%;  
+    height: auto;  
+    margin-top: 20px;  
+}  
+
+.button {  
+   
+    color: white;  
+    border: none;  
+    padding: 10px 20px;  
+    border-radius: 5px;  
+    cursor: pointer;  
+    transition: background-color 0.3s;  
+}  
+
+
+
+.button-group :nth-child(1){
+
+    background-color: #cc756f; 
+}
+
+.button-group :nth-child(2){
+
+    background-color: #de473c; 
+}
+
+.button-group :nth-child(1):hover{
+
+    background-color: #d85b52; 
+}
+.button-group :nth-child(2):hover {  
+    background-color: #d22222; 
+}  
+
+.separator {  
+    border-bottom: 2px solid #e0e0e0;  
+}  

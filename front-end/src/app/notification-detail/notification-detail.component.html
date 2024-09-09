@@ -1,7 +1,9 @@
 
 <div class="container">
+    <a (click)="goBack()" class="nav-link">← Go Back</a>  
     <div *ngIf="unreadNotifications?.length" id="top">
         <h4>Notifications</h4>
+       
     </div>
    
     <div  *ngFor="let notification of unreadNotifications; let i = index" class="description" (click)="btn.click()" >

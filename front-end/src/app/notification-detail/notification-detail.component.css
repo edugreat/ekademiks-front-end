@@ -15,6 +15,7 @@
     align-items: center;
     justify-content: center;
     margin-bottom: 20px;
+    flex-direction: row;
 }
 
 #top h4 {
@@ -73,3 +74,13 @@ button {
 .notification-icon {  
     margin-right: 8px; 
 }
+
+.nav-link {  
+    margin-bottom: 20px;  
+    display: inline-block;  
+    color: #1d4ed8;  
+    text-decoration: none;  
+    font-weight: bold;  
+    align-self: flex-start;
+    cursor: pointer;
+}  

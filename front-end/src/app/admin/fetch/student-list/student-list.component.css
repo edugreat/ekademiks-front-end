@@ -1,13 +1,11 @@
 .container {  
-   
     max-width: 800px;  
     margin: auto;  
     background: white;  
     border-radius: 8px;  
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);  
     padding: 20px;  
-
-    margin-bottom: 10px;
+    margin-bottom: 10px;  
 }  
 
 h1 {  
@@ -16,17 +14,16 @@ h1 {
 }  
 
 .page-list {  
-    
     padding: 0;  
 }  
 
-.student-info { 
+.student-info {   
     padding: 15px 0;  
-} 
+}   
 
-.separator{
+.separator {  
     border-bottom: 1px solid #e0e0e0;  
-}
+}  
 
 .student-info:last-child {  
     border-bottom: none;  
@@ -35,10 +32,10 @@ h1 {
 .student {  
     margin-bottom: 5px;  
     color: #555;  
-    cursor: pointer;
+   
 }  
 
-.back-button, .pagination-button {  
+.back-button, .pagination-button, .details-button {  
     display: inline-block;  
     margin-top: 20px;  
     padding: 10px 15px;  
@@ -49,7 +46,12 @@ h1 {
     text-align: center;  
 }  
 
-.back-button:hover, .pagination-button:hover {  
+.details-button{
+
+    cursor: pointer;
+}
+
+.back-button:hover, .pagination-button:hover, .details-button:hover {  
     background-color: #0056b3;  
 }  
 
@@ -63,9 +65,16 @@ h1 {
     margin: 0 5px;  
 }  
 
-#stat{
+.details-button {  
+    background-color: #28a745; /* Different color for the details button */  
+}  
 
-    align-self: flex-end;
-    margin-top: 6px;
-    font-size: medium;
+.details-button:hover {  
+    background-color: #218838; /* Hover color for the details button */  
+}  
+
+#stat {  
+    align-self: flex-end;  
+    margin-top: 6px;  
+    font-size: medium;  
 }

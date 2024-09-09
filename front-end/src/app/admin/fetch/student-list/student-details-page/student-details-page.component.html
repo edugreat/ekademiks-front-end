@@ -1,3 +1,76 @@
-<div *ngIf="student">
-    <div>{{student.firstName}} {{student.lastName}}</div>
+<div>
+
+
+    <div class="container">  
+        <a href="#" class="nav-link">← Back to Previous Page</a>  
+        <h1>Student's Academic Performance</h1>  
+          
+        <div>  
+            <strong>Overall Average Score(%):</strong> {{averageAssessmentScore ||'No Records Yet'}} 
+        </div>  
+        <div *ngIf="studentPerformances.length" class="assessment"  >  
+            <div class="assessment-title">Assessments Taken:</div>  
+            <div  *ngFor="let performance of studentPerformances; let i = index; let last = last">  
+                <strong>Title:</strong> {{assessmentNames[i]}}<br>  
+                <strong>Date Taken:</strong>{{performance.when |date}}<br>  
+                <strong>Average Score:</strong> {{performance.score}}
+                <div *ngIf="!last" class="separator"></div>
+            </div>  
+           
+        </div>  
+    
+        <div class="char-container">
+            <canvas id="analysisChart" [ngStyle]="{'width': studentPerformances.length ? 50 : 0}"
+            [ngStyle]="{'height': studentPerformances.length ? 50 : 0}"
+            ></canvas>
+        </div>
+        
+
+        <div class="button-group">  
+            <button class="button">Disable Account</button>  
+            <button class="button">Delete Account</button>  
+        </div>  
+    </div>  
 </div>
+
+
+
+
+
+
+
+
+
+<!-- <div class="container">  
+    <a href="#" class="nav-link">← Back to Previous Page</a>  
+    <h1>Student Academic Account Details</h1>  
+    <div>  
+        <strong>Full Name:</strong> John Doe  
+    </div>  
+    <div>  
+        <strong>Overall Assessment Average Score:</strong> 85%  
+    </div>  
+    <div class="assessment">  
+        <div class="assessment-title">Assessments Taken:</div>  
+        <div>  
+            <strong>Title:</strong> Math Exam<br>  
+            <strong>Date Taken:</strong> 2023-01-15<br>  
+            <strong>Average Score:</strong> 90%  
+        </div>  
+        <div>  
+            <strong>Title:</strong> Science Project<br>  
+            <strong>Date Taken:</strong> 2023-02-20<br>  
+            <strong>Average Score:</strong> 80%  
+        </div>  
+        <div>  
+            <strong>Title:</strong> History Quiz<br>  
+            <strong>Date Taken:</strong> 2023-03-10<br>  
+            <strong>Average Score:</strong> 85%  
+        </div>  
+    </div>  
+    <canvas id="performanceChart" width="400" height="400"></canvas>  
+    <div class="button-group">  
+        <button class="button">Disable Account</button>  
+        <button class="button">Delete Account</button>  
+    </div>  
+</div>   -->

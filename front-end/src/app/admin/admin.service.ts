@@ -19,6 +19,9 @@ export class AdminService {
   // HATEOAS LINK
   private  studenListUrl = 'http://localhost:8080/learning/students';
 
+  // HATEOAS endpoint that retrieves information about studentTest(e.g the name of assessment the student took for a given assessment id)
+  private studentTestsUrl = 'http://localhost:8080/learning/studentTests'
+  
   // Observable that emits the number of tasks completed
   // This is itended to use in a mat-stepper to indicate progress on tasks such as assessment upload, result uploads tasks etc
   private taskMilestone = new BehaviorSubject<number>(0);
@@ -77,6 +80,26 @@ export class AdminService {
 
   }
 
+
+// fetches student's assessment performance information for the student with the given student id
+fetchStudentPerformanceInfo(studentId:number):Observable<StudentPerformanceInfo>{
+
+  return this.http.get<StudentPerformanceInfo>(`${this.studenListUrl}/${studentId}/studentTests`)
+
+}
+
+// fetches the names of an assessment using the given studentTest id
+fetchAssessmentNames(studentTestId:number):Observable<any>{
+
+  return this.http.get<any>(`${this.studentTestsUrl}/${studentTestId}/test`).pipe(
+    map((result) => {
+
+      return {testName:result.testName}
+    })
+  )
+  
+}
+
   // set task's milestone to the current value
    setTaskMilestone(value:number):void{
 
@@ -102,7 +125,6 @@ sendNotifications(notification:NotificationDTO):Observable<HttpResponse<void>>{
 
   return this.http.post<void>(this.notificationUrl, notification,{observe:'response'});
 }
-
 
 }
 
@@ -148,11 +170,31 @@ type  links =
   } 
 export interface Student{
 
+  id:number,
   firstName:string,
   lastName:string,
   email:string,
   mobileNumber:string,
   accountCreationDate:string
+}
+
+// An interface representing student's performance information on assessments they had taken
+export interface StudentPerformanceInfo{
+
+  _embedded:{
+
+    StudentTests:Array<StudentPerformance>
+  }
+
+
+}
+
+// An interface representing students performance in an assessment
+export interface StudentPerformance{
+  id:number,
+  score:number,
+  grade:string,
+  when:string
 }
 
  

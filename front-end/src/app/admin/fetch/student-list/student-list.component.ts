@@ -6,9 +6,11 @@ type pageInfo = {
   currentPage:number
 
 }
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AdminService, Student, StudentInfo } from '../../admin.service';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AdminService, Student } from '../../admin.service';
 import { Subscription } from 'rxjs';
+import { StudentDetailsPageComponent } from './student-details-page/student-details-page.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-student-list',
@@ -22,6 +24,8 @@ export class StudentListComponent implements OnInit, OnDestroy{
 
 
 
+  // used to check when data fetching has completed
+  loading = true;
 
   // pagination information returned from the server
   pagination?:pageInfo;
@@ -35,16 +39,18 @@ export class StudentListComponent implements OnInit, OnDestroy{
   // used to unsubscribe from the service that fetches students information
   private studentInfoSub?:Subscription;
 
-  selectedStudent: Student|undefined;
+  
 
 
 
-  constructor(private adminService:AdminService){
+  constructor(private adminService:AdminService, private router:Router){
 
 
   }
   ngOnInit(): void {
     this.fetchStudentsInfo();
+
+    
   }
   ngOnDestroy(): void {
   this.studentInfoSub?.unsubscribe()
@@ -54,6 +60,8 @@ export class StudentListComponent implements OnInit, OnDestroy{
   // Calls the service implementation to fetch students list
   private fetchStudentsInfo(page_number?:number){
 
+    this.loading = true;
+
     this.studentInfoSub = this.adminService.fetchStudentList(page_number || 0,  this.DEFAULT_PAGE_SIZE).subscribe({
 
       next:(studentsInfo) =>{
@@ -61,6 +69,7 @@ export class StudentListComponent implements OnInit, OnDestroy{
 
      this.students =  studentsInfo._embedded.students.map(student =>({
 
+      id:student.id,
       firstName:student.firstName,
       lastName:student.lastName,
       email:student.email,
@@ -78,7 +87,7 @@ export class StudentListComponent implements OnInit, OnDestroy{
       totalPages:studentsInfo.page.totalPages
 
     }
-    
+    this.loading = !this.loading;
       
       }
     })
@@ -86,15 +95,11 @@ export class StudentListComponent implements OnInit, OnDestroy{
 
   }
 
-  // set the selectedStudent property to the student at the given index
-  details(index: number) {
-   
-    this.selectedStudent = this.students[index];
-    }
 
 // go to next page
 nextPage() {
   
+ 
   // unsubscribe from previous subscription
   this.studentInfoSub?.unsubscribe();
 
@@ -115,5 +120,13 @@ nextPage() {
       
       window.history.back();
       }
+
+
+      // Routes to the student's performance details page
+      goToPerformanceDetails(id: number) {
+        
+        this.router.navigate(['students-list',id])
+
+        }
 
 }
