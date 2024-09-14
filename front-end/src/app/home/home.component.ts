@@ -55,6 +55,8 @@ private authService:AuthService
       if(param !== null){
 
         const more = (param === 'true');
+
+       
         if(more){
 
           this.getAcademicLevels();

@@ -11,7 +11,7 @@ import { ConfirmationDialogService } from '../../confirmation-dialog.service';
 export class ConfirmationComponent implements OnInit {
 
 
-  //dialog message to present before the user
+  //dialog message to present to the user to consent to or decline an impending action
   message? : string;
 
   constructor(private confirmService:ConfirmationDialogService){}
@@ -22,7 +22,7 @@ export class ConfirmationComponent implements OnInit {
 
 //method that subscribes to the confirmation service to recieve the confirmation message and then opens the dialog if confirmation message is not empty
   private confirmationMessage() {
-    this.confirmService.message$.subscribe((message) => {
+    this.confirmService.actionMessageConfirm$.subscribe((message) => {
       this.message = message;
 
       if (message) {
@@ -37,7 +37,8 @@ export class ConfirmationComponent implements OnInit {
   //method that receives user confirmation response, then calls the confirmation service to emit the response
   confirm(response: boolean) {
       this.confirmService.confirmationResponse(response)//emits true or true
-      this.closeDialog();
+    //  Closes the confrmation dialog once the user has responsed
+      this.closeDialog(); 
      
      
     }

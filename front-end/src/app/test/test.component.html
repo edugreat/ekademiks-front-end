@@ -50,7 +50,7 @@ class="progress-bar-fixed" >
            </mat-panel-title>
          </mat-expansion-panel-header>
          
-         <mat-radio-group 
+         <mat-radio-group [disabled]="submitting"
          
          (change)="calculateProgress()"
  

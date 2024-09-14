@@ -46,9 +46,15 @@ h1 {
     text-align: center;  
 }  
 
+.back-button{
+    margin-top: 10px; 
+}
+
 .details-button{
 
+    margin-bottom: 10px;
     cursor: pointer;
+    background-color: #28a745;
 }
 
 .back-button:hover, .pagination-button:hover, .details-button:hover {  
@@ -65,9 +71,7 @@ h1 {
     margin: 0 5px;  
 }  
 
-.details-button {  
-    background-color: #28a745; /* Different color for the details button */  
-}  
+
 
 .details-button:hover {  
     background-color: #218838; /* Hover color for the details button */  
@@ -78,3 +82,54 @@ h1 {
     margin-top: 6px;  
     font-size: medium;  
 }
+
+.button-group {  
+    display: flex;  
+    justify-content: space-between; 
+    margin-bottom: 3px;
+    
+}  
+
+.disable-delete {  
+   
+    color: white;  
+    border: none;  
+    padding: 10px 20px;  
+    border-radius: 5px;  
+    cursor: pointer;  
+    transition: background-color 0.3s;  
+}  
+
+
+
+.button-group :nth-child(1){
+
+    background-color: #cc756f; 
+}
+
+.button-group :nth-child(2){
+
+    background-color: #de473c; 
+}
+
+.button-group :nth-child(1):hover{
+
+    background-color: #d85b52; 
+}
+.button-group :nth-child(2):hover {  
+    background-color: #d22222; 
+}  
+
+.nav-link {  
+    margin-bottom: 20px;  
+    margin-top: 20px;
+    display: inline-block;  
+    color: #1d4ed8;  
+    text-decoration: none;  
+    font-weight: bold; 
+    cursor: pointer; 
+}  
+
+.nav-link:hover {  
+    text-decoration: underline;  
+}  

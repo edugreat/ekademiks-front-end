@@ -32,22 +32,8 @@ h1 {
     margin-bottom: 10px;  
 }  
 
-.button-group {  
-    display: flex;  
-    justify-content: space-between;  
-}  
 
-.nav-link {  
-    margin-bottom: 20px;  
-    display: inline-block;  
-    color: #1d4ed8;  
-    text-decoration: none;  
-    font-weight: bold;  
-}  
 
-.nav-link:hover {  
-    text-decoration: underline;  
-}  
 
 canvas {  
     max-width: 100%;  
@@ -55,35 +41,7 @@ canvas {
     margin-top: 20px;  
 }  
 
-.button {  
-   
-    color: white;  
-    border: none;  
-    padding: 10px 20px;  
-    border-radius: 5px;  
-    cursor: pointer;  
-    transition: background-color 0.3s;  
-}  
 
-
-
-.button-group :nth-child(1){
-
-    background-color: #cc756f; 
-}
-
-.button-group :nth-child(2){
-
-    background-color: #de473c; 
-}
-
-.button-group :nth-child(1):hover{
-
-    background-color: #d85b52; 
-}
-.button-group :nth-child(2):hover {  
-    background-color: #d22222; 
-}  
 
 .separator {  
     border-bottom: 2px solid #e0e0e0;  

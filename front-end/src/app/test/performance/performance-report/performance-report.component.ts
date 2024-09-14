@@ -224,8 +224,8 @@ goToDetails(_index:number) {
       }else if(this.signoutOrMore === 'Out'){
 
 
-        this.confirmationService.confirmText('Do you want to logout?');
-        this.confirmationService.confirm$.pipe(take(1)).subscribe((yes) =>{
+        this.confirmationService.confirmAction('Do you want to logout?');
+        this.confirmationService.userConfirmationResponse$.pipe(take(1)).subscribe((yes) =>{
 
           if(yes){
         this.authService.logout();

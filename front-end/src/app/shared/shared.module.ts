@@ -9,24 +9,26 @@ import { CommonModule } from '@angular/common';
 import { ProgressBarComponent } from './progress-bar/progress-bar.component';
 import { ConfirmationComponent } from './confirmation/confirmation.component';
 import { NumericDirective } from './numeric.directive';
+import { ErrorMessageComponent } from './error-message/error-message.component';
 
 
 
 @NgModule({
   declarations: [OptionSortPipe, SortPipe, 
-    SpinnerComponent, ProgressBarComponent, ConfirmationComponent, NumericDirective],
+    SpinnerComponent, ProgressBarComponent, ConfirmationComponent, NumericDirective, ErrorMessageComponent],
   imports: [
     FormsModule,
     MaterialModule,
     CommonModule,
     ReactiveFormsModule,
+   
     
     
     
   ],
   exports:[FormsModule, ReactiveFormsModule, OptionSortPipe,SortPipe,
      SpinnerComponent, MaterialModule,
-    ProgressBarComponent, ConfirmationComponent, NumericDirective
+    ProgressBarComponent, ConfirmationComponent, NumericDirective, ErrorMessageComponent
     ]
 })
 export class SharedModule { }

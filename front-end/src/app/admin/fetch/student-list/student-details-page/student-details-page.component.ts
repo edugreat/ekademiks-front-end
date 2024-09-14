@@ -12,7 +12,7 @@ Chart.register(...registerables);
   templateUrl: './student-details-page.component.html',
   styleUrl: './student-details-page.component.css'
 })
-export class StudentDetailsPageComponent implements OnInit, AfterViewInit, OnDestroy{
+export class StudentDetailsPageComponent implements OnInit,  OnDestroy{
   
   
   
@@ -64,12 +64,6 @@ export class StudentDetailsPageComponent implements OnInit, AfterViewInit, OnDes
     this.performanceChart?.destroy();
   }
 
-  ngAfterViewInit(): void {
-    
-    //this.renderPerformancePieChart();
-
-
-  }
 
   // subscribes to the service to get student performance information
   getPerformanceInfo(studentId:number){

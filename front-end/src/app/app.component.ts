@@ -68,8 +68,8 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
   //log out the user by clearing the session storage
   logout() {
-    this.confirmationService.confirmText('Do you want to logout?');
-    this.confirmationService.confirm$.pipe(take(1)).subscribe((yes) => {
+    this.confirmationService.confirmAction('Do you want to logout?');
+    this.confirmationService.userConfirmationResponse$.pipe(take(1)).subscribe((yes) => {
       if (yes) {
         //reset the user to the generic 'Student' placeholder name
         this.authService.logout();

@@ -70,6 +70,9 @@ remaining = 0;
 //if submission is made by the system due to the duration been elapsed, no confirm is required from the student
 _autoSubmit = false;
 
+// Flag that indicates when assessment is about being submitted. It triggers disabling of selection radio buttons upon assessment submission
+submitting = false;
+
 //to be unsubscribed when the template is destroyed
 questionSub:Subscription | undefined;
 
@@ -237,11 +240,14 @@ submit() {
 
   if(!this._autoSubmit){ //if it is student's initiated submission
 
-    this.confirmService.confirmText('Are you sure to submit ?');
-    this.confirmService.confirm$.pipe(take(1)).subscribe((response) =>{
+    this.confirmService.confirmAction('Are you sure to submit ?');
+    this.confirmService.userConfirmationResponse$.pipe(take(1)).subscribe((response) =>{
 
       //user vetoes submission
       if(response){
+
+        this.submitting = true; 
+
 
         const attempted = this.selectedOptions.some(option => option !== null);
   
@@ -317,6 +323,8 @@ submit() {
 
   //system initiated submission
   else{
+
+    this.submitting = true;
     const attempted = this.selectedOptions.some(option => option !== null);
   
     if(attempted){
@@ -487,14 +495,20 @@ private openSnackBar(message:string){
  //subscribes to the obsrvable emitted from the TestService due to user input selection(radio button selection to view their recent performance)
  private showPerformanceorTakeMoreTest(){
 
-  this.testService.ShowMyPerformanceOrTakeMoreTestObservable().subscribe( value => {
+
+  this.testService.showMyPerformanceOrTakeMoreTestObservable().subscribe( value => {
+
+    
     this.showMyPerformace = value;
     
     if(value === true){
 
+      
+
       this.recentAcademicPerformance();//produces student's recent assessment performance
     }else{
 
+     
      
       this.router.navigate(['/home/true'])//routes back to the component with request parameter set to true to show the student desires to take more assessment
     }

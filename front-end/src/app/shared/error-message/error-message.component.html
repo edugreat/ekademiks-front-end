@@ -1,0 +1,8 @@
+<div class="error">
+
+    <div class="container">  
+        <h1 class="title">Oops! {{errorMessage}} .</h1>  
+        <p *ngIf="!errorMessage" class="message">{{DEFAULT_ERROR_MSG}}</p>  
+        <a (click)="goBack()" class="back-button">Go Back</a>  
+    </div>  
+</div>

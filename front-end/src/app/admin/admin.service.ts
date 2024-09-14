@@ -20,7 +20,9 @@ export class AdminService {
   private  studenListUrl = 'http://localhost:8080/learning/students';
 
   // HATEOAS endpoint that retrieves information about studentTest(e.g the name of assessment the student took for a given assessment id)
-  private studentTestsUrl = 'http://localhost:8080/learning/studentTests'
+  private studentTestsUrl = 'http://localhost:8080/learning/studentTests';
+
+  private deleteUrl = 'http://localhost:8080/admins/delete';
   
   // Observable that emits the number of tasks completed
   // This is itended to use in a mat-stepper to indicate progress on tasks such as assessment upload, result uploads tasks etc
@@ -33,9 +35,6 @@ export class AdminService {
   private task = new BehaviorSubject<string>('');
 
   taskObs$ = this.task.asObservable();
-
-  // Tasks milestone initialized to zero
-  private _milestone = 0;
 
 
 
@@ -80,6 +79,12 @@ export class AdminService {
 
   }
 
+  // Service for disabling student's account
+  disableStudentAccount(studentId:number):Observable<HttpResponse<number>>{
+
+    return this.http.patch<HttpStatusCode>('http://localhost:8080/disable', studentId,{observe:'response'});
+
+  }
 
 // fetches student's assessment performance information for the student with the given student id
 fetchStudentPerformanceInfo(studentId:number):Observable<StudentPerformanceInfo>{
@@ -98,6 +103,13 @@ fetchAssessmentNames(studentTestId:number):Observable<any>{
     })
   )
   
+}
+
+public deleteStudent(studentId:number):Observable<HttpResponse<number>>{
+
+  
+
+  return this.http.delete<HttpStatusCode>(`${this.deleteUrl}?studentId=${studentId}`,{observe:'response'});
 }
 
   // set task's milestone to the current value

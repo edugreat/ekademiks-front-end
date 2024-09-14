@@ -27,9 +27,9 @@ export const testDeactivateGuard: CanDeactivateFn<TestComponent> = () => {
    if(! ALLOWABLE.some(action => action === activityService.action)){
 
     
-    confirmationService.confirmText(`Assessment not completed! \nAre you sure to leave?`.replace(/\n/g, '<br>'));
+    confirmationService.confirmAction(`Assessment not completed! \nAre you sure to leave?`.replace(/\n/g, '<br>'));
    
-    confirmationService.confirm$.subscribe((response) => {
+    confirmationService.userConfirmationResponse$.subscribe((response) => {
       resolve(response);
     });
    }else{

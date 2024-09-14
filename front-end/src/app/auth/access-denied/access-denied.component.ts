@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-access-denied',
@@ -16,7 +16,7 @@ export class AccessDeniedComponent implements OnInit, OnDestroy{
 
   //timer that decreases progress bar value every second
   timer:any;
-  constructor(private activatedRoute: ActivatedRoute){}
+  constructor(private activatedRoute: ActivatedRoute, private router:Router){}
   
   ngOnInit(): void {
     this.displayErrorMessage();
@@ -30,22 +30,17 @@ ngOnDestroy(): void {
 
     //error status code received from the backend
     const errorCode = +this.activatedRoute.snapshot.params['code'];
-   
-    if(errorCode === 401){
-      this.errorMessage = 'Unauthorized Request!';
-      this.unhide();
-      setTimeout(() => {
-        this.hide();
-        window.history.back();
-      }, 6000);
-    }else if(errorCode === 403){
+   if(errorCode === 403){
 
       this.errorMessage = 'Access Denied!';
       this.unhide();
       setTimeout(() => {
         this.hide();
-        window.history.back();
+       
       }, 6000);
+
+       // Take them to the home page
+       this.router.navigate(['/home']);
     }
 
     

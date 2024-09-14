@@ -10,7 +10,11 @@ export class AuthService {
 
   private baseUrl = 'http://localhost:8080/auth/sign-in';
 
+  // This flag is used to stop anyother requests from proceeding while refresh token process is ongoing, until it completes
+  private _refreshTokenInProcess = false;
   
+
+  private refreshTokenUrl = 'http://localhost:8080/auth/refresh-token';
 
   // Login event that is used at the app.compoent to trigger connection to the server's notification channel upon student's login ;
   private studentLoginSubject = new BehaviorSubject<boolean>(this.isLoggedInStudent());
@@ -44,10 +48,34 @@ export class AuthService {
 
   }
 
+  // requests for new token when the existing token has expired
+  requestNewToken():Observable<User>{
+
+    const refreshToken = sessionStorage.getItem('refreshToken');
+
+    return this.http.post<User>(`${this.refreshTokenUrl}`, {'refreshToken':refreshToken}).pipe(
+      tap((user) => {
+
+       
+        this.saveToSession(user)
+      }),
+    
+    );
+      
+
+  }
+
   //saves the just logged in user's token to the session storage
   private saveToSession(user:User){
   
-    sessionStorage.setItem("token", user.token);
+    sessionStorage.setItem("accessToken", user.accessToken);
+   
+    // sets the refresh token once as it serves only for requesting new tokens
+    if(!sessionStorage.getItem('refreshToken')){
+
+      sessionStorage.setItem('refreshToken', user.refreshToken);
+    }
+
     sessionStorage.setItem("studentId", `${user.id}`)
     sessionStorage.setItem('username', user.firstName);
    sessionStorage.setItem('roles', JSON.stringify(user.roles));
@@ -66,13 +94,11 @@ export class AuthService {
   //checks if the current user is a logged in user user
   isLoggedIn():boolean{
 
-    return sessionStorage.getItem("token") !== null;
+    return sessionStorage.getItem("accessToken") !== null;
   }
 
   //logs the current user out by simply clearing their token from the session storage
  logout():void{
-
-    sessionStorage.clear();
     //clears the user roles stored in memory once the user logs out
    sessionStorage.clear();
     this.currentUserName.next('Student');
@@ -101,6 +127,15 @@ export class AuthService {
 
     return Number(sessionStorage.getItem('studentId')!);
   }
+
+
+  public get refreshTokenInProcess() {
+    return this._refreshTokenInProcess;
+  }
+  
+  public set refreshTokenInProcess(value) {
+    this._refreshTokenInProcess = value;
+  }
 }
 
 export interface User{
@@ -111,7 +146,8 @@ export interface User{
   mobileNumber: string,
   email:string,
   statusCode:number,
-  token:string,
+  accessToken:string,
+  refreshToken:string,
   signInErrorMessage:string,
   roles:string[]
 }

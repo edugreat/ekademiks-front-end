@@ -1,3 +1,4 @@
+<a (click)="goBack()" class="nav-link">← Back to Previous Page</a>  
 <div *ngIf="!loading" class="container">  
     <h1>Students List</h1>  
 
@@ -9,6 +10,11 @@
             
             <button (click)="goToPerformanceDetails(student.id)" class="details-button">View Details</button>  
 
+            <div class="button-group">  
+                <button (click)="disableAccount(student.id)"  class="button disable-delete">Disable Account</button>  
+                <button (click)="deleteAccount(student.id)" class="button disable-delete">Delete Account</button>  
+            </div> 
+            
             <div *ngIf="!lastIndex" class="separator"></div>  
         </div>  
 
@@ -26,7 +32,8 @@
         </div>  
     </div>  
 
-    <a (click)="goBack()" mat-flat-button class="back-button">Back</a>  
+    
+    <a (click)="goBack()" mat-flat-button class="back-button">Back</a> 
 </div>
 
 <router-outlet></router-outlet>

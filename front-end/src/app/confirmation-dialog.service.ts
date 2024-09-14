@@ -6,30 +6,30 @@ import { Subject } from 'rxjs';
 })
 export class ConfirmationDialogService {
 
-  //subject that emits confirmation messages to display on the confirmation dialog
-  private messageSubject = new Subject<string>();
+  //subject that emits confirmation messages that the user should consent to or decline, pending an action
+  private actionMessageConfirmation = new Subject<string>();
 
   //subject that emits the user response to confirmation dialog
-  private confirmSubject = new Subject<boolean>();
+  private userConfirmationResponse = new Subject<boolean>();
 
-  //gets observable from the subject that subscribers can subscribe to, to receive emitted values from the messageSubject
-  message$ = this.messageSubject.asObservable();
+  //gets observable from the subject that subscribers can subscribe to, to receive emitted values from the actionMessageConfirmation
+  actionMessageConfirm$ = this.actionMessageConfirmation.asObservable();
 
-  //get observable from the subject that subscribers can subscribe to, to receive emitted values from the confirmSubject
-  confirm$ = this.confirmSubject.asObservable();
+  //get observable from the subject that subscribers can subscribe to, to receive emitted values (such as user's confirmation response) from the userConfirmationResponse
+  userConfirmationResponse$ = this.userConfirmationResponse.asObservable();
 
   constructor() { }
 
   //emits the confirmation message
-  confirmText(message:string){
+  confirmAction(message:string){
 
-    this.messageSubject.next(message);
+    this.actionMessageConfirmation.next(message);
   }
 
   //emits user confirmation response
   confirmationResponse(response:boolean){
 
-    this.confirmSubject.next(response);
+    this.userConfirmationResponse.next(response);
 
   }
 }

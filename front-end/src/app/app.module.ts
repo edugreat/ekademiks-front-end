@@ -21,7 +21,6 @@ import { AppRoutingModule } from './app-routing/app-routing.module';
 import { NotificationDetailComponent } from './notification-detail/notification-detail.component';
 
 
-
   
 
 
@@ -31,6 +30,7 @@ import { NotificationDetailComponent } from './notification-detail/notification-
     ContactComponent,
     SignUpComponent,
     NotificationDetailComponent,
+   
    
    
    

@@ -14,6 +14,7 @@ import { AccessDeniedComponent } from '../auth/access-denied/access-denied.compo
 import { adminGuard } from '../admin/admin.guard';
 import { NotificationDetailComponent } from '../notification-detail/notification-detail.component';
 import { notificationGuard } from '../notification.guard';
+import { ErrorMessageComponent } from '../shared/error-message/error-message.component';
 
 
 
@@ -28,6 +29,7 @@ const routes: Routes = [
   { path: 'supports', component: SupportComponent },
   { path: 'contact', component: ContactComponent },
   { path: 'login', component: AuthComponent },
+  {path: 'error/:message', component:ErrorMessageComponent},
   { path: 'sign-up', component: SignUpComponent },
   { path: 'performance', component: PerformanceComponent },
   { path: 'home/:more', component: HomeComponent },

@@ -74,12 +74,14 @@ showMyRecentPerformance(){
 
 //Emits false to show the student would like to take another test
 takeMoreTest(){
+
+
 this.performanceOrMoreTestSubject.next(false);
 
 }
 
 //provide an observable for the 'performanceOrTest' subject for proper encapsulation
-ShowMyPerformanceOrTakeMoreTestObservable():Observable<boolean>{
+showMyPerformanceOrTakeMoreTestObservable():Observable<boolean>{
 
 return this.performanceOrMoreTestSubject.asObservable();
 }

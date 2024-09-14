@@ -61,6 +61,7 @@ export class PerformanceComponent implements OnInit, OnDestroy {
   }else if(this.option === 'false'){
     
     this.performanceAvailable = false;
+  
     this.testService.takeMoreTest()//notifies subscribers that student would like to take more assessment instead
    
   }
