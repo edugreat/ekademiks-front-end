@@ -106,6 +106,8 @@ export class AuthService {
    
   }
 
+  
+
   //checks if the current user is an admin
   isAdmin():boolean{
     const roles:string[] = (sessionStorage.getItem('roles') ? JSON.parse(sessionStorage.getItem('roles')!)  : [])

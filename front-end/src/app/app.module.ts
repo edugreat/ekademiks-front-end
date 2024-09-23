@@ -19,6 +19,7 @@ import { AuthInterceptor } from './auth/auth.interceptor';
 import { AdminModule } from './admin/admin.module';
 import { AppRoutingModule } from './app-routing/app-routing.module';
 import { NotificationDetailComponent } from './notification-detail/notification-detail.component';
+import { AccountDisabledComponent } from './account-disabled/account-disabled.component';
 
 
   
@@ -30,6 +31,7 @@ import { NotificationDetailComponent } from './notification-detail/notification-
     ContactComponent,
     SignUpComponent,
     NotificationDetailComponent,
+    AccountDisabledComponent,
    
    
    

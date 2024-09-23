@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, Type, ViewChild } from '@angular/core';
 import { AuthService } from './auth.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 import { MatCheckbox } from '@angular/material/checkbox';
 
 
@@ -56,6 +56,8 @@ export class AuthComponent implements OnDestroy {
   //logs a user in
   public login(email:string,password:string):void{
 
+    console.log('about to login')
+
     // First, log the user out if already logged in
     if(this.isLoggedIn()){
 
@@ -82,7 +84,18 @@ export class AuthComponent implements OnDestroy {
         
       //redirect to the assessment component
       },
-      error:(err:HttpErrorResponse) => {
+      error:(err) => {
+
+        
+       if(err.status === HttpStatusCode.NotAcceptable){
+       
+
+
+        //  Notify them that their account was disabled
+        this.router.navigate(['/disabled'])
+       }
+
+       else{
 
         const element = document.getElementById('error');
         if(element){
@@ -101,6 +114,7 @@ export class AuthComponent implements OnDestroy {
          
          }
         }
+       }
       }
     })
   }

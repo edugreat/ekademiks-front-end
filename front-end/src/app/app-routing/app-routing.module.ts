@@ -15,6 +15,7 @@ import { adminGuard } from '../admin/admin.guard';
 import { NotificationDetailComponent } from '../notification-detail/notification-detail.component';
 import { notificationGuard } from '../notification.guard';
 import { ErrorMessageComponent } from '../shared/error-message/error-message.component';
+import { AccountDisabledComponent } from '../account-disabled/account-disabled.component';
 
 
 
@@ -34,6 +35,7 @@ const routes: Routes = [
   { path: 'performance', component: PerformanceComponent },
   { path: 'home/:more', component: HomeComponent },
   { path: 'assessments/:level', component: AssessmentComponent },
+  {path: 'disabled', component: AccountDisabledComponent},
  
   {
     path: 'assessment-panel/:subject/:category',

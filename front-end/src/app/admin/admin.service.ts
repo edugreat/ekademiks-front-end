@@ -8,6 +8,7 @@ import { NotificationDTO } from './upload/notifications/notifications.component'
   providedIn: 'root'
 })
 export class AdminService {
+  
 
   private setTestUrl = 'http://localhost:8080/admins/test';
 
@@ -82,8 +83,16 @@ export class AdminService {
   // Service for disabling student's account
   disableStudentAccount(studentId:number):Observable<HttpResponse<number>>{
 
-    return this.http.patch<HttpStatusCode>('http://localhost:8080/disable', studentId,{observe:'response'});
+    return this.http.patch<HttpStatusCode>('http://localhost:8080/admins/disable', {'studentId':studentId},{observe:'response'});
 
+  }
+
+
+  // Enables student's account
+  enableStudentAccount(studentId: number):Observable<HttpResponse<number>> {
+
+    return this.http.patch<HttpStatusCode>('http://localhost:8080/admins/enable', {"studentId": studentId}, {observe:'response'})
+   
   }
 
 // fetches student's assessment performance information for the student with the given student id
@@ -187,7 +196,9 @@ export interface Student{
   lastName:string,
   email:string,
   mobileNumber:string,
-  accountCreationDate:string
+  accountCreationDate:string,
+  accountEnabled:boolean,
+  lockedAccount:boolean
 }
 
 // An interface representing student's performance information on assessments they had taken

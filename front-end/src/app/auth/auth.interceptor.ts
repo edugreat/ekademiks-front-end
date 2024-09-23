@@ -74,6 +74,13 @@ export class AuthInterceptor implements HttpInterceptor{
             // then they would be redirected to their previous page
             router.navigate(['/no-access', error.status]);
 
+            // This code is executed for logged in user whose account suddenly got disabled
+          }else if(error.status === HttpStatusCode.NotAcceptable){
+
+          // logs the current user out
+          authService.logout();
+
+            router.navigate(['/disabled'])
           }
           return throwError(() => error)
         })

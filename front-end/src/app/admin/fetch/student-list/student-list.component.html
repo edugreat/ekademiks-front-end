@@ -11,8 +11,9 @@
             <button (click)="goToPerformanceDetails(student.id)" class="details-button">View Details</button>  
 
             <div class="button-group">  
-                <button (click)="disableAccount(student.id)"  class="button disable-delete">Disable Account</button>  
-                <button (click)="deleteAccount(student.id)" class="button disable-delete">Delete Account</button>  
+                <button (click)="deleteAccount(student.id)"  class="button delete disable-delete">Delete Account</button>  
+                <button *ngIf="! student.accountEnabled" (click)="enableAccount(student.id)" class="button enable disable-delete">Enable Account</button>  
+                <button *ngIf="student.accountEnabled" (click)="disableAccount(student.id)" class="button disable disable-delete">Disable Account</button>  
             </div> 
             
             <div *ngIf="!lastIndex" class="separator"></div>  

@@ -25,8 +25,6 @@ export class StudentListComponent implements OnInit, OnDestroy{
 
 
 
-
-
   // used to check when data fetching has completed
   loading = true;
 
@@ -78,7 +76,9 @@ export class StudentListComponent implements OnInit, OnDestroy{
       lastName:student.lastName,
       email:student.email,
       mobileNumber:student.mobileNumber,
-      accountCreationDate:student.accountCreationDate
+      accountCreationDate:student.accountCreationDate,
+      accountEnabled:student.accountEnabled,
+      lockedAccount:student.lockedAccount
      }));
 
   
@@ -126,9 +126,7 @@ nextPage() {
       this.confirmation.confirmAction('Do you really want to delete this account?');
 
       // Gets admin's response
-      this.confirmation.userConfirmationResponse$.pipe(
-       
-      ).subscribe(response =>{
+      this.confirmation.userConfirmationResponse$.subscribe(response =>{
 
         // Go ahead with deleting the account if admin has consented to the deletion
         if(response){
@@ -160,8 +158,75 @@ nextPage() {
       // Disables student's account
       disableAccount(studentId: number) {
 
-        // IMPLEMENTATION SOON .....
+        // Ask admin to confirm their action
+        this.confirmation.confirmAction('Please confirm account disable action ?');
+
+         // Gets admin's response
+      this.confirmation.userConfirmationResponse$.subscribe(response => {
+
+        // Go ahead with disabling the account if admin has consented to the action
+        if(response){
+
+          this.adminService.disableStudentAccount(studentId).subscribe({
+            next:(response:HttpResponse<number>) => {
+
+              if(response.status === HttpStatusCode.Ok){
+
+                // reloads the current page after a successful disabling of the student's account
+                window.location.reload();
+              }
+            },
+
+            error:(err) => {
+            
+            
+              this.router.navigate(['/error', err.error])
+            }
+          })
+
+
+        }
+      })
+
        
+      }
+
+      // Enables student's account
+      enableAccount(studentId: number) {
+       
+
+         // Ask admin to confirm their action
+         this.confirmation.confirmAction('Enable this account ?');
+
+         // Gets admin's response
+      this.confirmation.userConfirmationResponse$.subscribe(response => {
+
+        // Go ahead with enabling the account if admin has consented to the action
+        if(response){
+
+          this.adminService.enableStudentAccount(studentId).subscribe({
+            next:(response:HttpResponse<number>) => {
+
+              if(response.status === HttpStatusCode.Ok){
+
+                // reloads the current page after successfully enabling the student's account
+                window.location.reload();
+              }
+            },
+
+            error:(err) => {
+            
+            
+              this.router.navigate(['/error', err.error])
+            }
+          })
+
+
+        }
+      })
+
+
+        
       }
 
     // takes the user to back to the webpage they were previously on

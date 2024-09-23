@@ -100,25 +100,40 @@ h1 {
     transition: background-color 0.3s;  
 }  
 
+.delete{
+    background-color: #de473c; 
+    
 
+}
 
-.button-group :nth-child(1){
+.delete:hover{
+    background-color: #d22222; 
+}
+
+.disable{
 
     background-color: #cc756f; 
+   
 }
 
-.button-group :nth-child(2){
-
-    background-color: #de473c; 
-}
-
-.button-group :nth-child(1):hover{
-
+.disable:hover{
     background-color: #d85b52; 
 }
-.button-group :nth-child(2):hover {  
-    background-color: #d22222; 
-}  
+
+.enable{
+
+    background-color: #5eaf71;
+    
+}
+.enable:hover{
+
+    background-color: #22bc46;
+
+}
+
+
+
+
 
 .nav-link {  
     margin-bottom: 20px;  
