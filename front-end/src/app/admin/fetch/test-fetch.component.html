@@ -1,1 +1,24 @@
-<p>test-fetch works!</p>
+
+<mat-spinner *ngIf="!categories" diameter="25"  style="margin-left: auto; margin-right: auto;" ></mat-spinner>
+<div  class="container">  
+    <header>  
+        <h4>Academic Categories</h4>  
+    </header>  
+    <main>  
+        <div class="categories-container">  
+            <div *ngFor="let category of categories" class="category-card">  
+                <a (click)="fetchAssessmentInfo(category.id)" class="category-link">{{ category.category }}</a>  
+            </div>  
+        </div>  
+        
+        <div class="pagination">  
+            <button [disabled]="pageInfo?.currentPage === 0" (click)="previousPage()">Previous</button>  
+            <span>Page {{ (pageInfo?.currentPage ?? 0) + 1 }} of {{ pageInfo?.totalPages ?? 1 }}</span>  
+            <button [disabled]="(pageInfo?.currentPage ?? 0) + 1 === (pageInfo?.totalPages ?? 1)" (click)="nextPage()">Next</button>  
+        </div>
+    </main>  
+</div>
+
+
+
+<router-outlet></router-outlet>

@@ -11,6 +11,8 @@ import { UploadTestComponent } from './upload/upload-test.component';
 import { adminGuard } from './admin.guard';
 import { StudentListComponent } from './fetch/student-list/student-list.component';
 import { StudentDetailsPageComponent } from './fetch/student-list/student-details-page/student-details-page.component';
+import { TestFetchInfoComponent } from './fetch/test-fetch-info/test-fetch-info.component';
+import { AssessmentQuestionsComponent } from './fetch/assessment-questions/assessment-questions.component';
 
 const routes: Routes = [
   {
@@ -23,7 +25,20 @@ const routes: Routes = [
       { path: 'u/subject', component: UploadSubjectComponent },
       { path: 'u/category', component: CategoryUploadComponent },
       {path: 'u/test', component: UploadTestComponent},
-      { path: 'f/test', component: TestFetchComponent },
+      { path: 'f/test', component: TestFetchComponent ,
+        children:[
+
+          {
+            path: ':id', component:TestFetchInfoComponent,
+            
+            children:[
+              {
+                path: ':topic/:testId', component:AssessmentQuestionsComponent
+              }
+            ]
+          }
+        ]
+      },
       { path: 'f/subject', component: SubjectFetchComponent },
       { path: 'f/category', component: CategoryFetchComponent },
       { path: 'f/topic', component: TopicFetchComponent },

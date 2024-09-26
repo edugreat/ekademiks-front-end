@@ -1,0 +1,41 @@
+<div class="container">  
+    <h1>Question List</h1>  
+  
+    <table class="questions-table">  
+      <thead>  
+        <tr>  
+          <th>Topic</th>  
+          <th>Question No</th>  
+          <th>Question</th>  
+          <th>Answer</th>  
+          <th>Options</th>  
+          <th>Actions</th>  
+        </tr>  
+      </thead>  
+      <tbody>  
+        <tr *ngFor="let question of paginatedQuestions" >  
+          <td>{{ assessmentTopic }}</td>  
+          <td>{{ question?.questionNumber }}</td>  
+          <td [appMathJax]="question?.question ?? '' " ></td>  
+          <td>{{ question?.answer }}</td>  
+          <td>  
+            <ul>  
+              <li *ngFor="let option of question?.options"  [appMathJax]="option.letter+'.'+option.text" ></li>  
+            </ul>  
+
+
+          </td>  
+          <td>  
+            <button class="edit-btn" (click)="editQuestion(question)">Edit</button>  
+            <button class="delete-btn" (click)="deleteQuestion(question.questionNumber)">Delete</button>  
+          </td>  
+        </tr>  
+      </tbody>  
+    </table>  
+  
+    <button class="previous-button" (click)="previousPage()" [disabled]="currentIndex === 0">Previous</button>  
+    <button class="next-button" (click)="nextPage()" [disabled]="totalQuestions - currentIndex <= 1" >Next</button>  
+    
+  
+    <button class="accept-button">Looks good</button>  
+  </div>

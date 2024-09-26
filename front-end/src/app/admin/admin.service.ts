@@ -24,6 +24,10 @@ export class AdminService {
   private studentTestsUrl = 'http://localhost:8080/learning/studentTests';
 
   private deleteUrl = 'http://localhost:8080/admins/delete';
+
+  private assessmentBaseUrl = 'http://localhost:8080/learning/levels';
+
+  private assessmentQuestionsBaseUrl = 'http://localhost:8080/learning/tests'
   
   // Observable that emits the number of tasks completed
   // This is itended to use in a mat-stepper to indicate progress on tasks such as assessment upload, result uploads tasks etc
@@ -44,7 +48,7 @@ export class AdminService {
   constructor(private http:HttpClient) { }
 
   //Fetches from the database, all the assessment categories
-  fetchCategory():Observable<any>{
+  fetchCategories():Observable<any>{
 
     return this.http.get<CategoryObject>(this.levelUrl);
   }
@@ -112,6 +116,25 @@ fetchAssessmentNames(studentTestId:number):Observable<any>{
     })
   )
   
+}
+
+
+// feches all assessment topics for the given assessment level and subject name
+public fetchAssessmentInfo(categoryId:number):Observable<AssessmentInfo>{
+
+  return this.http.get<AssessmentInfo>(`${this.assessmentBaseUrl}/${categoryId}/subjects`)
+}
+
+// fetches all assessment categories from the server
+public fetchAssessmentCategories(page:number, pageSize:number):Observable<AssessmentCategory>{
+
+  return this.http.get<AssessmentCategory>(`${this.assessmentBaseUrl}?page=${page}&size=${pageSize}&sort=firstName,asc&sort=lastName,asc`)
+}
+
+// method that fetches all the questions for the given test id
+public fetchQuestionsForTestId(testId:number):Observable<any>{
+
+  return this.http.get<any>(`${this.assessmentQuestionsBaseUrl}/${testId}/questions`)
 }
 
 public deleteStudent(studentId:number):Observable<HttpResponse<number>>{
@@ -220,5 +243,26 @@ export interface StudentPerformance{
   when:string
 }
 
- 
+// An interface representing a basic assessment information for a given assessment level and subject
+export interface AssessmentInfo{
+
+  _embedded:{
+
+    subjects:Array<{id:number, subjectName:string, test:Array<{id:number, testName:string, duration:number}>}>
+  }
+}
+
+// An interface representing assessment category received form the server (such as SENIOR AND JUNIOR)
+export interface AssessmentCategory{
+
+  _embedded:{
+    levels:Array<{id:number, category:string}>
+  },
+  page:{
+    size:number,
+    totalElements:number,
+    totalPages:number,
+    number:number
+  }
+}
 

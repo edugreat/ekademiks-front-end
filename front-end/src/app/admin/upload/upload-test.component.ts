@@ -189,7 +189,7 @@ export class UploadTestComponent implements OnInit {
 
   //get the data required for test upload. Such data include the test category and the subject for which the Test is intended
   private fetchTestUploadInfo() {
-    this.adminService.fetchCategory().subscribe(  {
+    this.adminService.fetchCategories().subscribe(  {
      next:(data: CategoryObject)=>{
 
       //assign the array of levels returnd from this server call to the 'category' property

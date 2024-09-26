@@ -1,0 +1,39 @@
+
+
+    <mat-spinner *ngIf="!paginatedAssessment.length" [diameter]="25" style="margin-left: auto; margin-right: auto; margin-top: 10px;"  ></mat-spinner>
+
+<div *ngIf="paginatedAssessment.length" class="container">  
+    <header>  
+        <h5>Assessment Info</h5>  
+        <a href="#" class="back-button">Back</a>  
+    </header>  
+    <main>  
+        <div class="subjects-container">  
+            <div *ngFor="let assessment of paginatedAssessment; let i = index" class="subject-card">  
+                <h2  class="subject-name">{{assessment.subjectName}}</h2>  
+                <div class="test-list">  
+                    <div *ngFor="let test of assessment.tests" class="test-item">  
+                        <span (click)="fetchQuestions(test.testName,test.id)" class="test-name" tabindex="0" >{{test.testName}}</span>  
+                        <span class="duration">Duration: {{test.duration}}</span>  
+                        <div class="actions">  
+                            <button class="edit-button">Edit</button>  
+                            <button class="delete-button">Delete</button>  
+                        </div>  
+                    </div>  
+                    
+                </div>  
+            </div>  
+
+           
+        </div>  
+        
+        <div class="pagination">  
+            <button (click)="previousPage()" class="pagination-btn" disabled>Previous</button>  
+            <span>Page {{currentPage + 1}} of {{totalPages}}</span>  
+            <button [disabled]="currentPage + 1 === totalPages " (click)="nextPage()"  class="pagination-btn">Next</button>  
+        </div>  
+    </main>  
+</div>  
+
+<router-outlet></router-outlet>
+

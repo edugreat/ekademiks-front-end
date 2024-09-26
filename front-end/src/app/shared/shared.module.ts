@@ -10,12 +10,13 @@ import { ProgressBarComponent } from './progress-bar/progress-bar.component';
 import { ConfirmationComponent } from './confirmation/confirmation.component';
 import { NumericDirective } from './numeric.directive';
 import { ErrorMessageComponent } from './error-message/error-message.component';
+import { MathJaxDirective } from './math-jax.directive';
 
 
 
 @NgModule({
   declarations: [OptionSortPipe, SortPipe, 
-    SpinnerComponent, ProgressBarComponent, ConfirmationComponent, NumericDirective, ErrorMessageComponent],
+    SpinnerComponent, ProgressBarComponent, ConfirmationComponent, NumericDirective, ErrorMessageComponent,  MathJaxDirective],
   imports: [
     FormsModule,
     MaterialModule,
@@ -23,12 +24,14 @@ import { ErrorMessageComponent } from './error-message/error-message.component';
     ReactiveFormsModule,
    
     
+   
+    
     
     
   ],
   exports:[FormsModule, ReactiveFormsModule, OptionSortPipe,SortPipe,
      SpinnerComponent, MaterialModule,
-    ProgressBarComponent, ConfirmationComponent, NumericDirective, ErrorMessageComponent
+    ProgressBarComponent, ConfirmationComponent, NumericDirective, ErrorMessageComponent, MathJaxDirective
     ]
 })
 export class SharedModule { }

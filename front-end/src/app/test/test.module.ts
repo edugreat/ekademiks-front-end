@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { TestComponent } from './test.component';
 import { SharedModule } from '../shared/shared.module';
 import { CommonModule } from '@angular/common';
-import { MathJaxDirective } from '../math-jax.directive';
+
 import { TimerComponent } from './timer/timer.component';
 import { TimerPipe } from './timer/timer.pipe';
 import { InstructionDialogComponent } from './instruction-dialog.component';
@@ -16,7 +16,7 @@ import { DetailPageComponent } from './performance/performance-report/detail-pag
 @NgModule({
   declarations: [
     TestComponent,
-    MathJaxDirective,
+    
     TimerComponent,
     TimerPipe,
     InstructionDialogComponent,

@@ -1,0 +1,84 @@
+body {  
+    font-family: 'Arial', sans-serif;  
+    background-color: #f4f4f4;  
+    margin: 0;  
+    padding: 0;  
+}  
+
+.container {  
+    max-width: 900px;  /* Max width for the layout */  
+    margin: auto;  
+    padding: 20px;  
+}  
+
+header {  
+    background: #4a89dc;  
+    color: #ffffff;  
+    padding: 15px 0;  
+    text-align: center;  
+    border-radius: 5px;  
+}  
+
+.categories-container {  
+    margin-top: 20px;  
+    display: grid; /* Using CSS Grid for layout */  
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));  
+    gap: 15px; /* Spacing between cards */  
+}  
+
+.category-card {  
+    background: #ffffff;  
+    border: 1px solid #e1e1e1;  
+    border-radius: 8px;  
+    padding: 15px;  
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);  
+    text-align: center;  
+}  
+
+.category-link {  
+    text-decoration: none;  
+    color: #333;  
+    font-weight: bold;  
+    transition: color 0.3s ease;  
+    cursor: pointer;
+}  
+
+.category-link:hover {  
+    color: #4a89dc;  
+}  
+
+.pagination {  
+    display: flex;  
+    justify-content: space-between;  
+    align-items: center;  
+    margin-top: 20px;  
+}  
+
+button {  
+    padding: 10px 15px;  
+    background: #4a89dc;  
+    color: white;  
+    border: none;  
+    border-radius: 5px;  
+    cursor: pointer;  
+    transition: background-color 0.3s ease;  
+}  
+
+button:disabled {  
+    background: #ccc;  
+}  
+
+button:hover:not(:disabled) {  
+    background-color: #3a7bc5;  
+}  
+
+/* Responsive styles */  
+@media (max-width: 600px) {  
+    .container {  
+        padding: 10px;  
+    }  
+    button {  
+        width: 35%;  
+        margin-bottom: 5px;  
+    }  
+}

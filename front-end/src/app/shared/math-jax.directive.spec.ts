@@ -1,4 +1,5 @@
-import { MathJaxDirective } from './math-jax.directive';
+import { MathJaxDirective } from "./math-jax.directive";
+
 
 describe('MathJaxDirective', () => {
   it('should create an instance', () => {
