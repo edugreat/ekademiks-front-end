@@ -56,7 +56,7 @@ export class AuthComponent implements OnDestroy {
   //logs a user in
   public login(email:string,password:string):void{
 
-    console.log('about to login')
+    
 
     // First, log the user out if already logged in
     if(this.isLoggedIn()){

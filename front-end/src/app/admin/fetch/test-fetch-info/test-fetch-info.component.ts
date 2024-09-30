@@ -75,7 +75,6 @@ export class TestFetchInfoComponent implements OnInit, OnDestroy {
         this.computePagination();
         this.paginatedAssessment = this.assessments.slice(this.currentPage, this.DEFAULT_PAGE_SIZE);
 
-        console.log(JSON.stringify(this.assessments, null,2))
       }
       
     })
@@ -124,8 +123,7 @@ export class TestFetchInfoComponent implements OnInit, OnDestroy {
   // routes to the questions page supplying the given testId which is used to fetch all the questions for the given test
   fetchQuestions(topic: string, testId: number) {
    
-    // get this component route path
-    const currentPath = this.activatedRoute.snapshot.url.map(segment => segment.path).join('/');
+   
     this.router.navigate([topic, testId],{relativeTo:this.activatedRoute})
     }
 

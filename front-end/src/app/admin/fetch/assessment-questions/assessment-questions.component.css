@@ -1,8 +1,12 @@
 
+.parent{
+
+    display: flex;
+}
 .container {  
-    max-width: 900px;  
-    margin: auto;  
-    padding: 20px;  
+    max-width: 700px;  
+    margin: auto;
+        padding: 20px;  
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  
     background-color: #f8f9fa;  
     border-radius: 8px; 
@@ -10,7 +14,8 @@
 }  
 
 
-h1 {  
+
+.description {  
     text-align: center;  
     color: #343a40;  
     margin-bottom: 20px; 
@@ -21,6 +26,7 @@ h1 {
     width: 100%;  
     border-collapse: collapse;  
     overflow: hidden;  
+    
 }  
 
 .questions-table th,   
@@ -95,8 +101,63 @@ ul {
     width: calc(50% - 10px);  
 }  
 
+
+/* EDIT CSS */
+
+.right-side {  
+        flex: 1; /* Shrinks and grows with the screen size */  
+        
+        min-width: 250px; /* Minimum width for form */  
+        max-width: 250px;
+    }  
+
+    .update-question-form {  
+        display: flex;  
+        flex-direction: column;  
+    }  
+
+    .form-group {  
+        margin-bottom: 15px;  
+    }  
+
+    .form-group label {  
+        margin-bottom: 5px;  
+    }  
+
+    .form-group input, textarea {  
+        padding: 8px;  
+        width: 100%; /* Make inputs full width */  
+        box-sizing: border-box; /* Ensures padding is included in total width */  
+    }  
+
+    .save-changes-btn {  
+        padding: 10px 15px;  
+        background-color: #4CAF50;  
+        color: white;  
+        border: none;  
+        cursor: pointer;  
+    }  
+
+    .save-changes-btn:hover {  
+        background-color: #45a049;  
+    }  
+
+/* EDIT CSS */
+
 /* Responsive Styles */  
 @media screen and (max-width: 768px) {  
+.parent{
+
+flex-direction: column;
+}
+
+.right-side{
+
+margin-left: auto;
+margin-right: auto;
+width: 100%;
+
+}
     .questions-table th,   
     .questions-table td {  
         padding: 10px;  
@@ -112,12 +173,14 @@ ul {
     }  
 }  
 
-@media screen and (max-width: 480px) {  
+@media screen and (max-width: 481px) {  
     h1 {  
         font-size: 24px;   
     }  
 
-    .questions-table th,   
+    .questions-table th{
+        display: none;
+    }  
     .questions-table td {  
         display: block;  
         width: 100%;   

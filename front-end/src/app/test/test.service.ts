@@ -45,7 +45,7 @@ getTest(topic:string, category:string):Observable<TestContent>{
 private convertToQuestionPart(dto: QuestionDTO): QuestionPart {
   return {
     number: dto.questionNumber,
-    problem: dto.text,
+    problem: dto.question,
     answer: dto.answer,
     options: dto.options
   };

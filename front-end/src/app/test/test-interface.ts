@@ -27,7 +27,7 @@ export interface TestContentDTO{
 // a data transfer object for easy communication between the backend and front end
 export interface QuestionDTO{
     questionNumber:number,//numeric value
-    text:string,//text representing the problem to attempt
+    question:string,//text representing the problem to attempt
     answer:string,//one character string value 'A-E' showing the correct option
     options:Option[]//option interface
     }

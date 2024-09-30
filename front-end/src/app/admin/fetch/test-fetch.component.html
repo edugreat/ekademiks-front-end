@@ -12,9 +12,9 @@
         </div>  
         
         <div class="pagination">  
-            <button [disabled]="pageInfo?.currentPage === 0" (click)="previousPage()">Previous</button>  
+            <button class="pagination-btn" [disabled]="pageInfo?.currentPage === 0" (click)="previousPage()">Previous</button>  
             <span>Page {{ (pageInfo?.currentPage ?? 0) + 1 }} of {{ pageInfo?.totalPages ?? 1 }}</span>  
-            <button [disabled]="(pageInfo?.currentPage ?? 0) + 1 === (pageInfo?.totalPages ?? 1)" (click)="nextPage()">Next</button>  
+            <button class="pagination-btn" [disabled]="(pageInfo?.currentPage ?? 0) + 1 === (pageInfo?.totalPages ?? 1)" (click)="nextPage()">Next</button>  
         </div>
     </main>  
 </div>

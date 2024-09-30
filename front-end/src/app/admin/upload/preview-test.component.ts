@@ -111,7 +111,7 @@ export class PreviewTestComponent implements OnInit, OnDestroy {
     const questionGroup: FormGroup = this.fb.group({
 
       questionNumber: new FormControl<number | undefined>({ value: question.questionNumber, disabled: true }, { nonNullable: true, validators: Validators.required }),
-      text: new FormControl<string | undefined>({ value: question.text, disabled: true }, { nonNullable: true, validators: Validators.required }),
+      text: new FormControl<string | undefined>({ value: question.question, disabled: true }, { nonNullable: true, validators: Validators.required }),
       answer: new FormControl<string | undefined>({ value: question.answer, disabled: true }, { nonNullable: true, validators: Validators.required }),
 
       options: this.fb.array([])

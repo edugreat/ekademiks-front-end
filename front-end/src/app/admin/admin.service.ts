@@ -27,7 +27,9 @@ export class AdminService {
 
   private assessmentBaseUrl = 'http://localhost:8080/learning/levels';
 
-  private assessmentQuestionsBaseUrl = 'http://localhost:8080/learning/tests'
+  private assessmentQuestionsBaseUrl = 'http://localhost:8080/learning/tests';
+
+  private updateQuestionUrl = 'http://localhost:8080/admins/update/questions';
   
   // Observable that emits the number of tasks completed
   // This is itended to use in a mat-stepper to indicate progress on tasks such as assessment upload, result uploads tasks etc
@@ -142,6 +144,12 @@ public deleteStudent(studentId:number):Observable<HttpResponse<number>>{
   
 
   return this.http.delete<HttpStatusCode>(`${this.deleteUrl}?studentId=${studentId}`,{observe:'response'});
+}
+
+updateQuestions(questions:any, testId:number):Observable<HttpResponse<number>>{
+
+
+  return this.http.put<HttpStatusCode>(`${this.updateQuestionUrl}?testId=${testId}`, questions, {observe:'response'})
 }
 
   // set task's milestone to the current value

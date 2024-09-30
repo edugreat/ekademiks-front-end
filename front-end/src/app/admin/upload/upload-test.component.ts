@@ -8,7 +8,7 @@ export type Option = { text: string | undefined; letter: string | undefined };
 //Declares an object of type Question
 export type Question = {
   questionNumber: number | undefined;
-  text: string | undefined;
+  question: string | undefined;
   answer: string | undefined;
   options: Option[];
 };
@@ -525,7 +525,7 @@ export class UploadTestComponent implements OnInit {
   private currentQuestion(currentNumber: number): Question {
     const currentQuestion: Question = {
       questionNumber: currentNumber,
-      text: this.problemInput.value,
+      question: this.problemInput.value,
       answer: this.answerInput.value,
       options: [],
     };

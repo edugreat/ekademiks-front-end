@@ -49,11 +49,20 @@ header {
 
 .pagination {  
     display: flex;  
-    justify-content: space-between;  
+    
     align-items: center;  
     margin-top: 20px;  
 }  
 
+.pagination-btn:nth-child(1){
+
+    margin-right: 70px;
+}
+
+.pagination span{
+
+    margin-right: 70px;
+}
 button {  
     padding: 10px 15px;  
     background: #4a89dc;  

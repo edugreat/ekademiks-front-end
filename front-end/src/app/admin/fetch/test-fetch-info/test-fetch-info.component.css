@@ -121,7 +121,7 @@ header {
 
 .pagination {  
     display: flex;  
-    justify-content: space-between;  
+    /* justify-content: space-between;   */
     align-items: center;  
     margin-top: 20px;  
 }  
@@ -141,9 +141,20 @@ header {
     cursor: not-allowed;  
 }  
 
+.pagination span{
+
+    margin-right: 30px;
+}
+.pagination-btn:nth-child(1){
+    margin-left: 50px;
+    margin-right: 30px;
+}
+
 .pagination-btn:hover:not(:disabled) {  
     background-color: #3a7bc5;  
 }  
+
+
 
 /* Responsive styles */  
 @media (max-width: 600px) {  
