@@ -1,7 +1,7 @@
-<div class="parent">
+<div id="parent" class="parent">
 
 
-  <div id="container" class="container auto-aligned">  
+  <div id="container" class="container">  
     <h1 class="description" *ngIf="!smallScreenDevice">Question List</h1>  
     <h3 class="description" *ngIf="smallScreenDevice" >Question List</h3>
   
@@ -31,7 +31,7 @@
           </td>  
           <td>  
             <button class="edit-btn" (click)="editQuestion(question.id)">Edit</button>  
-            <button class="delete-btn" (click)="deleteQuestion(question.questionNumber)">Delete</button>  
+            <button class="delete-btn" (click)="deleteQuestion(question.questionNumber, question.id)">Delete</button>  
           </td>  
         </tr>  
       </tbody>  
@@ -41,15 +41,15 @@
     <button class="next-button" (click)="nextPage()" [disabled]="totalQuestions - currentIndex <= 1" >Next</button>  
     
   
-    <button class="accept-button">Looks good</button>  
+    <button (click)="looksGood()" class="accept-button">Looks good</button>  
   </div>
 
  
 <!-- EDIT FORM GOES HERE  -->
 <div *ngIf="editableQuestion" class="right-side">  
   <form class="update-question-form">  
-      <h2 *ngIf="!smallScreenDevice" >Editing Question {{currentQuestionNumber}} </h2>  
-      <h4 *ngIf="smallScreenDevice" >Editing Question {{currentQuestionNumber}} </h4>
+      <h2 *ngIf="!smallScreenDevice" >Editing Question {{currentQuestionNumber}}... </h2>  
+      <h4 *ngIf="smallScreenDevice" >Editing Question {{currentQuestionNumber}}... </h4>
       <div class="form-group">  
           <label for="question">Question:</label>  
           <textarea  #first [(ngModel)]="editableQuestion!.question  " id="question" name="question" required > </textarea> 
@@ -78,12 +78,16 @@
           <label for="optionE">Option E:</label>  
           <input #seventh [(ngModel)]="editableQuestion!.options[4].text" type="text" id="optionE" name="optionE">  
       </div>  
-      <button [disabled]="(!first.value.trim().length || !second.value.trim().length) || !third.value.trim().length || !fourth.value.trim().length || !fifth.value.trim().length || !sixth.value.trim().length || !seventh.value.trim().length"
+      <div class="row-button">
+        <button [disabled]="(!first.value.trim().length || !second.value.trim().length) || !third.value.trim().length || !fourth.value.trim().length || !fifth.value.trim().length || !sixth.value.trim().length || !seventh.value.trim().length"
       
       (click)="saveChanges()" type="submit" class="save-changes-btn">
         
         Save Changes
       </button>  
+
+     <button (click)="cancelEdit()" class="cancel-btn" >Cancel</button>
+      </div>
   </form>  
 </div>  
 

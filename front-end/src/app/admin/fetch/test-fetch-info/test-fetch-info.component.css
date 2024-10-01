@@ -97,7 +97,7 @@ header {
     margin-top: 10px;  
 }  
 
-.edit-button, .delete-button {  
+.edit-button, .delete-button, .save-changes, .cancel-edit{  
     padding: 5px 10px;  
     background: #4a89dc;  
     color: white;  
@@ -114,6 +114,29 @@ header {
 .delete-button {  
     background: #ff6347;  
 }  
+
+.cancel-edit{
+
+    background-color: rgb(248, 137, 137);
+
+}
+
+.cancel-edit:hover{
+
+    background-color: rgb(242, 108, 108);
+
+}
+
+.save-changes{
+
+    width: 50%;
+}
+
+.save-changes:hover{
+
+    background: #3a7bc5;  
+
+}
 
 .delete-button:hover {  
     background: #ff4500;  

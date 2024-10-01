@@ -1,10 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { AdminService } from '../../admin.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, take } from 'rxjs';
 import { MediaService } from '../../../media-service';
 import { MediaChange } from '@angular/flex-layout';
 import { HttpResponse, HttpStatusCode } from '@angular/common/http';
+import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 
 @Component({
   selector: 'app-assessment-questions',
@@ -13,7 +14,10 @@ import { HttpResponse, HttpStatusCode } from '@angular/common/http';
 })
 
 // Component that serves assessment test for a given test id
-export class AssessmentQuestionsComponent implements OnInit, OnDestroy{
+export class AssessmentQuestionsComponent implements OnInit, OnDestroy, AfterViewInit{
+
+
+
 
 
   
@@ -53,7 +57,7 @@ export class AssessmentQuestionsComponent implements OnInit, OnDestroy{
 
   constructor(private adminService:AdminService, private activatedRoute:ActivatedRoute, private mediaService:MediaService,
 
-    private router:Router
+    private router:Router, private confirmationService:ConfirmationDialogService
   ){}
   
   
@@ -71,10 +75,13 @@ export class AssessmentQuestionsComponent implements OnInit, OnDestroy{
         this.fetchQuestions(Number(testId));
       };
 
-      this.userDevice();
     });
 
   
+  }
+
+  ngAfterViewInit(): void {
+    this.userDevice();
   }
   ngOnDestroy(): void {
     this.mediaSub?.unsubscribe();
@@ -144,11 +151,34 @@ this.currentIndex = endIndex;
     this.currentQuestionNumber = question.questionNumber;
 
     
-   
-
     }
-    deleteQuestion(arg0: any) {
-    
+
+    cancelEdit() {
+      
+      this.editableQuestion = undefined;
+      }
+
+    // deletes from the assessment, the question whose question number is given.
+    deleteQuestion(questionNumber:number, questionId:number) {
+
+      this.confirmationService.confirmAction(`Delete number ${questionNumber} ?`);
+
+      this.confirmationService.userConfirmationResponse$.pipe(take(1)).subscribe(approved =>{
+
+        if(approved){
+       // Remove the question from the paginated questions array
+      this.paginatedQuestions?.splice(this.paginatedQuestions.findIndex(q => q.questionNumber === questionNumber), 1);
+
+      const testId = this.activatedRoute.snapshot.paramMap.get('testId');
+
+      this.adminService.deleteQuestion(Number(testId), questionId).subscribe({
+
+        error:(err) => this.router.navigate(['/error', err.error])
+      })
+  
+        }
+      })
+      
     }
 
 
@@ -192,13 +222,35 @@ this.currentIndex = endIndex;
       
       }
 
+
+      // the 'looks good' button in the viewpage indicates the user is okay with question list, hence desires to route back to the previous page
+      looksGood() {
+
+        window.history.back()
+       
+        }
+
       // gets information about user's screen device size.
       // This is used to change the header tag depending on the screen size
       private userDevice(){
 
         this.mediaSub = this.mediaService.mediaChanges().subscribe((changes:MediaChange[]) => {
 
-      this.smallScreenDevice = changes.some(change => change.mqAlias === 'sm' || change.mqAlias === 'xs')
+      this.smallScreenDevice = changes.some(change => change.mqAlias === 'sm' || change.mqAlias === 'xs');
+
+      const el1 = document.getElementById('parent');
+      const el2 = document.getElementById('container');
+       if(!this.smallScreenDevice && el1 && el2){
+
+          el1.classList.remove('flex-start');
+          el2.classList.add('auto-aligned')
+        
+       }else if(this.smallScreenDevice && el1 && el2){
+
+        el1.classList.add('flex-start');
+        el2.classList.remove('auto-aligned');
+        el2.classList.add('right-padding');
+       }
         })
 
 

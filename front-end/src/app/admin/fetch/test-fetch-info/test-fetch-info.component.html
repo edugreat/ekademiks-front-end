@@ -12,12 +12,30 @@
             <div *ngFor="let assessment of paginatedAssessment; let i = index" class="subject-card">  
                 <h2  class="subject-name">{{assessment.subjectName}}</h2>  
                 <div class="test-list">  
-                    <div *ngFor="let test of assessment.tests" class="test-item">  
-                        <span (click)="fetchQuestions(test.testName,test.id)" class="test-name" tabindex="0" >{{test.testName}}</span>  
-                        <span class="duration">Duration: {{test.duration}}</span>  
+                    <div *ngFor="let test of assessment.tests; let index = index" class="test-item">  
+                        <span *ngIf="test.id !== editingId" (click)="fetchQuestions(test.testName,test.id)" class="test-name" tabindex="0" >{{test.testName}}</span>  
+                        
+                        <span *ngIf="editingMode && test.id === editingId" style="width: 75%;">
+                            <mat-form-field>
+                                <mat-label>Topic</mat-label>
+                                <input [(ngModel)]="assessment.tests[index].testName" matInput >
+                            </mat-form-field>
+                        </span>
+
+                        <span *ngIf="test.id !== editingId" class="duration">Duration: {{test.duration}}</span>  
+
+                        <span *ngIf="editingMode && test.id === editingId" style="width: 75%;">
+                            <mat-form-field>
+                                <mat-label>Duration</mat-label>
+                                <input appNumeric matInput [(ngModel)]="assessment.tests[index].duration" >
+                            </mat-form-field>
+                        </span>
+                        
                         <div class="actions">  
-                            <button class="edit-button">Edit</button>  
-                            <button class="delete-button">Delete</button>  
+                            <button (click)="saveChanges(test.testName, test.duration, test.id)" *ngIf="editingMode && test.id === editingId " class="save-changes">Save Changes</button>
+                            <button (click)="cancelEdit()" *ngIf="editingMode && test.id === editingId" class="cancel-edit">Cancel</button>    
+                            <button (click)="editTest(test.id)" *ngIf="test.id !== editingId" class="edit-button">Edit</button>  
+                            <button *ngIf="!editingMode" class="delete-button" (click)="delete(test.id, test.testName)" >Delete</button>  
                         </div>  
                     </div>  
                     
@@ -34,6 +52,10 @@
         </div>  
     </main>  
 </div>  
+
+
+
+
 
 <router-outlet></router-outlet>
 

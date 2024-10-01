@@ -9,27 +9,33 @@ import { NotificationDTO } from './upload/notifications/notifications.component'
 })
 export class AdminService {
   
-
-  private setTestUrl = 'http://localhost:8080/admins/test';
-
-  // HATEOAS LINK
-  private levelUrl = 'http://localhost:8080/learning/levels'; 
-
-  private notificationUrl = 'http://localhost:8080/admins/notify';
+  
+private baseUrl = 'http://localhost:8080';
+  private setTestUrl = `${this.baseUrl}/admins/test`;
 
   // HATEOAS LINK
-  private  studenListUrl = 'http://localhost:8080/learning/students';
+  private levelUrl = `${this.baseUrl}/learning/levels`;
+
+  private notificationUrl = `${this.baseUrl}/admins/notify`;
+
+  // HATEOAS LINK
+  private  studenListUrl = `${this.baseUrl}/learning/students`;
 
   // HATEOAS endpoint that retrieves information about studentTest(e.g the name of assessment the student took for a given assessment id)
-  private studentTestsUrl = 'http://localhost:8080/learning/studentTests';
+  private studentTestsUrl = `${this.baseUrl}/learning/studentTests`;
 
-  private deleteUrl = 'http://localhost:8080/admins/delete';
+  private deleteUrl = `${this.baseUrl}/admins/delete`;
 
-  private assessmentBaseUrl = 'http://localhost:8080/learning/levels';
+  private deleteAssessmentUrl = `${this.baseUrl}/admins/assessment`
 
-  private assessmentQuestionsBaseUrl = 'http://localhost:8080/learning/tests';
 
-  private updateQuestionUrl = 'http://localhost:8080/admins/update/questions';
+  private assessmentQuestionsBaseUrl = `${this.baseUrl}/learning/tests`;
+
+  private updateQuestionUrl = `${this.baseUrl}/admins/update/questions`;
+
+  private deleteQuestionUrl = `${this.baseUrl}/admins/del/question`;
+
+  private updateAssessmentUrl = `${this.baseUrl}/admins/modify/test`;
   
   // Observable that emits the number of tasks completed
   // This is itended to use in a mat-stepper to indicate progress on tasks such as assessment upload, result uploads tasks etc
@@ -89,7 +95,7 @@ export class AdminService {
   // Service for disabling student's account
   disableStudentAccount(studentId:number):Observable<HttpResponse<number>>{
 
-    return this.http.patch<HttpStatusCode>('http://localhost:8080/admins/disable', {'studentId':studentId},{observe:'response'});
+    return this.http.patch<HttpStatusCode>(`${this.baseUrl}/admins/disable`, {'studentId':studentId},{observe:'response'});
 
   }
 
@@ -97,7 +103,7 @@ export class AdminService {
   // Enables student's account
   enableStudentAccount(studentId: number):Observable<HttpResponse<number>> {
 
-    return this.http.patch<HttpStatusCode>('http://localhost:8080/admins/enable', {"studentId": studentId}, {observe:'response'})
+    return this.http.patch<HttpStatusCode>(`${this.baseUrl}/admins/enable`, {"studentId": studentId}, {observe:'response'})
    
   }
 
@@ -124,13 +130,13 @@ fetchAssessmentNames(studentTestId:number):Observable<any>{
 // feches all assessment topics for the given assessment level and subject name
 public fetchAssessmentInfo(categoryId:number):Observable<AssessmentInfo>{
 
-  return this.http.get<AssessmentInfo>(`${this.assessmentBaseUrl}/${categoryId}/subjects`)
+  return this.http.get<AssessmentInfo>(`${this.levelUrl}/${categoryId}/subjects`)
 }
 
 // fetches all assessment categories from the server
 public fetchAssessmentCategories(page:number, pageSize:number):Observable<AssessmentCategory>{
 
-  return this.http.get<AssessmentCategory>(`${this.assessmentBaseUrl}?page=${page}&size=${pageSize}&sort=firstName,asc&sort=lastName,asc`)
+  return this.http.get<AssessmentCategory>(`${this.levelUrl}?page=${page}&size=${pageSize}&sort=firstName,asc&sort=lastName,asc`)
 }
 
 // method that fetches all the questions for the given test id
@@ -152,6 +158,24 @@ updateQuestions(questions:any, testId:number):Observable<HttpResponse<number>>{
   return this.http.put<HttpStatusCode>(`${this.updateQuestionUrl}?testId=${testId}`, questions, {observe:'response'})
 }
 
+
+modifyAssessment(modifying:{topic:string, duration:number}, assessmentId:number):Observable<HttpResponse<number>>{
+  
+  return this.http.patch<HttpStatusCode>(`${this.updateAssessmentUrl}?assessmentId=${assessmentId}`, modifying, {observe:'response'});
+}
+
+ deleteQuestion(testId:number, questionId:number):Observable<HttpResponse<number>>{
+
+
+  return this.http.delete<HttpStatusCode>(`${this.deleteQuestionUrl}?testId=${testId}&questionId=${questionId}`,{observe:'response'});
+ }
+
+
+ deleteAssessment(testId: number):Observable<HttpResponse<number>> {
+
+  return this.http.delete<HttpStatusCode>(`${this.deleteAssessmentUrl}?testId=${testId}`, {observe:"response"})
+  
+}
   // set task's milestone to the current value
    setTaskMilestone(value:number):void{
 
