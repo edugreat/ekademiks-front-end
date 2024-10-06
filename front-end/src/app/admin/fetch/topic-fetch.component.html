@@ -1,1 +1,40 @@
-<p>topic-fetch works!</p>
+<mat-toolbar color="primary">  
+  <span>Assessment Topics</span>  
+  <span class="spacer"></span>  
+  <a mat-button routerLink="../">Back</a>   
+</mat-toolbar>  
+
+<div class="container">  
+  <mat-card *ngFor="let topic of assessmentTopics | keyvalue; let keyIndex = index" class="topic-card">  
+      <mat-card-header>  
+          <mat-card-title>{{ topic.key }} CATEGORY</mat-card-title>  
+      </mat-card-header>  
+      <mat-card-content>  
+          <mat-list>  
+              <mat-list-item class="mat-list" *ngFor="let value of topic.value; let valueIndex = index">  
+                  <span *ngIf="!editingMode || editableIndex !== valueIndex" class="value">{{value}}</span>  
+
+                  <div class="editing" *ngIf="editingMode && editableIndex === valueIndex" style="width: 90%;">  
+                     <div>
+                      <mat-form-field appearance="outline">  
+                        <input [(ngModel)]="newValue" matInput>  
+                    </mat-form-field> 
+                     </div> 
+
+                      <div  class="button-group">  
+                          <button mat-button color="primary" (click)="saveChanges(keyIndex, valueIndex)">Save Changes</button>  
+                          <button mat-button (click)="cancelEditing()">Cancel</button>  
+                      </div>   
+                  </div>  
+
+                  <span class="actions">  
+                      <div>  
+                          <button *ngIf="!editingMode || editableIndex !== valueIndex" mat-button color="warn" (click)="deleteTopic(topic.key, value)">Delete</button>  
+                          <button *ngIf="!editingMode || editableIndex !== valueIndex" mat-button (click)="editTopic(valueIndex, value)">Edit</button>  
+                      </div>  
+                  </span>  
+              </mat-list-item>  
+          </mat-list>  
+      </mat-card-content>  
+  </mat-card>  
+</div>

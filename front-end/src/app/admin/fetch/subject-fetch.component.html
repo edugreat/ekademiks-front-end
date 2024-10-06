@@ -1,1 +1,46 @@
-<p>subject-fetch works!</p>
+<div class="container">  
+    <h4>Overview of Assessment Subjects by Category</h4>  
+    
+    <mat-table [dataSource]="dataSource" class="mat-elevation-z8">  
+  
+      <!-- Category Column -->  
+      <ng-container matColumnDef="category">  
+        <mat-header-cell *matHeaderCellDef> Category </mat-header-cell>  
+        <mat-cell *matCellDef="let element"> {{ element.category }} </mat-cell>  
+      </ng-container>  
+  
+      <!-- Subject Column -->  
+      <ng-container matColumnDef="subject">  
+        <mat-header-cell *matHeaderCellDef> Subject </mat-header-cell>  
+        <mat-cell *matCellDef="let element"> {{ element.subject }} </mat-cell>  
+      </ng-container>  
+  
+      <!-- Edit Button Column -->  
+      <ng-container matColumnDef="edit">  
+        <mat-header-cell *matHeaderCellDef> Edit </mat-header-cell>  
+        <mat-cell *matCellDef="let element">  
+          <button mat-raised-button color="primary" (click)="editSubject(element.id)">Edit</button>  
+        </mat-cell>  
+      </ng-container>
+  
+      <!-- Delete Button Column -->  
+      <ng-container matColumnDef="delete">  
+        <mat-header-cell *matHeaderCellDef> Delete </mat-header-cell>  
+        <mat-cell *matCellDef="let element">  
+          <button mat-raised-button color="warn" (click)="deleteSubject(element.id)">Delete</button>  
+        </mat-cell>  
+      </ng-container>  
+  
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>  
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>  
+    </mat-table>  
+  
+    <!-- Pagination Controls -->  
+    <mat-paginator #paginator [length]="totalElements"  [pageSize]="pageSize" (page)="onPageChange($event)">  
+    </mat-paginator>  
+  
+    <!-- Looks Good Button -->  
+    <div class="footer">  
+      <button mat-raised-button color="accent" (click)="looksGood()">Looks Good</button>  
+    </div>  
+  </div>

@@ -81,7 +81,7 @@ export class NotificationsService {
 
       this.zone.run(() => {
 
-        // check if there is notification
+        // checks if there is notification
         if (event) {
 
 

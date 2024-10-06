@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpResponse, HttpStatusCode} from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, map, Observable, tap } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, tap } from 'rxjs';
 import { TestDTO } from './upload/upload-test.component';
 import { NotificationDTO } from './upload/notifications/notifications.component';
 
@@ -8,6 +8,9 @@ import { NotificationDTO } from './upload/notifications/notifications.component'
   providedIn: 'root'
 })
 export class AdminService {
+  
+  
+  
   
   
 private baseUrl = 'http://localhost:8080';
@@ -36,6 +39,14 @@ private baseUrl = 'http://localhost:8080';
   private deleteQuestionUrl = `${this.baseUrl}/admins/del/question`;
 
   private updateAssessmentUrl = `${this.baseUrl}/admins/modify/test`;
+
+  private assessmentTopicsUrl = `${this.baseUrl}/admins/topics`;
+
+  private editTopicUrl = `${this.baseUrl}/admins/edit/topic`;
+
+  private assessmentDeletionUrl = `${this.baseUrl}/admins/del/topic`;
+
+  private assessmentSubjectsUrl = `${this.baseUrl}/admins/subjects`;
   
   // Observable that emits the number of tasks completed
   // This is itended to use in a mat-stepper to indicate progress on tasks such as assessment upload, result uploads tasks etc
@@ -178,6 +189,37 @@ modifyAssessment(modifying:{topic:string, duration:number}, assessmentId:number)
   return this.http.delete<HttpStatusCode>(`${this.deleteAssessmentUrl}?testId=${testId}`, {observe:"response"})
   
 }
+
+// calls the server endpoint to return all assessment topics for editing or deletion purpose
+assessmentTopics():Observable<{[key:string]:Array<string>}>{
+
+  return this.http.get<{[key:string]:Array<string>}>(`${this.assessmentTopicsUrl}`);
+}
+
+// service that calls the server endpoint to update an assessment topic. 
+// object passed to the method is a key-value object where the key is the oldValue used to uniquely retrieve the assessment topic from the database, and the value is new value used to update the topic
+updateAssessementTopic(keyValueObj: any, category: string):Observable<HttpResponse<number>> {
+
+ 
+  
+  return this.http.patch<HttpStatusCode>(`${this.editTopicUrl}?category=${category}`, keyValueObj,{observe:'response'})
+}
+
+
+deleteAssessmentTopic(category: string, topic: string):Observable<HttpResponse<number>> {
+
+  return this.http.delete<HttpStatusCode>(`${this.assessmentDeletionUrl}?category=${category}&topic=${topic}`,{observe:'response'})
+  
+}
+
+// service that calls the server endpoint to retrieve all assessment subject names in a key-value object,
+// where key is the category assessment belongs to and value is a list of subject names under the category
+assessmentSubjects():Observable<{[key:string]:Array<string>}> {
+
+  return this.http.get<{[key:string]:Array<string>}>(`${this.assessmentSubjectsUrl}`)
+ 
+}
+
   // set task's milestone to the current value
    setTaskMilestone(value:number):void{
 

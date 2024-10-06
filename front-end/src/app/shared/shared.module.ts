@@ -14,6 +14,7 @@ import { MathJaxDirective } from './math-jax.directive';
 
 
 
+
 @NgModule({
   declarations: [OptionSortPipe, SortPipe, 
     SpinnerComponent, ProgressBarComponent, ConfirmationComponent, NumericDirective, ErrorMessageComponent,  MathJaxDirective],

@@ -1,0 +1,58 @@
+.container {  
+  max-width: 800px;   
+  margin: 20px auto;   
+}  
+
+.topic-card {  
+  margin-bottom: 20px;   
+}  
+
+.spacer {  
+  flex: 1 1 auto;  
+}  
+
+.actions {  
+  margin-left: 20px;   
+}  
+
+.mat-list {  
+  margin-top: 5px;  
+}  
+
+.value {  
+  margin-left: 20px;  
+}   
+
+.button-group {  
+  display: flex;  
+  flex-direction: column;
+  align-items: flex-start;
+   
+  margin-top: 4px; 
+}  
+
+
+
+
+.editing {  
+  display: flex; 
+  margin-top: 20px;
+}  
+
+@media (max-width: 600px) {  
+  .container {  
+      padding: 10px;  
+  }  
+  
+  .topic-card {  
+      margin-bottom: 10px;   
+  }  
+
+  mat-card-title {  
+      font-size: 1.5rem;   
+  }  
+
+  mat-button {  
+      padding: 5px 8px;   
+  }  
+}
