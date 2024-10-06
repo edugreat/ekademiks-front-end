@@ -440,6 +440,8 @@ export class PreviewTestComponent implements OnInit, OnDestroy {
   // Uploads assessment
   uploadNow() {
 
+    console.log(JSON.stringify(this.testForm?.value, null, 2))
+
     this.adminService.postAssessment(this.testForm!.value).subscribe({
 
       next: (response: HttpResponse<number>) => {

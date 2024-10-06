@@ -68,9 +68,12 @@ export class AdminComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-   // this.stepper!.selectedIndex = 0;
-    this.numberOfSteps = this.stepper!.steps.length;
+  
+    if(this.stepper){
+      this.numberOfSteps = this.stepper!.steps.length;
+
    
+    }
     
 
     
