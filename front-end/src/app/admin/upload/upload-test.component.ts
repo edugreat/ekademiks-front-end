@@ -143,7 +143,7 @@ export class UploadTestComponent implements OnInit {
       }
     ),
 
-    text: new FormControl<string | undefined>(
+    question: new FormControl<string | undefined>(
       { value: undefined, disabled: true },
       {
         nonNullable: true,
@@ -389,7 +389,7 @@ export class UploadTestComponent implements OnInit {
 
   private get problemInput(){
 
-    return this.questionForm.get('text')!;
+    return this.questionForm.get('question')!;
   }
 
   private get answerInput(){

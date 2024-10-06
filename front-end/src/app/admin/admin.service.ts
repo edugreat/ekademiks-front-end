@@ -79,6 +79,8 @@ private baseUrl = 'http://localhost:8080';
   // method that posts new created assessment to the server
   postAssessment(test:TestDTO):Observable<HttpResponse<number>>{
 
+    console.log(JSON.stringify(test, null, 2))
+
     return this.http.post<HttpStatusCode>(this.setTestUrl, test,{observe:'response'});
 
 
