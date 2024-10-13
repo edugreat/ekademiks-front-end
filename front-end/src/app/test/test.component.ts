@@ -111,8 +111,6 @@ testStarted: boolean = false; // boolean flag indicating whether the student has
    
    this.getQuestions();
    this.mediaAlias();
-   this.showPerformanceorTakeMoreTest();
-   
    
    
   }
@@ -186,7 +184,7 @@ if(to < this.totalQuestions){
   }))
 }
 
-this.totalPages = this.totalQuestions/this.pageSize;
+this.totalPages = Math.ceil(this.totalQuestions/this.pageSize);
 
 }
 
@@ -395,6 +393,9 @@ submit() {
     }
 
   }
+
+  // persist student's performance to temporary storage for display purpose
+  this.saveRecentPerformance();
   
   }
 
@@ -417,7 +418,7 @@ this.submit();//reuse the existing code
    
     this.progress = Math.floor((attempted.length * 100)/this.totalQuestions);
     
-    this.remaining = this.totalQuestions - attempted.length;
+    this.remaining = Number(Math.ceil(this.totalQuestions - attempted.length));
   
     this.progressBarColor = (this.progress >= 50) ? 'primary' : 'warn'; //checks if the student has attempted 50% questions or more,then changes color of the progress bar
 
@@ -492,49 +493,26 @@ private openSnackBar(message:string){
 
  }
 
- //subscribes to the obsrvable emitted from the TestService due to user input selection(radio button selection to view their recent performance)
- private showPerformanceorTakeMoreTest(){
 
-
-  this.testService.showMyPerformanceOrTakeMoreTestObservable().subscribe( value => {
-
-    
-    this.showMyPerformace = value;
-    
-    if(value === true){
-
-      
-
-      this.recentAcademicPerformance();//produces student's recent assessment performance
-    }else{
-
-     
-     
-      this.router.navigate(['/home/true'])//routes back to the component with request parameter set to true to show the student desires to take more assessment
-    }
-  }) 
- }
 
  //displays users's recent performance if the 'showMyPerformance' evaluates to true due to user's input selection
-private recentAcademicPerformance(){
+private saveRecentPerformance(){
 
-  
+  if(!sessionStorage.getItem('recent-performance')){
+//extract the correct options for the particular test
+const correctOptions = this.testContent!.questions.map(question => question.answer);
+//get the student's recent performance
+const recentPerformance: PerformanceObject = {
+ subjectName: this.subject,
+ testTopic: this.topic,
+ selectedOptions: this.selectedOptions,
+ correctOptions:correctOptions
+}
 
-   
+sessionStorage.setItem('recent-performance', JSON.stringify(recentPerformance));
 
-   //extract the correct options for the particular test
-   const correctOptions = this.testContent!.questions.map(question => question.answer);
-   //get the student's recent performance
-   const recentPerformance: PerformanceObject = {
-    subjectName: this.subject,
-    testTopic: this.topic,
-    selectedOptions: this.selectedOptions,
-    correctOptions:correctOptions
-   }
 
-  this.testService.showRecentPerformance(recentPerformance);
-
-  
+  }
 
 }
 }

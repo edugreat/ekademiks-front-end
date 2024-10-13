@@ -1,1 +1,62 @@
-<p>category-fetch works!</p>
+<div class="container">
+    <h4>Overview of Assessment Categories</h4>
+  
+    <mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+  
+      <!-- Category Column -->
+      <ng-container matColumnDef="category">
+        <mat-header-cell *matHeaderCellDef> Category </mat-header-cell>
+        <mat-cell *matCellDef="let category"> {{category }} </mat-cell>
+      </ng-container>
+  
+     
+  
+      <!-- Edit Button Column -->
+      <ng-container matColumnDef="edit">
+        <mat-header-cell *matHeaderCellDef> Edit </mat-header-cell>
+        <mat-cell *matCellDef="let category; let i = index">
+          <button mat-raised-button color="primary" (click)="editCategory(category, i)">Edit</button>
+        </mat-cell>
+      </ng-container>
+  
+      <!-- Delete Button Column -->
+      <ng-container matColumnDef="delete">
+        <mat-header-cell *matHeaderCellDef> Delete </mat-header-cell>
+        <mat-cell *matCellDef="let category; let index = index">
+          <button mat-raised-button color="warn"
+            (click)="deleteCategory(category)">Delete</button>
+        </mat-cell>
+      </ng-container>
+  
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+  
+    <!-- Pagination Controls -->
+    <mat-paginator #paginator [length]="totalElements" [pageSize]="pageSize">
+    </mat-paginator>
+  
+    <!-- Looks Good Button -->
+    <div class="footer">
+      <button mat-raised-button color="accent" (click)="looksGood()">Looks Good</button>
+    </div>
+  </div>
+  
+  <!-- EDITING PAGE -->
+  <div id="editing-container" class="hide">
+    <div class="editor">
+      <h3 class="label">New name ?</h3>
+      <div>
+        <mat-form-field appearance="outline">
+          <input #editorInput matInput>
+        </mat-form-field>
+      </div>
+  
+      <div class="button-group">
+        <button mat-button color="primary" (click)="saveChanges()">Save Changes</button>
+        <button mat-button (click)="cancelEditing()">Cancel editing</button>
+      </div>
+  
+    </div>
+  
+  </div>

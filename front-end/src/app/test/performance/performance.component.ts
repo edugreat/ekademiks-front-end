@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TestService } from '../test.service';
 import { PerformanceObject } from '../test.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-performance',
@@ -31,15 +32,13 @@ export class PerformanceComponent implements OnInit, OnDestroy {
   //flag that detects if the student's performance is ready to be displayed
   performanceAvailable = false;
 
-  constructor(private testService: TestService){}
+  constructor(private testService: TestService, private router:Router){}
 
 
   ngOnInit(): void {
 
     this.testService.submission(false)//notifies 'canDeactivate'that submission is complete. Further navigation out of the TestComponent should be checked
-    this.showMyRecentAccessPerformance();
-    
-   
+  
   }
 
   ngOnDestroy(): void {
@@ -53,17 +52,14 @@ export class PerformanceComponent implements OnInit, OnDestroy {
   
 
   if(this.option === 'true'){
-    //this.testService.showPerformanceOrMoreTest(true);
-    this.performanceAvailable = true;
-    this.testService.showMyRecentPerformance();//notifies subscriber that the student would like to see their recent performance
-  
+    
+    this.showMyRecentAccessPerformance();
   
   }else if(this.option === 'false'){
     
     this.performanceAvailable = false;
-  
-    this.testService.takeMoreTest()//notifies subscribers that student would like to take more assessment instead
-   
+  // routes to the home page with parameter 'true' indicating the user wants to take another assessment
+  this.router.navigate(['/home/true'])
   }
   
 }
@@ -71,14 +67,10 @@ export class PerformanceComponent implements OnInit, OnDestroy {
 //Method that subscribes to observable and listens to know when student wants to see their recent assessment.
 showMyRecentAccessPerformance(){
 
-  this.testService.myRecentPerformanceObservable().subscribe( {
-  next:(performance:PerformanceObject) => {
-   
+  const recentPeformance = JSON.parse(sessionStorage.getItem('recent-performance')!);
 
-   this.recentPerformance = performance;
-    this.performanceAvailable = true;
 
-  }    
-  })
+  this.recentPerformance = recentPeformance;
+  this.performanceAvailable = true;
 }
 }

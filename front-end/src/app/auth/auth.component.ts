@@ -29,7 +29,7 @@ export class AuthComponent implements OnDestroy {
  dynamicPasswordInputType = 'password'; //property that toggles the password input field type between 'text' and 'password'
 
 
- signInErrorMessage? :string;
+ signInErrorMessage :string = '';
 
  opacity = 0; //display effect login success check mark
 
@@ -101,7 +101,8 @@ export class AuthComponent implements OnDestroy {
         if(element){
 
           element.classList.remove('hidden');
-         this.signInErrorMessage = err.error;
+          // I discovered when server is down, error message would be an object {'isTrusted':true}, when serialized
+         this.signInErrorMessage = typeof err.error !== 'object' ? err.error : 'Server not responding!';
          this.form.get('password')?.reset('')
          if(this.showPassword){
           this.showPassword = !this.showPassword;

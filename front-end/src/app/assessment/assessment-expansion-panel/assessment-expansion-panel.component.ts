@@ -11,6 +11,7 @@ import { Observable } from 'rxjs';
 export class AssessmentExpansionPanelComponent implements OnInit{
 
 
+
   constructor(private activatedRoute: ActivatedRoute,
      private assessmentService:AssessmentsService,
     private router: Router){}
@@ -62,6 +63,11 @@ export class AssessmentExpansionPanelComponent implements OnInit{
 
     window.history.back()
   }
-  
+
+  // refreshes the page incase no data was fetched on previous attempt
+  refreshData() {
+    
+    window.location.reload()
+    }
 }
 

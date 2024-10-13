@@ -1,9 +1,9 @@
-import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { AdminService, Student, StudentPerformance, StudentPerformanceInfo } from '../../../admin.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AdminService, StudentPerformance, StudentPerformanceInfo } from '../../../admin.service';
 import { Subscription } from 'rxjs';
 
 import { ActivatedRoute } from '@angular/router';
-import { ArcElement, Chart, Legend, registerables, Tooltip } from 'chart.js';
+import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
 
@@ -131,6 +131,7 @@ export class StudentDetailsPageComponent implements OnInit,  OnDestroy{
      this.averageAssessmentScore /= this.studentPerformances.length;
      this.averageAssessmentScore *= 10;
 
+     
      this.renderPerformancePieChart()
 
      
@@ -202,6 +203,19 @@ export class StudentDetailsPageComponent implements OnInit,  OnDestroy{
           return hexColors;
 
 
+        }
+
+        toPrecision(value:number):number{
+
+          let precisionValue = value.toString();
+
+          const decimalPointIndex = precisionValue.indexOf('.');
+        if(decimalPointIndex  >= 0){
+
+          precisionValue = precisionValue.substring(0, decimalPointIndex+2);
+        }
+
+        return Number(precisionValue);
         }
     } 
 

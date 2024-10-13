@@ -5,7 +5,7 @@
         <h1>Student's Academic Performance</h1>  
           
         <div>  
-            <strong>Overall Average Score(%):</strong> {{averageAssessmentScore ||'No Records Yet'}} 
+            <strong>Overall Average Score(%):</strong> {{toPrecision(averageAssessmentScore) ||'No Records Yet'}} 
         </div>  
         <div *ngIf="studentPerformances.length" class="assessment"  >  
             <div class="assessment-title">Assessments Taken:</div>  

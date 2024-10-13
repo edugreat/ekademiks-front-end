@@ -30,3 +30,9 @@
 
 </mat-accordion>
 </ng-container>
+
+<div *ngIf="!topicsAndDurations$ || (topicsAndDurations$ | async)?.length === 0" class="no-data-container">  
+    <h2 class="no-data-caption">No Data</h2>  
+    <p class="no-data-message">We couldn't find any records matching your request.</p>  
+    <button (click)="refreshData()" class="btn btn-primary">Refresh</button>  
+ </div>

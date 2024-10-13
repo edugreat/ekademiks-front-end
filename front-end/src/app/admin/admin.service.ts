@@ -8,10 +8,7 @@ import { NotificationDTO } from './upload/notifications/notifications.component'
   providedIn: 'root'
 })
 export class AdminService {
-  
-  
-  
-  
+ 
   
 private baseUrl = 'http://localhost:8080';
   private setTestUrl = `${this.baseUrl}/admins/test`;
@@ -47,7 +44,13 @@ private baseUrl = 'http://localhost:8080';
   private assessmentDeletionUrl = `${this.baseUrl}/admins/del/topic`;
 
   private assessmentSubjectsUrl = `${this.baseUrl}/admins/subjects`;
+
+  private updateSubjectNameUrl = `${this.baseUrl}/admins/update/subject_name`;
+
+  private deleteSubjectUrl = `${this.baseUrl}/admins/delete/subject`;
+  private updateCategoryNameUrl = `${this.baseUrl}/admins/update/category`;
   
+  private deleteCategoryUrl = `${this.baseUrl}/admins/delete/category`;
   // Observable that emits the number of tasks completed
   // This is itended to use in a mat-stepper to indicate progress on tasks such as assessment upload, result uploads tasks etc
   private taskMilestone = new BehaviorSubject<number>(0);
@@ -145,9 +148,11 @@ public fetchAssessmentInfo(categoryId:number):Observable<AssessmentInfo>{
 }
 
 // fetches all assessment categories from the server
-public fetchAssessmentCategories(page:number, pageSize:number):Observable<AssessmentCategory>{
+public fetchAssessmentCategories(page?:number, pageSize?:number):Observable<AssessmentCategory>{
 
-  return this.http.get<AssessmentCategory>(`${this.levelUrl}?page=${page}&size=${pageSize}&sort=firstName,asc&sort=lastName,asc`)
+  if(page && pageSize) return this.http.get<AssessmentCategory>(`${this.levelUrl}?page=${page}&size=${pageSize}&sort=firstName,asc&sort=lastName,asc`);
+
+  return this.http.get<AssessmentCategory>(`${this.levelUrl}?sort=category,asc`);
 }
 
 // method that fetches all the questions for the given test id
@@ -218,6 +223,33 @@ assessmentSubjects():Observable<{[key:string]:Array<string>}> {
  
 }
 
+// calls the server api passing a key-value object, where key is the assessment category and value is the subject name used to update old name
+updateSubjectName(editedObject: { [key: string]: string; }, oldSubjectName:string):Observable<HttpResponse<number>> {
+  
+  return this.http.patch<HttpStatusCode>(`${this.updateSubjectNameUrl}?oldName=${oldSubjectName}`,editedObject, {observe:'response'})
+}
+
+// calls the server endpoint passing values(category and subjectName) to delete the given subject name
+deleteSubject(category:string, subjectName:string):Observable<HttpResponse<number>> {
+  
+
+  return this.http.delete<HttpStatusCode>(`${this.deleteSubjectUrl}?category=${category}&subjectName=${subjectName}`, {observe:'response'});
+}
+
+// communicates to the backend to update name of the category rreferenced by 'previousName' with 'currentName'
+updateCategoryName(currentName:string, previousName: string):Observable<HttpResponse<number>> {
+  
+  return this.http.patch<HttpStatusCode>(`${this.updateCategoryNameUrl}?previousName=${previousName}`, currentName, {observe:'response'});
+
+
+}
+
+// communicates to the server to delete the assessment category referenced by 'category'
+deleteCategory(category: number):Observable<HttpResponse<number>> {
+  
+  return this.http.delete<HttpStatusCode>(`${this.deleteCategoryUrl}?category=${category}`, {observe:'response'})
+
+}
   // set task's milestone to the current value
    setTaskMilestone(value:number):void{
 

@@ -1,5 +1,5 @@
 
-
+/* 
 p {
    font-family: 'Roboto', sans-serif;
    transition: opacity 1s ease-out;
@@ -42,4 +42,14 @@ p {
         
        
       }
-  }
+  } */
+
+  /* Import the fonts */  
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap');  
+
+.welcome {  
+    padding-top: 1px; 
+    text-align: center; 
+    background-color: #f9f9f9; 
+    padding: 50px 20px; 
+}  

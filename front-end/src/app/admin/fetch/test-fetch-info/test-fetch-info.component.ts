@@ -179,6 +179,7 @@ export class TestFetchInfoComponent implements OnInit, OnDestroy {
   cancelEdit() {
 
     this.editingMode = !this.editingMode;
+    this.editingId = undefined;
 
   }
 

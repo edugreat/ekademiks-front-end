@@ -10,6 +10,7 @@ import { AdminService } from '../admin.service';
 export class TopicFetchComponent implements OnInit {
 
 
+
 // new value for the assessmen topic as a result of editing
   newValue:any;
 
@@ -117,7 +118,10 @@ editTopic(index: number, value: string) {
      
       }
 
-
+      goBack() {
+       
+        window.history.back()
+        }
 }
 
 // object of assessment topics received from the server
