@@ -4,6 +4,29 @@ export class Endpoints {
 
 
 
+     //routes to the backend server to fetch test based on the request parameters
+ private _baseTestUrl = 'http://localhost:8080/tests/start';
+    public get baseTestUrl() {
+        return this._baseTestUrl;
+    }
+   
+ private _submissionUrl = 'http://localhost:8080/tests/submit';
+    public get submissionUrl() {
+        return this._submissionUrl;
+    }
+    
+
+  private _baseSignInUrl = 'http://localhost:8080/auth/sign-in';
+    public get baseSignInUrl() {
+        return this._baseSignInUrl;
+    }
+   
+
+  private _refreshTokenUrl = 'http://localhost:8080/auth/refresh-token';
+    public get refreshTokenUrl() {
+        return this._refreshTokenUrl;
+    }
+    
 
     private _baseUrl = 'http://localhost:8080';
     public get baseUrl() {

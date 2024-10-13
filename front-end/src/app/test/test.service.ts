@@ -3,15 +3,14 @@ import { QuestionDTO, QuestionPart, TestContent, TestContentDTO } from './test-i
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, Subject, Subscription, map, tap } from 'rxjs';
 import { PerformanceObject } from './test.component';
+import { Endpoints } from '../end-point';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TestService {
 
-  //routes to the backend server to fetch test based on the request parameters
- private baseTestUrl = 'http://localhost:8080/tests/start';
- private submissionUrl = 'http://localhost:8080/tests/submit';
+ 
 
  //the submitting subject emits true or either student's or system initiated assessment submission
  //This is to notify the 'canDeactivate' guard not to block navigation.
@@ -20,7 +19,7 @@ export class TestService {
  //boolean flag that shows when user's route navigation is due to assessment submission. This is basically to prevent the 'canDeactivate from blocking navigation
  forSubmission = false;
  
-  constructor(private http:HttpClient) {
+  constructor(private http:HttpClient, private endpoints:Endpoints) {
     this.submissionSubject.asObservable().subscribe(value => this.forSubmission = value)
    }
 
@@ -28,7 +27,7 @@ export class TestService {
 
 getTest(topic:string, category:string):Observable<TestContent>{
 
-  return this.http.get<TestContentDTO>(`${this.baseTestUrl}?topic=${topic}&category=${category}`).pipe(
+  return this.http.get<TestContentDTO>(`${this.endpoints.baseTestUrl}?topic=${topic}&category=${category}`).pipe(
     tap(dto => sessionStorage.setItem("testId", dto.testId+"")), 
     map(dto => this.convertToTestContent(dto)),
   )
@@ -57,7 +56,7 @@ private convertToTestContent(dto: TestContentDTO): TestContent {
 //submit the test response to the back-end
 submitTest(attempt:Attempt):Observable<{message:string}>{
 
-  return this.http.post<{message:string}>(this.submissionUrl, attempt);
+  return this.http.post<{message:string}>(this.endpoints.submissionUrl, attempt);
 }
 
 

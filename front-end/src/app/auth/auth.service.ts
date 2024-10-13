@@ -2,19 +2,17 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { Endpoints } from '../end-point';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  private baseUrl = 'http://localhost:8080/auth/sign-in';
 
   // This flag is used to stop anyother requests from proceeding while refresh token process is ongoing, until it completes
   private _refreshTokenInProcess = false;
   
-
-  private refreshTokenUrl = 'http://localhost:8080/auth/refresh-token';
 
   // Login event that is used at the app.compoent to trigger connection to the server's notification channel upon student's login ;
   private studentLoginSubject = new BehaviorSubject<boolean>(this.isLoggedInStudent());
@@ -30,7 +28,7 @@ export class AuthService {
   //Get the observable version of the behabvior subject to ensure it only emits directly to this observable which subsequently notofies subscribers
   //The of this is to not allow subscribers directly subscribe to the Behavior subject so as not to emit unintended values by calling the subject's 'next' method upon subscription
   public userName$: Observable<string> ;
-  constructor(private http: HttpClient, private router:Router) {
+  constructor(private http: HttpClient, private router:Router, private endpoints:Endpoints) {
 
     this.currentUserName = new BehaviorSubject<string>(sessionStorage.getItem('username')! || 'Student');
     this.userName$= this.currentUserName.asObservable();
@@ -41,7 +39,7 @@ export class AuthService {
    login(email:string, password:string, role:string):Observable<User>{
 
     
-    return this.http.post<User>(`${this.baseUrl}?role=${role}`, {email:`${email}`, password:`${password}`}).pipe(
+    return this.http.post<User>(`${this.endpoints.baseSignInUrl}?role=${role}`, {email:`${email}`, password:`${password}`}).pipe(
       tap(user => this.saveToSession(user))
     )
 
@@ -53,7 +51,7 @@ export class AuthService {
 
     const refreshToken = sessionStorage.getItem('refreshToken');
 
-    return this.http.post<User>(`${this.refreshTokenUrl}`, {'refreshToken':refreshToken}).pipe(
+    return this.http.post<User>(`${this.endpoints.refreshTokenUrl}`, {'refreshToken':refreshToken}).pipe(
       tap((user) => {
 
        
