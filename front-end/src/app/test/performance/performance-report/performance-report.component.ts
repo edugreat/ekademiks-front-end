@@ -69,7 +69,7 @@ constructor(private router:Router, private authService:AuthService,
 
   ngOnDestroy(): void {
 
-    sessionStorage.removeItem('testTip');
+    //sessionStorage.removeItem('testTip');
     this.performance = undefined;
    
     

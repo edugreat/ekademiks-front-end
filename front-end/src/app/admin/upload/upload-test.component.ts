@@ -317,22 +317,22 @@ export class UploadTestComponent implements OnInit {
 
     this.totalInput.valueChanges.subscribe(() => {
       this.indexInput.reset();
-      this.problemInput.reset();
+      this.quesstionInput.reset();
       this.answerInput.reset();
       this.optionForm.reset();
       // (currentValue !==  undefined && currentValue.length) ? indexInput.enable() : indexInput.disable();
     });
 
     this.indexInput.valueChanges.subscribe((currentValue) => {
-      this.problemInput.reset();
+      this.quesstionInput.reset();
       this.answerInput.reset();
       this.optionForm.reset();
       currentValue !== undefined
-        ? this.problemInput.enable()
-        : this.problemInput.disable();
+        ? this.quesstionInput.enable()
+        : this.quesstionInput.disable();
     });
 
-    this.problemInput.valueChanges.subscribe((currentValue) => {
+    this.quesstionInput.valueChanges.subscribe((currentValue) => {
       this.answerInput.reset();
       this.optionForm.reset();
       currentValue !== undefined && currentValue.length
@@ -387,7 +387,7 @@ export class UploadTestComponent implements OnInit {
     return this.questionForm.get('index')!;
   }
 
-  private get problemInput(){
+  private get quesstionInput(){
 
     return this.questionForm.get('question')!;
   }
@@ -525,7 +525,7 @@ export class UploadTestComponent implements OnInit {
   private currentQuestion(currentNumber: number): Question {
     const currentQuestion: Question = {
       questionNumber: currentNumber,
-      question: this.problemInput.value,
+      question: this.quesstionInput.value,
       answer: this.answerInput.value,
       options: [],
     };

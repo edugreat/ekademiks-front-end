@@ -30,6 +30,7 @@
 }  
 .back-button {  
     margin-top: 24px;  
+    cursor: pointer;
     display: inline-block;  
     background-color: #3182ce; /* Blue color */  
     color: white;  

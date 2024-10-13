@@ -4,6 +4,7 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
 import { Subscription } from 'rxjs';
 import { AdminService } from '../admin.service';
 import { HttpResponse, HttpStatusCode } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-preview-test',
@@ -56,7 +57,7 @@ export class PreviewTestComponent implements OnInit, OnDestroy {
 
 
 
-  constructor(private fb: FormBuilder, private adminService: AdminService) { }
+  constructor(private fb: FormBuilder, private adminService: AdminService, private router:Router) { }
 
 
 
@@ -440,9 +441,12 @@ export class PreviewTestComponent implements OnInit, OnDestroy {
   // Uploads assessment
   uploadNow() {
 
+
+    
    
     this.adminService.postAssessment(this.testForm!.value).subscribe({
 
+    
       next: (response: HttpResponse<number>) => {
 
         // If the response status is 'OK' and we actually got a respone body(typically an id)
@@ -456,7 +460,7 @@ export class PreviewTestComponent implements OnInit, OnDestroy {
         }
       },
 
-      error: (err) => console.log(err)
+      error: (err) => this.router.navigate(['/error', err.error])
 
 
     })

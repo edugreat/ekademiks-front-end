@@ -13,12 +13,6 @@ export class TestService {
  private baseTestUrl = 'http://localhost:8080/tests/start';
  private submissionUrl = 'http://localhost:8080/tests/submit';
 
- //emits true to notify subscribers that the student wishes to see their assessment performance. If it emits false, then it means the student wishes to take another assessment instead of seeing their recent performance
- private performanceOrMoreTestSubject:Subject<boolean> = new Subject<boolean>();
- 
- //subject that emits student's recent performance.
- private recentPerformanceSubject:Subject<PerformanceObject> = new Subject<PerformanceObject>();
-
  //the submitting subject emits true or either student's or system initiated assessment submission
  //This is to notify the 'canDeactivate' guard not to block navigation.
  private submissionSubject = new BehaviorSubject<boolean>(false);
@@ -66,37 +60,7 @@ submitTest(attempt:Attempt):Observable<{message:string}>{
   return this.http.post<{message:string}>(this.submissionUrl, attempt);
 }
 
-//emits true to subscribers to show the student want to see their recent performance. 
-showMyRecentPerformance(){
 
-  this.performanceOrMoreTestSubject.next(true);
-}
-
-//Emits false to show the student would like to take another test
-takeMoreTest(){
-
-
-this.performanceOrMoreTestSubject.next(false);
-
-}
-
-//provide an observable for the 'performanceOrTest' subject for proper encapsulation
-showMyPerformanceOrTakeMoreTestObservable():Observable<boolean>{
-
-return this.performanceOrMoreTestSubject.asObservable();
-}
-
-//emits student's recent performance to subscribers
-showRecentPerformance(recentPerformance:PerformanceObject){
-
-  this.recentPerformanceSubject.next(recentPerformance);
-}
-
-//provide an observable for the 'recentPerformanceSubject' subject for proper encapsulation
-myRecentPerformanceObservable():Observable<PerformanceObject>{
-
-  return this.recentPerformanceSubject.asObservable();
-}
 
 //notifies subscribers, especially the 'canDeactivate' guard that navigation should be allowed due to assessment submission
 submission(value:boolean){
