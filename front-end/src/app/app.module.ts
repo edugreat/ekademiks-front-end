@@ -20,6 +20,7 @@ import { AdminModule } from './admin/admin.module';
 import { AppRoutingModule } from './app-routing/app-routing.module';
 import { NotificationDetailComponent } from './notification-detail/notification-detail.component';
 import { AccountDisabledComponent } from './account-disabled/account-disabled.component';
+import { ChatModule } from './chat/chat.module';
 
 
   
@@ -54,6 +55,7 @@ import { AccountDisabledComponent } from './account-disabled/account-disabled.co
     AppRoutingModule,
     ReactiveFormsModule,
     AdminModule,
+    ChatModule
   ],
   
  exports:[AuthModule],

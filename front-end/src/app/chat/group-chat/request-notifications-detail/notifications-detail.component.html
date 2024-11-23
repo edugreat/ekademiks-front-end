@@ -1,0 +1,14 @@
+
+<div *ngIf="notifications" class="container">  
+    <button mat-button (click)="goBack()">Back</button>  
+    <h1>You've got new request(s)</h1>  
+    <div *ngFor="let notification of notifications" class="notification-card">  
+      <div class="notification-header">  
+        <h3>{{ notification.notifier }}</h3>  
+        <span>{{ notification.createdAt | date: 'medium' }}</span>  
+      </div>  
+      <p>{{ notification.message }}</p>  
+      <button class="approve-btn" mat-raised-button color="primary" (click)="approveRequest(notification)">Approve</button>  
+      <button mat-raised-button color="warn" (click)="declineRequest(notification)">Decline</button>  
+    </div>  
+  </div>

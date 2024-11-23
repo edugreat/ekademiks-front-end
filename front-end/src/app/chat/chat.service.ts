@@ -1,0 +1,266 @@
+import { Injectable, NgZone, OnDestroy } from '@angular/core';
+import { Endpoints } from '../end-point';
+import { BehaviorSubject, Observable, Subject, Subscription, tap } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpResponse, HttpStatusCode } from '@angular/common/http';
+import { AuthService } from '../auth/auth.service';
+import { _Notification as _Notification } from '../admin/upload/notifications/notifications.service';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ChatService implements OnDestroy {
+ 
+  
+  private chatEventSource?: EventSource;
+
+  private reconnectionTiming:any;
+  private loginSub?:Subscription;
+
+  // keeps try of the number of reconnection counts when server sent event connection is lost
+  private retryCount = 0;
+
+  
+
+
+  // message chat observable that emits chats
+  private chatSubject = new Subject<ChatMessage>();
+
+  chatMessages$ = this.chatSubject.asObservable();
+
+
+  // observable that emits notifications such as request to join a group chat
+  private joinGroupRequest = new Subject<_Notification>();
+ 
+  joinGroupRequest$ = this.joinGroupRequest.asObservable();
+
+
+  constructor(private endpoints:Endpoints,
+     private http:HttpClient, private zone:NgZone, private authService:AuthService) { 
+
+      // disconnect from receiving chat messages once the user logs out
+     this.loginSub = this.authService.studentLoginObs$.subscribe(isLoggedIn => {
+
+        if(!isLoggedIn) this.disconnectFromChatUpdates();
+      });
+
+    
+     }
+
+     ngOnDestroy(): void {
+       this.loginSub?.unsubscribe();
+     }
+
+  createGroupChat(dto:any):Observable<HttpResponse<number>>{
+
+    return this.http.post<HttpStatusCode>(this.endpoints.createGroupChatUrl, dto,{observe:'response'});
+  }
+
+  // returns all the id for the groups the student already belongs to
+  myGroupIds(studentId:number):Observable<number[]>{
+
+    return this.http.get<number[]>(`${this.endpoints.myGroupIdsUrl}?studentId=${studentId}`)
+
+  }
+  // communicates to the server endpoint to fetch to fetch unread chats count for the given student
+  // Unread chats count is a map object having the group's id as the key, and count of unread messages(greater than or zero) as the values
+  unreadChats(studentId:number):Observable<any>{
+
+    return this.http.get<any>(`${this.endpoints.unreadChatsUrl}?studentId=${studentId}`);
+
+  }
+
+  // get group chat messages
+  groupChatUpdates(groupId:number, studentId:number){
+
+    this.connectToChatMessages(groupId, studentId);
+  }
+
+  // fetch all the group chats from the server
+  fetchGroupChats():Observable<GroupChatInfo>{
+
+    return this.http.get<GroupChatInfo>(this.endpoints.allGroupsUrl);
+  }
+
+  // send new chat messages to the server which then broadcasts the chats in realtime to all members online
+  sendNewChatMessage(newChat:ChatMessage):Observable<HttpResponse<number>>{
+
+    
+
+    return this.http.post<HttpStatusCode>(this.endpoints.newChatMessageUrl, newChat,{'observe':'response'})
+
+
+
+  }
+
+  sendJoinRequest(joinGroupRequest:GroupJoinRequest):Observable<HttpResponse<number>>{
+
+    return this.http.post<HttpStatusCode>(this.endpoints.joinRequestUrl, joinGroupRequest, {'observe':'response'})
+
+  }
+
+  // calls the server side to approvide user's requst to join the group chat referened by groupId.
+  // requesterId is the ID to points to the user that actually requested to join the groupchat
+  approveJoinRequest(groupId: number, requesterId: number, requestId:number):Observable<HttpResponse<number>> {
+
+   
+
+    return this.http.post<HttpStatusCode>(`${this.endpoints.approveRequestUrl}?id=${requestId}`, {[groupId]:requesterId}, {'observe':'response'})
+
+    
+
+  }
+
+  // calls the server to decline user's request to join the group chat
+  declineJoinRequest(groupId: number, studentId: number, notificationId:number):Observable<HttpResponse<number>> {
+
+    return this.http.get<HttpStatusCode>(`${this.endpoints.declineJoinRequestUrl}?grp=${groupId}&stu=${studentId}&notice_id=${notificationId}`,{'observe':'response'});
+  
+
+  }
+
+
+
+  // method that deletes the given join request notification referenced by the notification ID
+  deleteChatNotifications(studentId: number,notificationIds: number[]):Observable<void> {
+
+    return this.http.delete<void>(`${this.endpoints.deleteChatNotificationsUrl}?owner_id=${studentId}`, {
+      headers:new HttpHeaders({'content-type':'application/json'}),
+      body:notificationIds
+    })
+   
+   
+
+  }
+
+  // fetches all the group chats the user has once requested to join, which have yet to receive approval or disapproval
+  getPendingGroupChatRequestsFor(studentId: number):Observable<number[]> {
+
+    return this.http.get<number[]>(`${this.endpoints.pendingGroupChatRequestsUrl}?studentId=${studentId}`)
+
+
+
+  }
+
+  // method that establishes a unidirectional messaging system where the server forwards previous chat messages to the cient via the server sent event emitter client
+  private connectToChatMessages(groupId: number, studentId:number){
+
+    // // closes the previous event source before connecting to avoid receiving stale chats
+    // if(this.chatEventSource) this.chatEventSource.close();
+
+    this.chatEventSource = new EventSource(`${this.endpoints.chatMessagesUrl}?group=${groupId}&student=${studentId}`);
+
+    // add event listener to only listen to chat events
+   this.chatEventSource.addEventListener('chats', (event:MessageEvent<any>) => {
+
+      this.zone.run(() => {
+
+        // check if any message has been received
+        if(event){
+
+          const _notification:any = JSON.parse(event.data);
+
+          // confirm the type of notification received
+          if(this.isJoinGroupRequest(_notification)){
+
+            const notification:_Notification = _notification;
+          
+
+            // emits to active subscribers
+            this.joinGroupRequest.next(notification);
+          }else if(this.isChatMessages(_notification)){
+
+
+            const chatMessage: ChatMessage = _notification;
+
+        // emits to active subscribers
+            this.chatSubject.next(chatMessage);
+          }
+          
+          
+         
+
+        }
+      })
+    });
+
+    // executes once an error occurs
+    this.chatEventSource.onerror = () => {
+
+      // error handling retry connection that ensures retry time does not exceed 30 seconds
+      const retryDelay = Math.min(1000 * Math.pow(2, this.retryCount), 30000);
+
+      this.retryCount++;
+      // close and reconnect the event source
+      this.reconnectionTiming = setTimeout(() => {
+        
+        this.connectToChatMessages(groupId,studentId);
+      }, retryDelay);
+
+    }
+
+  }
+  
+
+
+  // disconnect from the chat updates service
+  disconnectFromChatUpdates() {
+    
+    if(this.chatEventSource) {
+      this.chatEventSource.close();
+
+      clearTimeout(this.reconnectionTiming);
+    }
+  }
+
+  // checks if the new notification received is a request to join group chat or about new member that has just joined the group chat
+  private isJoinGroupRequest(data:any):data is _Notification{
+
+    return (data as _Notification).notifier !== undefined &&
+  ( (data as _Notification).type === 'join group' || (data as _Notification).type === 'new member' );
+  }
+
+  // check if the notification received is chat message
+  private isChatMessages(data: any): data is ChatMessage {
+   
+    return (data as ChatMessage).onlineMembers !== undefined;
+  }
+}
+
+
+// a type representing the chat messages for the a given group chat
+export type ChatMessage = {
+
+  id?:number,
+  groupId:number,
+  senderId:number,
+  senderName?:string,
+  content:string,
+  sentAt:Date,
+  onlineMembers?:number//tracks the number of members who are currently online
+
+
+}
+
+// a key-value pair object representing group chats where the key is the group chat id.
+export type GroupChatInfo = {
+
+ [groupId:number]:{
+   unreadChats:number, // zero or more unread chats
+   groupName:string, // the group chat name
+   groupIconUrl:string, // the group icon url pointing to the group icon
+   groupDescription:string, // the group description which every group chat must have. It portrays their ideology 
+   groupAdminId:string // information pointing the group admin
+  }
+}
+
+// object for sending request to join group chats
+export type GroupJoinRequest = {
+
+  groupId:string,
+  requesterId:string  | null,
+  groupAdminId:string,
+  requestedAt:Date,
+  requester:string //the name of the user requesting to join the group chat
+}
+
+

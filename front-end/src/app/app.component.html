@@ -11,6 +11,12 @@
     <a mat-button routerLink="/supports" class="top-menu-item"><mat-icon>help</mat-icon>Help/Supports</a>
     <a mat-button routerLink="/contact" class="top-menu-item" ><mat-icon>call</mat-icon>Contact</a>
 
+    <a *ngIf="isLoggedInStudent()" mat-button routerLink="/new-group" class="top-menu-item" ><mat-icon>group_add</mat-icon>new group</a>
+    <a *ngIf="isLoggedInStudent() && isGroupMemeber()" mat-button [routerLink]="['/my-groups', studentId]" class="top-menu-item" > <mat-icon>group</mat-icon>my groups</a>
+
+    <a *ngIf="isLoggedInStudent()" [routerLink]="['/group-request']" mat-button  class="top-menu-item" > <mat-icon>person_add</mat-icon>join a groups</a>
+
+
     <!-- ADMIN BUTTON -->
     <a *ngIf="isAdmin()" mat-button [matMenuTriggerFor]="admins" aria-label="Example icon-button with a menu" class="top-menu-item" >
 
@@ -63,12 +69,6 @@
      </mat-menu>
 
 
-
-   
-
-
-
-
     <span *ngIf="isGuestUser()" id="user" > 👋 Hi {{userName | uppercase}} </span>
     <span *ngIf="isLoggedInStudent() || isAdmin()" id="user" > <mat-icon>person</mat-icon> Hi {{userName | uppercase}} </span>
     <button routerLink="/notifications" *ngIf="isLoggedInStudent() && unreadNotifications === 0 "  id="notifications" ><mat-icon   >notifications</mat-icon></button>
@@ -108,7 +108,18 @@
             <a  *ngIf="!loggedIn()"  (click)="sidenav.close()" mat-button routerLink="/login" class="side-menu-item"> <mat-icon>login</mat-icon> Login</a>
         </div>
 
+        <div *ngIf="isLoggedInStudent()">
+            <a (click)="sidenav.close()" routerLink="/new-group" mat-button class="side-menu-item" > <mat-icon>group_add</mat-icon>new group</a>
+        </div>
         
+
+        <div *ngIf="isLoggedInStudent() && isGroupMemeber()"  >
+            <a (click)="sidenav.close()" [routerLink]="['/my-groups', studentId]" mat-button class="side-menu-item"> <mat-icon>group</mat-icon>my groups</a>
+        </div>
+
+        <div *ngIf="isLoggedInStudent()"  >
+            <a  (click)="sidenav.close()" [routerLink]="['/group-request']"   mat-button class="side-menu-item"> <mat-icon>person_add</mat-icon>join a group</a>
+        </div>
         <div >
             <a (click)="logout()" *ngIf="loggedIn()" (click)="sidenav.close()" mat-button class="side-menu-item"> <mat-icon>logout</mat-icon> Logout</a>
         </div>

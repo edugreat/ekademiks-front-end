@@ -1,0 +1,143 @@
+body {  
+  margin: 0;  
+  font-family: Arial, sans-serif; /* General font for better appearance */  
+  overflow: hidden; /* Prevent scrolling on the entire page */  
+}  
+
+#drop-down-container{
+
+  padding-top: 5px;
+  margin-top: 20px;
+  height: fit-content;
+
+  margin-left: auto;
+  margin-right: auto;
+}
+.sidenav-container {  
+  height: 100vh; /* Full height */  
+  display: flex; /* Use flex to keep sidebar and content side by side */  
+}  
+
+.sidenav {  
+  width: 250px; /* Fixed width for sidenav */  
+  background-color: #f4f4f4; /* Light background for contrast */  
+  transition: width 0.3s; /* Smooth transition for width changes */  
+}  
+
+.sidenav-content {  
+  padding: 10px;  
+}  
+
+.chat-list-item {  
+  display: flex;  
+  align-items: center; 
+  padding: 10px; 
+  cursor: pointer;  
+  transition: background 0.2s; 
+}  
+
+.chat-list-item:hover {  
+  background-color: #eaf6ea; 
+  cursor: pointer;
+}  
+
+
+.group-name {  
+  font-size: 16px; 
+  font-weight: 500; 
+}  
+
+.chat-container {  
+  padding: 20px; 
+  /* background-color: #e1ffd7;  */
+  flex: 1; 
+  overflow: hidden; 
+  display: flex; 
+  flex-direction: column; 
+ 
+}  
+
+/* Chat message area with scrolling */  
+.chat-messages {  
+  overflow: hidden;
+  flex: 1; /* Allow chat-messages to expand and fill available space */  
+}  
+
+mat-sidenav-content{
+  overflow: hidden;
+}
+/* Additional styling for dropdown */  
+.group-dropdown {  
+  margin-bottom: 15px; /* Space below the dropdown */  
+  width: 100%; /* Full width */  
+}  
+
+mat-option{
+
+ 
+  width: fit-content;
+}
+
+ 
+.icon-img {  
+  width: 24px;  
+  height: 24px;  
+  margin-right: 8px; /* Space between icon and text */  
+}  
+
+/* Responsive Design */  
+@media (max-width: 768px) {  
+  .sidenav {  
+    width: 200px; /* Slightly reduced width for smaller screens */  
+  }  
+
+
+  .group-name {  
+    font-size: 14px; /* Smaller font size for mobile */  
+  }  
+
+  .chat-container {  
+    overflow: hidden;
+    padding: 15px; /* Reduced padding for mobile */  
+  }  
+
+  .icon-img {  
+    width: 20px;  
+    height: 20px;  
+  }  
+}  
+
+@media (max-width: 568px) {  
+
+  .group-dropdown {  
+    display: block; /* Show dropdown on small screens */  
+    width: auto; /* Adjust width as per your design */  
+  }  
+
+  .sidenav {  
+    display: none; /* Hide sidenav on very small screens */  
+  }  
+
+  .chat-container {  
+    padding: 10px; /* Further reduced padding for mobile */  
+  }  
+
+  .group-dropdown {  
+    display: block; /* Ensure dropdown is visible on small screens */  
+  }  
+ 
+ 
+}
+
+@media(min-width:568.2px){
+
+  #drop-down-container{
+    display: none;
+  }
+}
+
+@media(min-width:768px){
+  .chat-container{
+    margin-left: 50px;
+  }
+}

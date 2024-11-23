@@ -1,4 +1,8 @@
+import { Injectable } from "@angular/core";
 
+@Injectable({
+    providedIn:"root"
+})
 // class that provides links to the server endpoints
 export class Endpoints {
 
@@ -6,6 +10,7 @@ export class Endpoints {
 
      //routes to the backend server to fetch test based on the request parameters
  private _baseTestUrl = 'http://localhost:8080/tests/start';
+  
     public get baseTestUrl() {
         return this._baseTestUrl;
     }
@@ -168,4 +173,83 @@ export class Endpoints {
     public get setTestUrl() {
         return this._setTestUrl;
     }
+
+
+    // CHAT ENDPOINTS
+    private chatUrl = 'http://localhost:8080/chats';
+    private _createGroupChatUrl = `${this.chatUrl}/group?new=true`;
+    
+    public get createGroupChatUrl() {
+        return this._createGroupChatUrl;
+    }
+
+    private _isGroupMemberUrl = `${this.chatUrl}/inGroup`;
+
+    public get isGroupMemberUrl(){
+
+        return this._isGroupMemberUrl;
+    }
+   
+    private _unreadChatsUrl  = `${this.chatUrl}/unread`;
+
+    public get unreadChatsUrl() {
+
+        return this._unreadChatsUrl;
+    }
+
+    private _chatMessagesUrl = `${this.chatUrl}/messages`;
+
+    public get chatMessagesUrl() {
+        return this._chatMessagesUrl;
+  
+    } 
+
+    private _newChatMessageUrl = `${this.chatUrl}/new_chat`;
+    public get newChatMessageUrl() {
+       
+        return this._newChatMessageUrl;
+    }
+
+    private _allGroupsUrl = `${this.chatUrl}/groups`;
+    public get allGroupsUrl() {
+        return this._allGroupsUrl;
+    }
+   
+
+    private _myGroupIdsUrl = `${this.chatUrl}/ids`;
+    public get myGroupIdsUrl() {
+        return this._myGroupIdsUrl;
+    }
+
+    private _joinRequestUrl = `${this.chatUrl}/join_req`;
+    public get joinRequestUrl() {
+        return this._joinRequestUrl;
+    }
+    
+
+    private _approveRequestUrl = `${this.chatUrl}/approve`;
+    public get approveRequestUrl(){
+
+        return this._approveRequestUrl;
+    }
+
+    private _deleteChatNotificationsUrl  = `${this.chatUrl}/delete`;
+    public get deleteChatNotificationsUrl(){
+
+        return this._deleteChatNotificationsUrl
+    }
+   
+    private _pendingGroupChatRequestsUrl = `${this.chatUrl}/pending`;
+    public get pendingGroupChatRequestsUrl(){
+
+        return this._pendingGroupChatRequestsUrl;
+    }
+    
+
+    private _declineJoinRequestUrl = `${this.chatUrl}/decline`;
+    public get declineJoinRequestUrl(){
+
+        return this._declineJoinRequestUrl;
+    }
+   
 }

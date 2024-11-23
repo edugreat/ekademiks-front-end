@@ -1,0 +1,91 @@
+.chat-container {  
+  display: flex;  
+  flex-direction: column;  
+  height: 100vh; /* Full viewport height */  
+  max-width: 600px; /* Max width for the chat container */  
+  margin: auto; /* Center the container */  
+  background-color: #f9f9f9; /* Background color for the chat */  
+  border-radius: 8px; /* Rounded corners */  
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */  
+  position: relative;
+  
+}  
+
+.chat-header {
+  position: sticky;
+  top: 0;
+  padding: 10px;
+  background-color:rgb(221, 219, 219); /* Header background color */
+  color: black; /* Text color */
+  font-weight: bold;
+  text-align: center;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  z-index: 1; /* Ensures the header stays on top of other elements */
+  display: flex;
+    justify-content: space-between;
+}
+
+.chat-label {
+  font-size: 1.2em;
+}
+
+.chat {  
+  flex: 1; /* Allow this area to grow */  
+  overflow-y: auto; /* Enable vertical scrolling for messages */  
+  
+  padding: 10px; /* Padding inside the message area */  
+  margin-bottom: 60px; /* Space to prevent overlap with input field */  
+}  
+
+.chat-message { 
+ 
+  margin-bottom: 10px; /* Space between messages */  
+}  
+
+.sender-name {  
+  font-weight: bold; /* Bold text for sender's name */  
+  color: #333; /* Dark text color */  
+}  
+
+.message-content {  
+ 
+  padding: 8px; /* Padding inside the message bubble */  
+  border-radius: 5px; /* Rounded corners for message bubble */  
+  margin-top: 2px; /* Small space above the message content */  
+  width: fit-content; 
+}  
+
+.sent-at {  
+  font-size: 0.75em; /* Smaller font size */  
+  color: #777; /* Gray color for timestamp */  
+  margin-top: 2px; /* Small space above timestamp */  
+}  
+
+.chat-input {  
+  position: sticky;  
+  bottom: 0;  
+  display: flex;  
+  padding: 10px; /* Padding inside the input area */  
+  background-color: #fff; /* White background for input area */  
+  border-top: 1px solid #ddd; /* Light border on top for separation */  
+  width: 100%;
+}  
+
+mat-form-field {
+  flex: 1; /* Expand to fill the available space */ 
+  margin-right: 12px;
+}
+
+.chat-input button {  
+  padding: 10px 15px; /* Padding inside the button */  
+  background-color: #4caf50; /* Green background for button */  
+  color: white; /* White text color */  
+  border: none; /* No border */  
+  border-radius: 5px; /* Rounded corners */  
+  cursor: pointer; /* Change cursor on hover */  
+}  
+
+.chat-input button:hover {  
+  background-color: #45a049; /* Darker green on hover */  
+} 

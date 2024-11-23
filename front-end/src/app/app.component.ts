@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthService } from './auth/auth.service';
 import { Subscription, take } from 'rxjs';
 import { Router } from '@angular/router';
@@ -27,7 +27,8 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     private router: Router,
     private confirmationService: ConfirmationDialogService,
     private activityService:ActivityService,
-    private notificationService:NotificationsService
+    private notificationService:NotificationsService,
+ 
   
     
   ) {}
@@ -113,7 +114,20 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
       })
     }
 
-    
+    // checks if the current user belongs in any group chat. This is for conditional display of chat functionalities
+    isGroupMemeber(): boolean {
+     
+     
+     
+      return this.authService.isAgroupMember();
+
+      }
+      
+      // returns current loggedin student's id
+     public get studentId():number{
+
+        return Number(sessionStorage.getItem('studentId'));
+      }
 
   }
 

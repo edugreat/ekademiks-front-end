@@ -19,7 +19,6 @@ export class AuthService {
 
   studentLoginObs$ = this.studentLoginSubject.asObservable();
 
-
   
 
   //A subject to emit the name of the currently logged in user (initially emits the generic placeholder 'Student'). Subscribers receive up to date information
@@ -28,7 +27,7 @@ export class AuthService {
   //Get the observable version of the behabvior subject to ensure it only emits directly to this observable which subsequently notofies subscribers
   //The of this is to not allow subscribers directly subscribe to the Behavior subject so as not to emit unintended values by calling the subject's 'next' method upon subscription
   public userName$: Observable<string> ;
-  constructor(private http: HttpClient, private router:Router, private endpoints:Endpoints) {
+  constructor(private http: HttpClient, private endpoints:Endpoints) {
 
     this.currentUserName = new BehaviorSubject<string>(sessionStorage.getItem('username')! || 'Student');
     this.userName$= this.currentUserName.asObservable();
@@ -63,6 +62,25 @@ export class AuthService {
 
   }
 
+  
+  // checks of the current user is belongs to any group chat. This is used for displaying certain chat functionalities
+  isAgroupMember():boolean{
+
+    const aGroupMember = sessionStorage.getItem('groupMember');
+
+    if(aGroupMember === 'true') return true;
+
+    return false;
+
+  }
+
+  // observable of boolean value that checks if the current user belongs in any group chat
+  isGroupMember(studentId:number):Observable<boolean>{
+
+  
+    return this.http.get<boolean>(`${this.endpoints.isGroupMemberUrl}?id=${studentId}`);
+
+  }
   //saves the just logged in user's token to the session storage
   private saveToSession(user:User){
   
@@ -82,6 +100,16 @@ export class AuthService {
       this.studentLoginSubject.next(true);//send browser reload notification once a user successfully logs
 
     }
+
+    // indicates that the current user belong in a group chat. This is used to provide some chat functionalities
+    const studentId = Number(sessionStorage.getItem('studentId'));
+    this.isGroupMember(studentId).subscribe((member:boolean) =>{
+
+      if(member){
+
+        sessionStorage.setItem('groupMember', 'true');
+      }
+    })
   }
 
   

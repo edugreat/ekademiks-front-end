@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdminService } from '../admin.service';
+import { ConfirmationDialogService } from '../../confirmation-dialog.service';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-topic-fetch',
@@ -28,7 +30,9 @@ export class TopicFetchComponent implements OnInit {
 
 
 
-  constructor(private activatedRoute:ActivatedRoute, private adminService:AdminService, private router:Router){}
+  constructor(private activatedRoute:ActivatedRoute, private adminService:AdminService, private router:Router,
+    private confirmationService:ConfirmationDialogService
+  ){}
 
 
   ngOnInit(): void {
@@ -109,12 +113,22 @@ editTopic(index: number, value: string) {
     }
 
     deleteTopic(category: string, topic: string) {
+       
+      // confirm that they really want to delete this assessment from the database
+      this.confirmationService.confirmAction(`Do you want to delete ${topic} ?`);
 
-     this.adminService.deleteAssessmentTopic(category, topic).subscribe({
+      this.confirmationService.userConfirmationResponse$.pipe(take(1)).subscribe(response => {
 
-      error:(err) => this.router.navigate(['/error', err.error]),
-      complete:() => window.location.reload()
-     })
+        if(response === true){
+
+          this.adminService.deleteAssessmentTopic(category, topic).subscribe({
+
+            error:(err) => this.router.navigate(['/error', err.error]),
+            complete:() => window.location.reload()
+           })
+        }
+      })
+     
      
       }
 

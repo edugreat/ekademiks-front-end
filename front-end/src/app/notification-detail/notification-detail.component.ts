@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Notification, NotificationsService } from '../admin/upload/notifications/notifications.service';
+import { _Notification, NotificationsService } from '../admin/upload/notifications/notifications.service';
 import { TestService } from '../test/test.service';
 import { HttpResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -17,7 +17,7 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
 
 
   // unread notifications initialized to an empty array
-  unreadNotifications?:Notification[];
+  unreadNotifications?:_Notification[];
 
 
   // this is used to unsubscribe from the event that retrieves the assessment topic and duration
