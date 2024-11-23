@@ -1,0 +1,18 @@
+
+
+<div class="container">  
+ <button mat-button (click)="goBack()">Back</button>  
+ <mat-card *ngFor="let group of groupChats | keyvalue" class="group-chat-card">  
+ <mat-card-header>  
+ <mat-card-title ><img class="icon-img" [src]="group.value.groupIconUrl" alt="{{ group.value.groupName }} logo" class="group-logo">   {{ group.value.groupName}}</mat-card-title>  
+ </mat-card-header>  
+ <mat-card-actions>  
+ <button mat-button *ngIf="! isGroupMember(group.key) && !hasPendingRequest(group.key)" (click)="sendRequest(group.key)">Send Request</button>  
+
+ <button mat-button *ngIf="isGroupMember(group.key)" disabled >{{'You are a member'}}</button>
+
+ <!-- Show this if the user has already sent a request that has to be approved -->
+ <button disabled mat-button *ngIf="hasPendingRequest(group.key)" >{{'Awaiting approval'}}</button>
+ </mat-card-actions>  
+ </mat-card>  
+</div>

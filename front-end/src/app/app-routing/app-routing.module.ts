@@ -16,6 +16,12 @@ import { NotificationDetailComponent } from '../notification-detail/notification
 import { notificationGuard } from '../notification.guard';
 import { ErrorMessageComponent } from '../shared/error-message/error-message.component';
 import { AccountDisabledComponent } from '../account-disabled/account-disabled.component';
+import { NewGroupChatComponent } from '../chat/new-group-chat/new-group-chat.component';
+import {chatGuard } from '../chat/chat.guard';
+import { MyGroupsComponent } from '../chat/my-groups/my-groups.component';
+import { GroupChatComponent } from '../chat/group-chat/group-chat.component';
+import { GroupRequestComponent } from '../chat/group-request/group-request.component';
+import { authGuard } from '../chat/auth.guard';
 
 
 
@@ -32,11 +38,27 @@ const routes: Routes = [
   { path: 'login', component: AuthComponent },
   {path: 'error/:message', component:ErrorMessageComponent},
   { path: 'sign-up', component: SignUpComponent },
-  { path: 'performance', component: PerformanceComponent },
+  { path: 'performance', component: PerformanceComponent ,
+    canActivate:[authGuard],
+    canMatch:[authGuard]
+  },
   { path: 'home/:more', component: HomeComponent },
   { path: 'assessments/:level', component: AssessmentComponent },
   {path: 'disabled', component: AccountDisabledComponent},
- 
+  {path: 'new-group', component: NewGroupChatComponent, canActivate:[chatGuard], canMatch:[chatGuard]
+  },
+
+  {path: 'group-request',component: GroupRequestComponent,
+    canActivate:[authGuard],
+    canMatch:[authGuard]
+  },
+  
+  {path:'my-groups/:studentId', component:MyGroupsComponent,
+
+    children:[
+      {path: ':group_id/:group_admin_id/:description', component: GroupChatComponent}
+    ]
+  },
   {
     path: 'assessment-panel/:subject/:category',
     component: AssessmentExpansionPanelComponent,

@@ -1,0 +1,30 @@
+
+.container {  
+    max-width: 800px;  
+    margin: auto;  
+    padding: 20px;  
+    text-align: left;  
+  }  
+  
+  .notification-card {  
+    border: 1px solid #ccc;  
+    border-radius: 5px;  
+    padding: 15px;  
+    margin: 10px 0;  
+    transition: box-shadow 0.2s;  
+  }  
+  
+  .notification-card:hover {  
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);  
+  }  
+  
+  .notification-header {  
+    display: flex;  
+    justify-content: space-between;  
+    align-items: center;  
+  }
+
+  .approve-btn{
+
+    margin-right: 10px;
+  }

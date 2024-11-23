@@ -29,6 +29,7 @@
 .side-menu-item{
     color: white !important;
     margin-top: 20px;
+    margin-right: 20px !important;
 }
 
 #notifications{
@@ -42,7 +43,7 @@
 
   
 
-@media(min-width:900px){
+@media(min-width:1158.1px){
 
     #menuItem{
         display: none;
@@ -67,7 +68,7 @@
     
 }
 
-@media(max-width:900px){
+@media(max-width:1158px){
 
     .top-menu-item{
         display: none;

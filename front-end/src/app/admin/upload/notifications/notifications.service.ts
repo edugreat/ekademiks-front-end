@@ -15,7 +15,7 @@ export class NotificationsService {
   notificationCount$ = this.unreaNotificationsCount.asObservable();
 
   // emits all received notifications to subscriber. This is initialized to all notifications received upon login
-  private unreadNotifications = new BehaviorSubject<Notification[]>(this.notifications)
+  private unreadNotifications = new BehaviorSubject<_Notification[]>(this.notifications)
 
   unreadNotifications$ = this.unreadNotifications.asObservable();
 
@@ -26,7 +26,7 @@ export class NotificationsService {
   private notificationUrl = 'http://localhost:8080/notice/notify_me';
 
   // An array that stores all received notifications
-  private _notifications: Notification[] = [];
+  private _notifications: _Notification[] = [];
 
 
 
@@ -55,7 +55,7 @@ export class NotificationsService {
 
 
   // return all unread notifications
-  public get notifications(): Notification[] {
+  public get notifications(): _Notification[] {
     return this._notifications;
   }
 
@@ -86,13 +86,13 @@ export class NotificationsService {
 
 
           // Parses the received object to its correct json object
-          const notification: Notification = JSON.parse(event.data);
+          const notification: _Notification = JSON.parse(event.data);
 
 
           this.addToNotifications(notification);
         }
       })
-    })
+    });
 
     // executes once there is error suc as timeout of the server connection etc
     this.eventSource.onerror = () => {
@@ -124,7 +124,7 @@ export class NotificationsService {
 
   }
   // Add the just arriving notification if has not been received till not
-  private addToNotifications(newNotification: Notification) {
+  private addToNotifications(newNotification: _Notification) {
 
 
 
@@ -174,12 +174,16 @@ export class NotificationsService {
 
 // An object representing the notifications logged in user receive.
 // Notification can be for new assessment upload, resut release etc
-export type Notification = {
+export type _Notification = {
   id: number,
   type: string,
   metadata: number,
   message: string,
-  createdAt: string
+  createdAt: string,
+  //in the case of notification for request to join new group chat, 'notifier' is the name of the user who wants to join the group chat.
+  notifier?:string 
+ 
+
 
 }
 

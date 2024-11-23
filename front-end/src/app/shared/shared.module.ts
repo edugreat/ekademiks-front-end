@@ -11,6 +11,7 @@ import { ConfirmationComponent } from './confirmation/confirmation.component';
 import { NumericDirective } from './numeric.directive';
 import { ErrorMessageComponent } from './error-message/error-message.component';
 import { MathJaxDirective } from './math-jax.directive';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 
 
@@ -23,6 +24,7 @@ import { MathJaxDirective } from './math-jax.directive';
     MaterialModule,
     CommonModule,
     ReactiveFormsModule,
+    FlexLayoutModule
    
     
    

@@ -1,0 +1,63 @@
+
+<div *ngIf="! _viewNotificationDetails" class="chat-container">  
+  <div class="chat-header">
+      <label class="chat-label">{{groupDescription}}</label>
+      <a  mat-button matTooltip="online members" *ngIf="onlineMembers"  >
+        <mat-icon color="primary" >online_prediction</mat-icon>
+        {{onlineMembers }}
+      </a>
+
+      <a *ngIf="isGroupAdmin() && requestNotificationCount() > 0"
+         mat-button matTooltip="new requests" (click)="viewNotificationDetails()" >
+        <mat-icon aria-hidden="false" [matBadge]="requestNotificationCount()">mail</mat-icon>
+      </a>
+  </div>
+
+  <div class="chat">  
+      <div *ngFor="let chat of chatMessages" class="chat-message"> 
+
+          <div class="sender-name">
+              <button *ngIf="!(chat.senderId === loggedInStudentId())" mat-icon-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
+                  <mat-icon>more_vert</mat-icon>
+              </button> 
+              <span style="margin-top: -5px; color: #777 ">
+                  {{ chat.senderId === loggedInStudentId() ? 'You' : chat.senderName }}
+              </span>
+          </div>  
+          <div [ngStyle]="{'background-color':chat.senderId === loggedInStudentId() ? '#d2f0c4':'#f5f7f4'}" class="message-content">{{ chat.content }}</div>  
+          <div class="sent-at">{{ chat.sentAt | date:'medium' }}</div>  
+      </div>
+  </div> 
+
+  <mat-menu #menu="matMenu">
+      <button mat-menu-item>
+          <mat-icon color="warn">report</mat-icon>
+          <span>Report account</span>
+      </button>
+  </mat-menu>
+
+  <div class="chat-input">  
+      <mat-form-field>
+          <mat-label>Type a message...</mat-label>
+          <button 
+              style="background-color: rgb(81, 81, 231);" 
+              [disabled]="validateChatContent()" 
+              (click)="sendChat(); $event.stopPropagation()" 
+              mat-icon-button matSuffix>
+              <mat-icon>send</mat-icon>
+          </button>
+          <textarea 
+              matInput 
+              (keydown.enter)="sendChat()"
+              [(ngModel)]="newChatContent"
+              cdkTextareaAutosize
+              #autosize="cdkTextareaAutosize"
+              cdkAutosizeMinRows="1"
+              cdkAutosizeMaxRows="5">
+          </textarea>
+      </mat-form-field>
+  </div> 
+</div> 
+
+<app-request-notifications-detail *ngIf="_viewNotificationDetails" [notifications]="requestNotifications" [groupId]="groupId" (notificationDetails)="_viewNotificationDetails=$event" (clearParentJoinRequestNotification)="requestNotificationToClear=$event"  ></app-request-notifications-detail>
+

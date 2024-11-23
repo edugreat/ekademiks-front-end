@@ -1,0 +1,37 @@
+<mat-toolbar id="tool-container" >  
+  
+  <mat-form-field id="drop-down-container" >
+    <mat-label>Group Chats</mat-label>
+    <mat-select class="group-dropdown" >
+      <mat-option *ngFor="let chat of groupChatInfo | keyvalue" [value]="chat.value.groupIconUrl"
+      
+        [matBadge]="chat.value.unreadChats ? chat.value.unreadChats : '' " matBadgeOverlap="false" aria-hidden="false" >
+        <img class="icon-img" [src]="chat.value.groupIconUrl" alt="">
+        {{chat.value.groupName}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</mat-toolbar>  
+
+<mat-sidenav-container class="sidenav-container">  
+  <mat-sidenav mode="side" opened class="sidenav">  
+    <div class="sidenav-content">  
+      <h3>Chat Groups</h3>  
+      <mat-list>  
+        <mat-list-item *ngFor="let chat of groupChatInfo | keyvalue" (click)="connectToChat(chat.key, chat.value.groupDescription,  chat.value.groupAdminId)" class="chat-list-item">  
+          <img  [src]="chat.value.groupIconUrl" alt="{{ chat.value.groupName }}" class="icon-img">  
+          <span [matBadge]="chat.value.unreadChats ? chat.value.unreadChats : '' " matBadgeOverlap="false" aria-hidden="false" class="group-name">{{ chat.value.groupName }}</span>  
+        </mat-list-item>  
+      </mat-list>  
+    </div>  
+  </mat-sidenav>  
+
+  <mat-sidenav-content>  
+    <div class="chat-container" >  
+      <div class="chat-messages">  
+        <router-outlet></router-outlet>  
+        <!-- This is where the selected chat messages will be displayed -->  
+      </div>  
+    </div>  
+  </mat-sidenav-content>  
+</mat-sidenav-container>
