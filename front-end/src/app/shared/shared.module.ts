@@ -12,13 +12,14 @@ import { NumericDirective } from './numeric.directive';
 import { ErrorMessageComponent } from './error-message/error-message.component';
 import { MathJaxDirective } from './math-jax.directive';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { RightClickDirective } from './right-click.directive';
 
 
 
 
 @NgModule({
   declarations: [OptionSortPipe, SortPipe, 
-    SpinnerComponent, ProgressBarComponent, ConfirmationComponent, NumericDirective, ErrorMessageComponent,  MathJaxDirective],
+    SpinnerComponent, ProgressBarComponent, ConfirmationComponent, NumericDirective, ErrorMessageComponent,  MathJaxDirective, RightClickDirective],
   imports: [
     FormsModule,
     MaterialModule,
@@ -34,7 +35,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
   ],
   exports:[FormsModule, ReactiveFormsModule, OptionSortPipe,SortPipe,
      SpinnerComponent, MaterialModule,
-    ProgressBarComponent, ConfirmationComponent, NumericDirective, ErrorMessageComponent, MathJaxDirective
+    ProgressBarComponent, ConfirmationComponent, NumericDirective, ErrorMessageComponent, MathJaxDirective, RightClickDirective
     ]
 })
 export class SharedModule { }

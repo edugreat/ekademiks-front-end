@@ -4,15 +4,37 @@ body {
   overflow: hidden; /* Prevent scrolling on the entire page */  
 }  
 
+
+
 #drop-down-container{
 
   padding-top: 5px;
   margin-top: 20px;
+  margin-bottom: 10px;
   height: fit-content;
 
   margin-left: auto;
   margin-right: auto;
+  display: block;
+
+ 
 }
+
+#tool-container{
+
+  margin-bottom: 15px;
+}
+
+#toolBarDiv{
+
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  flex-direction: column;
+ 
+}
+
+
 .sidenav-container {  
   height: 100vh; /* Full height */  
   display: flex; /* Use flex to keep sidebar and content side by side */  
@@ -26,6 +48,43 @@ body {
 
 .sidenav-content {  
   padding: 10px;  
+}  
+
+
+.actions {  
+  display: flex;  
+  justify-content: space-between;  
+  margin-top: 10px;  
+}  
+
+
+
+.save-changes, .cancel-edit{  
+  padding: 5px 10px;   
+  color: white;  
+  border: none;  
+  border-radius: 3px;  
+  cursor: pointer;  
+  transition: background-color 0.3s ease;  
+}  
+
+.save-changes{
+  background: #4a89dc; 
+}
+
+.cancel-edit{
+
+  background-color: rgb(245, 174, 174);
+}
+
+
+
+.save-changes:hover {  
+  background: #3a7bc5;  
+}  
+
+.cancel-edit:hover {  
+  background: #ff6347;  
 }  
 
 .chat-list-item {  
@@ -51,15 +110,18 @@ body {
   padding: 20px; 
   /* background-color: #e1ffd7;  */
   flex: 1; 
-  overflow: hidden; 
+  overflow: y; 
   display: flex; 
   flex-direction: column; 
+  height: 95vh;
+  background-color: rgb(181, 180, 180); 
+  border-radius: 5px;
  
 }  
 
 /* Chat message area with scrolling */  
 .chat-messages {  
-  overflow: hidden;
+  overflow-y: hidden;
   flex: 1; /* Allow chat-messages to expand and fill available space */  
 }  
 
@@ -126,6 +188,14 @@ mat-option{
     display: block; /* Ensure dropdown is visible on small screens */  
   }  
  
+   mat-form-field {  
+    width: 100%; /* Ensure the input field takes full width on small screens */  
+  } 
+
+  #toolBarDiv{
+
+    display: block;
+  }
  
 }
 
@@ -139,5 +209,10 @@ mat-option{
 @media(min-width:768px){
   .chat-container{
     margin-left: 50px;
+  }
+
+  #toolBarDiv{
+
+    display: none;
   }
 }

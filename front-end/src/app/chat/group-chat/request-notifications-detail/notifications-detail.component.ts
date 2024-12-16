@@ -28,7 +28,7 @@ export class NotificationsDetailComponent implements OnDestroy {
   @Output()
   notificationDetails = new EventEmitter<boolean>();
 
-  // emits the parent notification to clear after the join request has been approved or decline
+  // emits notification ID so the parent notifications array can remove it after request has been approved or declined
   @Output()
   clearParentJoinRequestNotification = new EventEmitter<number|undefined>
 
@@ -68,7 +68,12 @@ export class NotificationsDetailComponent implements OnDestroy {
         
           this.approveSub = this.chatService.approveJoinRequest(this.groupId, joinRequest.metadata, joinRequest.id).subscribe({
 
-            complete:() => this.goBack(joinRequest.id)
+            complete:() => {
+
+             this.updateUserPendingRequests(joinRequest);
+              this.goBack(joinRequest.id)
+            
+            }
           
           })
 
@@ -82,9 +87,34 @@ export class NotificationsDetailComponent implements OnDestroy {
 
       this.declineSub = this.chatService.declineJoinRequest(this.groupId!, joinRequest.metadata, joinRequest.id).subscribe({
 
-        complete:() => this.goBack(joinRequest.id)
+        complete:() => {
+
+            // removes the request from the list of requests the user is awaiting response from the admin
+            this.updateUserPendingRequests(joinRequest);
+          this.goBack(joinRequest.id)
+        
+        }
       });
     
     }
 
+// handles updating of user's pending join requests 
+  private updateUserPendingRequests(joinRequest: _Notification) {
+    if (sessionStorage.getItem('join_req')) {
+
+      let pendingReqsIDS: string[] = JSON.parse(sessionStorage.getItem('join_req')!);
+
+      pendingReqsIDS.splice(pendingReqsIDS.findIndex(req => Number(req) === joinRequest.id), 1);
+
+      // if there are no more pending request for the user, then remove the item from the session storage
+      if (!pendingReqsIDS.length) {
+        sessionStorage.removeItem('pending_req');
+      } else {
+
+        sessionStorage.setItem('pending_req', JSON.stringify(pendingReqsIDS));
+      }
+
+
+    }
+  }
 }

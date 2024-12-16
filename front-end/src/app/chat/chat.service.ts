@@ -1,4 +1,4 @@
-import { Injectable, NgZone, OnDestroy } from '@angular/core';
+import { enableProdMode, Injectable, NgZone, OnDestroy } from '@angular/core';
 import { Endpoints } from '../end-point';
 import { BehaviorSubject, Observable, Subject, Subscription, tap } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpResponse, HttpStatusCode } from '@angular/common/http';
@@ -8,8 +8,9 @@ import { _Notification as _Notification } from '../admin/upload/notifications/no
 @Injectable({
   providedIn: 'root'
 })
-export class ChatService implements OnDestroy {
+export class  ChatService implements OnDestroy {
  
+  
   
   private chatEventSource?: EventSource;
 
@@ -40,7 +41,7 @@ export class ChatService implements OnDestroy {
       // disconnect from receiving chat messages once the user logs out
      this.loginSub = this.authService.studentLoginObs$.subscribe(isLoggedIn => {
 
-        if(!isLoggedIn) this.disconnectFromChatUpdates();
+        if(!isLoggedIn) this.disconnectFromSSE();
       });
 
     
@@ -63,14 +64,16 @@ export class ChatService implements OnDestroy {
   }
   // communicates to the server endpoint to fetch to fetch unread chats count for the given student
   // Unread chats count is a map object having the group's id as the key, and count of unread messages(greater than or zero) as the values
-  unreadChats(studentId:number):Observable<any>{
+  groupInfo(studentId:number):Observable<any>{
 
-    return this.http.get<any>(`${this.endpoints.unreadChatsUrl}?studentId=${studentId}`);
+    return this.http.get<any>(`${this.endpoints.groupInfoUrl}?studentId=${studentId}`);
 
   }
 
   // get group chat messages
   groupChatUpdates(groupId:number, studentId:number){
+
+    
 
     this.connectToChatMessages(groupId, studentId);
   }
@@ -84,6 +87,7 @@ export class ChatService implements OnDestroy {
   // send new chat messages to the server which then broadcasts the chats in realtime to all members online
   sendNewChatMessage(newChat:ChatMessage):Observable<HttpResponse<number>>{
 
+  
     
 
     return this.http.post<HttpStatusCode>(this.endpoints.newChatMessageUrl, newChat,{'observe':'response'})
@@ -98,7 +102,7 @@ export class ChatService implements OnDestroy {
 
   }
 
-  // calls the server side to approvide user's requst to join the group chat referened by groupId.
+  // calls the server side to approvide user's requst to join the group chat referenced by groupId.
   // requesterId is the ID to points to the user that actually requested to join the groupchat
   approveJoinRequest(groupId: number, requesterId: number, requestId:number):Observable<HttpResponse<number>> {
 
@@ -141,11 +145,22 @@ export class ChatService implements OnDestroy {
 
   }
 
-  // method that establishes a unidirectional messaging system where the server forwards previous chat messages to the cient via the server sent event emitter client
+
+  hadPreviousPosts(studentId: number, groupId:number):Observable<boolean> {
+
+    const data:{[studentId:number]:number} = {[studentId]:groupId}
+   
+    return this.http.post<boolean>(`${this.endpoints.anyRecentPosts}`,data)
+   
+  }
+
+  // method that establishes a unidirectional messaging system where the server forwards previous chat messages to the client via the server sent event emitter client
   private connectToChatMessages(groupId: number, studentId:number){
 
     // // closes the previous event source before connecting to avoid receiving stale chats
-    // if(this.chatEventSource) this.chatEventSource.close();
+     if(this.chatEventSource) this.chatEventSource.close();
+
+     
 
     this.chatEventSource = new EventSource(`${this.endpoints.chatMessagesUrl}?group=${groupId}&student=${studentId}`);
 
@@ -156,6 +171,8 @@ export class ChatService implements OnDestroy {
 
         // check if any message has been received
         if(event){
+
+          console.log('connected to chats')
 
           const _notification:any = JSON.parse(event.data);
 
@@ -186,6 +203,7 @@ export class ChatService implements OnDestroy {
     // executes once an error occurs
     this.chatEventSource.onerror = () => {
 
+      console.log('retrying connections to chats');
       // error handling retry connection that ensures retry time does not exceed 30 seconds
       const retryDelay = Math.min(1000 * Math.pow(2, this.retryCount), 30000);
 
@@ -196,17 +214,37 @@ export class ChatService implements OnDestroy {
         this.connectToChatMessages(groupId,studentId);
       }, retryDelay);
 
-    }
+    };
+
+    this.chatEventSource!.onopen = () => {
+
+     
+
+      this.retryCount = 0;
+     }
 
   }
   
 
+  // deletes a given chat message whose groupId is the key and chatId is the value of the map
+  deleteChatMessage(map: { [x: number]: number }):Observable<HttpResponse<number>> {
+  
 
-  // disconnect from the chat updates service
-  disconnectFromChatUpdates() {
+    return this.http.delete<HttpStatusCode>(this.endpoints.deleteChatUrl, {
+      body:map,
+      observe:"response"
+    })
+
+  }
+
+
+  // disconnect from the chat SSE service
+  disconnectFromSSE() {
     
     if(this.chatEventSource) {
       this.chatEventSource.close();
+
+     
 
       clearTimeout(this.reconnectionTiming);
     }
@@ -224,6 +262,49 @@ export class ChatService implements OnDestroy {
    
     return (data as ChatMessage).onlineMembers !== undefined;
   }
+
+
+  // implements functionality for editing group chat names
+  editGroupName(_studentId: string, groupId: string, currentGroupName: string):Observable<HttpResponse<number>> {
+
+    
+    return this.http.patch<HttpStatusCode>(`${this.endpoints.editGroupUrl}?_new=${currentGroupName}`, {[Number(_studentId)]:Number(groupId)}  ,{'observe':'response'})
+  }
+
+
+  // _studentId is used to verify that it's the group admin who actually wants to delete the group chat
+  deleteGroupChat(_studentId: string, groupId: string):Observable<HttpResponse<number>> {
+   
+    
+
+    return this.http.delete<HttpStatusCode>(this.endpoints.deleteGroupUrl, {
+      headers:new HttpHeaders({'content-type':'application/json'}),
+      observe:'response',
+      body:{[Number(_studentId)]: Number(groupId)}
+    })
+
+  }
+
+  leaveGroup(groupId: number, studentId: number):Observable<HttpResponse<number>> {
+
+    return this.http.delete<HttpStatusCode>(this.endpoints.leaveGroupUrl, {
+
+      headers: new HttpHeaders({'content-type':'application/json'}),
+      observe:'response',
+      body:{[groupId]:studentId}
+    })
+    
+  }
+
+  updateChat(editableChat: ChatMessage) :Observable<HttpResponse<number>> {
+    
+
+   
+
+    return this.http.put<HttpStatusCode>(this.endpoints.editChatUrl, editableChat, {observe:'response'});
+
+   
+  }
 }
 
 
@@ -235,6 +316,8 @@ export type ChatMessage = {
   senderId:number,
   senderName?:string,
   content:string,
+  repliedTo?:number,//ID of the chat that was replied to assuming this was a replied chat
+  repliedToChat?:string,//The actual chat message that was replied to if this was a replied chat
   sentAt:Date,
   onlineMembers?:number//tracks the number of members who are currently online
 
@@ -247,9 +330,11 @@ export type GroupChatInfo = {
  [groupId:number]:{
    unreadChats:number, // zero or more unread chats
    groupName:string, // the group chat name
+   createdAt:Date, // the date the group was created
    groupIconUrl:string, // the group icon url pointing to the group icon
    groupDescription:string, // the group description which every group chat must have. It portrays their ideology 
-   groupAdminId:string // information pointing the group admin
+   groupAdminId:string, // information pointing the group admin
+   hasPreviousPosts:boolean //determines if the group chat previous posts
   }
 }
 

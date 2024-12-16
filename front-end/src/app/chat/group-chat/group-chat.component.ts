@@ -1,11 +1,11 @@
-import { AfterViewInit, Component, Inject, inject, Injector, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, Inject, inject, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { ChatMessage, ChatService } from '../chat.service';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription, take } from 'rxjs';
-import { HttpResponse } from '@angular/common/http';
+import { HttpResponse, HttpStatusCode } from '@angular/common/http';
 import { _Notification as _Notification } from '../../admin/upload/notifications/notifications.service';
 import { MAT_SNACK_BAR_DATA, MatSnackBar } from '@angular/material/snack-bar';
-import { CommonModule, JsonPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-group-chat',
@@ -15,10 +15,27 @@ import { CommonModule, JsonPipe } from '@angular/common';
 export class GroupChatComponent implements OnInit, OnDestroy {
 
 
+
+
   fontSize = '10px';
 
+  currentlyClickedChat?: ChatMessage;
 
+  // holds reference to the list of elements in the #chatMessageRef
+  @ViewChildren('chatMessageRef') chatMessageRefs!:QueryList<ElementRef>;
 
+  @ViewChild('textAreaDiv') textAreaDiv!:ElementRef<HTMLDivElement>;
+
+  @ViewChild('textarea') textArea!:ElementRef<HTMLTextAreaElement>
+
+  // indicates if chat message is being edited or not
+  editingChat = false;
+
+  // indicates if a chat is being replied to
+  _replyToChat = false;
+
+  // indicates chat content currently copied to the clipboard
+  copiedText = '';
 
   // boolean flag that shows when the notification icon has been clicked so as to view the notification detals
   _viewNotificationDetails = false;
@@ -42,8 +59,6 @@ export class GroupChatComponent implements OnInit, OnDestroy {
   chatMessages: ChatMessage[] = [];
 
 
-  // keeps reference to the join request notification to clear from the array of notification after the request has been approved or declined
-  requestNotificationToClear?: number;
 
 
   groupId?: number; //the group ID of this group chat
@@ -55,6 +70,11 @@ export class GroupChatComponent implements OnInit, OnDestroy {
   snackBarTimer: any;
 
 
+  @ViewChild('chatContainer') chatContainer!: ElementRef;
+
+
+
+
   constructor(private chatService: ChatService, private activatedRoute: ActivatedRoute) { }
 
 
@@ -64,16 +84,28 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
     this.activatedRoute.paramMap.subscribe(params => {
 
-      
+      console.log('inside oninit')
+
+
 
       const groupId = params.get('group_id');
       const groupDescription = params.get('description');
+
+
       if (groupId && groupDescription) {
         this.groupId = Number(groupId);
 
         this.groupDescription = groupDescription;
 
         this.chatService.groupChatUpdates(Number(groupId), this.loggedInStudentId());
+
+        // checks if the user had recent messages
+        this.hadRecentPosts();
+
+        // clear previous chat
+        if (this.chatMessages.length) {
+          this.chatMessages.splice(0)
+        }
 
         this.streamChats();
 
@@ -82,11 +114,6 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
     this.joinRequestNotification();
 
-    // removes from the request notification, the given notification ID
-    if(this.requestNotificationToClear){
-
-      this.requestNotifications.splice(this.requestNotificationToClear, 1);
-    }
 
 
   }
@@ -97,7 +124,10 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
     this.chatSubscription?.unsubscribe();
     this.joinRequestSub?.unsubscribe();
-    clearInterval(this.snackBarTimer)
+    clearInterval(this.snackBarTimer);
+
+    // disconnect from the receiving chat messages
+    this.chatService.disconnectFromSSE();
   }
 
 
@@ -122,6 +152,156 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
   }
 
+  // shows when the mouse right button is clicked
+  showChatMenu(chat: ChatMessage) {
+
+    this.currentlyClickedChat = chat;
+
+  }
+
+
+  async copyToClipboard(chatMessage: string | undefined): Promise<void> {
+
+
+    if (chatMessage) {
+
+
+      try {
+
+        await navigator.clipboard.writeText(chatMessage);
+
+        this.copiedText = chatMessage;
+
+        console.log(`copied: ${this.copiedText}`)
+
+        setTimeout(() => {
+
+          this.copiedText = '';
+
+          this.currentlyClickedChat = undefined;
+
+        }, 5000);
+
+
+
+      } catch (error: unknown) {
+
+        if (error instanceof Error) {
+
+          console.log(`could not copy to clipboard due to ${error}`)
+
+        } else {
+
+          console.log(`Unknown error while copying to clipboard`)
+
+        }
+      }
+
+    }
+  }
+
+  private scrollToTextArea(){
+
+   const element =  this.textAreaDiv.nativeElement;
+
+   element.scrollIntoView({
+    block:'end',behavior:'smooth'
+  });
+
+  if(this.textArea){
+
+    this.textArea.nativeElement.focus({preventScroll:true})
+  }
+
+  element.classList.add('animated-border');
+
+  setTimeout(() => {
+    
+    element.classList.remove('animated-border');
+
+  }, 10000);
+
+    
+  }
+
+  editChat() {
+
+    if (this.currentlyClickedChat) {
+
+
+
+      this.editingChat = true;
+
+      this.newChatContent = this.currentlyClickedChat.content;
+      this.scrollToTextArea();
+
+
+
+    }
+
+
+  }
+
+  // replies to a chat
+  replyToChat() {
+    
+    //confirm a chat is being replied to
+    if(this.currentlyClickedChat){
+
+      this._replyToChat = true;
+
+      this.newChatContent = `Your reply...`;
+     this.scrollToTextArea();
+      
+    }
+
+  
+    }
+    
+
+  deleteChat() {
+
+    // only the chat author or the group admin is permitted to delete the chat
+    if(this.currentlyClickedChat?.senderId === this.loggedInStudentId() || this.isGroupAdmin() ){
+
+      this.chatService.deleteChatMessage({[this.currentlyClickedChat!.groupId]:this.currentlyClickedChat!.id!})
+      .pipe(take(1)).subscribe({
+
+        next:(response:HttpResponse<number>) => {
+
+          if(response.status === HttpStatusCode.Ok){
+
+            // remove the chat from the array if chats
+            const index = this.chatMessages.findIndex(msg => msg.id === this.currentlyClickedChat?.id);
+
+            if(index >= 0){
+
+              this.chatMessages.splice(index, 1);
+            }
+          }
+        }
+      })
+
+
+    }
+
+
+  }
+
+  // checks if the logged in was the sender of the chat message
+  isAuthor(): boolean {
+
+    if (this.currentlyClickedChat) {
+
+      return this.loggedInStudentId() === this.currentlyClickedChat.senderId;
+    }
+
+    return false;
+
+
+  }
+
+
   // get the number of online members from the session storage
   get onlineMembers(): number | undefined {
 
@@ -138,16 +318,98 @@ export class GroupChatComponent implements OnInit, OnDestroy {
   private addToChats(chat: ChatMessage) {
 
 
-    const index = this.chatMessages.findIndex(c => c === chat);
-    if (index < 0) {
+
+
+    const index = this.chatMessages.findIndex(c => c.id === chat.id);
+    if (index >= 0) {
+
+
+      let updatableChat = this.chatMessages[index];
+
+     
+      // check if it's a deleted chat
+      if (chat.content === "Deleted") {
+
+        this.chatMessages.splice(index, 1);
+
+        return;
+
+        
+      }
+       // replace the old chat with the new chat since it's an updated version of the chat message
+      else if(chat.content !== updatableChat.content){
+
+        updatableChat.content = chat.content;
+
+        return;
+      }
+
+
+    } else {
+
+
 
       this.chatMessages.push(chat);
+
+      // scrolls to the bottom
+      setTimeout(() => {
+        this.scrollToBottom()
+      }, 0);
 
       // update online presence of members
       sessionStorage.setItem('online_members', `${chat.onlineMembers}`)
     }
 
   }
+
+
+  // Automatically scrolls to the bottom (allowing views) when previous chats keep populated and when new chat arrives
+  private scrollToBottom() {
+
+    try {
+      this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
+    } catch (error) {
+      console.log(`could not scroll: ${error}`)
+    }
+
+  }
+
+  // finds out if the user has received chats since they had joined the group chat.
+  //This is used to control the display of spinner while waiting for the retrieval of previous chats
+  private hadRecentPosts() {
+
+    const studentId = sessionStorage.getItem('studentId');
+
+    if (studentId && this.groupId) {
+
+      this.chatService.hadPreviousPosts(Number(studentId), this.groupId).pipe(take(1)).subscribe({
+        next: (result) => {
+          if (result) {
+            sessionStorage.setItem('recentPosts', 'true');
+          }
+        }
+      })
+
+    }
+
+  }
+
+  joinedAt(): Date {
+
+    const _joinedAt = JSON.parse(sessionStorage.getItem('joinedAt')!);
+
+
+
+    return new Date(_joinedAt[this.groupId!]);
+
+
+  }
+
+  recentPosts(): boolean {
+
+    return (sessionStorage.getItem('recentPosts') ? true : false)
+  }
+
   loggedInStudentId(): number {
 
     const id = Number(sessionStorage.getItem('studentId'));
@@ -160,29 +422,150 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
 
     const senderId = sessionStorage.getItem('studentId');
-    if (this.groupId && senderId) {
+    if (this.groupId && senderId && this.newChatContent.trim().length) {
 
-      const newChatMessage: ChatMessage = {
-        id: 0,//not actually a required field, but to prevent server reporting error 
-        groupId: Number(this.groupId),
-        senderId: Number(senderId),
-        senderName: '',//not actually a required field, but to prevent server reporting error 
-        content: this.newChatContent,
-        sentAt: new Date()
-      };
 
-      this.newChatContent = '';
 
-     
-      this.chatService.sendNewChatMessage(newChatMessage).subscribe({
-        next: (status: HttpResponse<number>) => {
+      // handle differently for the case of chat editing
+      if (this.currentlyClickedChat && this.editingChat) {
 
-        },
+        // get the chat message being edited
+        let editableChat = this.chatMessages.find(chat => chat.id === this.currentlyClickedChat!.id);
+        const editedChatIndex = this.chatMessages.findIndex(chat => chat.id === this.currentlyClickedChat!.id);
+        if (editableChat) {
 
-        error: (err) => console.log(err)
-      })
+          //    // update the content of the chat
+          // editableChat!.content = this.newChatContent;
+
+          const updatedChat: ChatMessage = {
+            id: editableChat.id,
+            groupId: editableChat.groupId,
+            senderId: editableChat.senderId,
+            content: this.newChatContent,
+            sentAt: editableChat.sentAt
+
+          }
+
+          this.chatService.updateChat(updatedChat).pipe(take(1)).subscribe({
+            next: (response: HttpResponse<number>) => {
+
+              if (response.status === HttpStatusCode.Ok) {
+
+
+                // replace existing chat with the edited chat
+                editableChat!.content = this.newChatContent;
+
+                this.newChatContent = '';
+
+              }
+
+
+            },
+            error: (err) => {
+              console.log(`could not edit chat`);
+
+              editableChat = undefined;
+            this.newChatContent = '';
+
+            },
+
+            complete: () => {
+              this.editingChat = false;
+
+              editableChat = undefined;
+
+              this.newChatContent = '';
+            }
+          })
+
+          return;
+        }
+
+        // handle differently if this is a reply chat
+      }else if(this.currentlyClickedChat && this._replyToChat){
+
+        const newChatMessage: ChatMessage = {
+          id: 0,//not actually a required field, but to prevent server reporting error 
+          groupId: Number(this.groupId),
+          senderId: Number(senderId),
+          senderName: '',//not actually a required field, but to prevent server reporting error 
+          content: this.newChatContent,
+          repliedTo:this.currentlyClickedChat.id,
+          repliedToChat:this.currentlyClickedChat.content,
+          sentAt: new Date()
+        };
+
+        this.newChatContent = '';
+
+        this._replyToChat = false;
+
+        this.chatService.sendNewChatMessage(newChatMessage).pipe(take(1)).subscribe({
+          next: (response: HttpResponse<number>) => {
+            if (response.status === HttpStatusCode.Ok) console.log('success')
+          },
+
+          error: (err) => console.log(err)
+        })
+
+        return;
+
+      }
+
+      // handle differently for fresh chat message
+      else {
+
+        const newChatMessage: ChatMessage = {
+          id: 0,//not actually a required field, but to prevent server reporting error 
+          groupId: Number(this.groupId),
+          senderId: Number(senderId),
+          senderName: '',//not actually a required field, but to prevent server reporting error 
+          content: this.newChatContent,
+          sentAt: new Date()
+        };
+
+        this.newChatContent = '';
+
+
+        this.chatService.sendNewChatMessage(newChatMessage).subscribe({
+          next: (response: HttpResponse<number>) => {
+            if (response.status === HttpStatusCode.Ok) console.log('success')
+          },
+
+          error: (err) => console.log(err)
+        })
+
+        
+      }
+
+
     }
 
+  }
+// scrolls to the original chat has a reply
+goToChat(chatId:number) {
+    
+  // get the index position of the chat 
+  const index = this.chatMessages.findIndex(chat => chat.id === chatId);
+  // go the elementRef at the given index
+  if(index >= 0){
+
+    // get the element at this index of the querry list
+    const element = this.chatMessageRefs.toArray()[index].nativeElement as HTMLElement;
+
+    if(element){
+
+      element.scrollIntoView({behavior:'smooth',block:'center'});
+    
+
+      element.classList.add('animated-highlight');
+
+      setTimeout(() => {
+        
+        element.classList.remove('animated-highlight')
+
+      }, 10000);
+    }
+  }
   }
 
   // checks if the logged in user is the group admin
@@ -198,6 +581,25 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
     return this.newChatContent.trim().length === 0;
 
+
+
+  }
+
+
+
+  clearRequestNotification(notificationId?: number) {
+
+    if (notificationId) {
+
+      const index = this.requestNotifications.findIndex(req => req.id = notificationId);
+
+      if (index >= 0) {
+
+        this.requestNotifications.splice(index, 1);
+      } else {
+        console.log(`could not find index: ${index}`)
+      }
+    } else console.log(`notification is undefined:`)
 
 
   }
@@ -252,7 +654,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
           }
 
 
-         
+
         }
 
     }
@@ -313,16 +715,30 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
     this.chatService.deleteChatNotifications(this.loggedInStudentId(), notificationIds).subscribe({
 
-      complete:() => {
+      complete: () => {
 
         for (let index = 0; index < notificationIds.length; index++) {
-         
+
           this.newMemberNotifications.splice(index, 1);
-          
+
         }
       }
 
     })
+  }
+
+  // checks if the user is forbidden from posting to the group chat referenced by the ID.
+  // Once a user leaves a group chat, they should immediately be prevented from posting to the group chat without the need
+  // to refresh the page to update group member counts
+  canPost(): boolean {
+
+
+    if (this.groupId && sessionStorage.getItem('forbidden') !== null) {
+
+      return Number(sessionStorage.getItem('forbidden')) !== this.groupId;
+    }
+    return true;
+
   }
 }
 

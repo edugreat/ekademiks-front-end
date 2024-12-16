@@ -57,7 +57,9 @@ const routes: Routes = [
 
     children:[
       {path: ':group_id/:group_admin_id/:description', component: GroupChatComponent}
-    ]
+    ],
+    canActivate:[authGuard],
+    canMatch:[authGuard]
   },
   {
     path: 'assessment-panel/:subject/:category',

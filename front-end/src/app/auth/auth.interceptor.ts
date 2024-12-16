@@ -81,11 +81,13 @@ export class AuthInterceptor implements HttpInterceptor{
           authService.logout();
 
             router.navigate(['/disabled'])
+          }else{
+            console.log(`generic error: ${error.error}`)
           }
           return throwError(() => error)
         })
       )
-    }
+    }else{console.log('no access token found')}
 
   return next.handle(req)
 

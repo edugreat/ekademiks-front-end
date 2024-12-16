@@ -1,8 +1,9 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { GroupChatInfo, ChatService, GroupJoinRequest } from '../chat.service';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, take } from 'rxjs';
 import { _Notification } from '../../admin/upload/notifications/notifications.service';
+import { HttpResponse, HttpStatusCode } from '@angular/common/http';
 
 @Component({
   selector: 'app-group-request',
@@ -11,24 +12,19 @@ import { _Notification } from '../../admin/upload/notifications/notifications.se
 })
 
 // component that handles user's requests to join already created group chats.
-export class GroupRequestComponent implements OnInit, OnDestroy {
+export class GroupRequestComponent implements OnInit{
 
 
   
   groupChats?:GroupChatInfo;
 
-  groupJoinRequestSub?:Subscription;
 
   myGroupsSub?:Subscription;
 
   // stores all the group ids the current user belongs to
   _myGroupIds?:number[];
 
-  // store IDs of all the groups the user has pending request approval
-  // this is to ensure the user does not send multiple join request
-  pendingGroupChatRequests?:number[];
-
-  pendingRequestSub?:Subscription;
+ 
 
   
   
@@ -48,14 +44,7 @@ export class GroupRequestComponent implements OnInit, OnDestroy {
 
   }
 
-     
-
-ngOnDestroy(): void {
-
-  this.groupJoinRequestSub?.unsubscribe();
-  this.pendingRequestSub?.unsubscribe()
  
-}
 
   // fetch all the group chats so the student can send join request to any
   fetchChatGroups() {
@@ -78,7 +67,7 @@ ngOnDestroy(): void {
   }
 
 
-    // retrieves true is the current user is already a member of the group chat
+    // retrieves true if the current user is already a member of the group chat
     isGroupMember(groupId:string): boolean {
      
      if(this._myGroupIds?.length){
@@ -100,7 +89,7 @@ ngOnDestroy(): void {
         const studentId = Number(sessionStorage.getItem('studentId'));
        if(studentId){
 
-        this.myGroupsSub = this.chatService.myGroupIds(studentId).subscribe({
+        this.chatService.myGroupIds(studentId).pipe(take(1)).subscribe({
 
           next:(ids:number[]) => {
 
@@ -110,11 +99,10 @@ ngOnDestroy(): void {
           // get the IDs of the group chat the user has already sent join requests awaiting response
           complete:() => {
 
-            this.pendingRequestSub = this.chatService.getPendingGroupChatRequestsFor(Number(this.studentId())).subscribe({
+            this.chatService.getPendingGroupChatRequestsFor(Number(this.studentId())).pipe(take(1)).subscribe({
               next:(pendingRequests:number[]) => {
-            
-              
-                this.pendingGroupChatRequests = pendingRequests
+               // temporarily persist the groups the user has pending pending requests for
+                sessionStorage.setItem('pending_req',JSON.stringify(pendingRequests));
               }
             })
 
@@ -148,7 +136,15 @@ ngOnDestroy(): void {
             requester:this.username()
           }
 
-          this.groupJoinRequestSub = this.chatService.sendJoinRequest(joinRequest).subscribe({
+         this.chatService.sendJoinRequest(joinRequest).pipe(take(1)).subscribe({
+
+            next:(response:HttpResponse<number>) => {
+
+              if(response.status === HttpStatusCode.Ok){
+
+                this.myGroupIds();
+              }
+            },
 
             error: (error) => console.log(error)
           })
@@ -165,17 +161,21 @@ ngOnDestroy(): void {
         // checks if the current user has sent a join request for this group chat(referenced by groupId) which has yet to be approved
         hasPendingRequest(groupId:string):boolean{
 
-          if(this.pendingGroupChatRequests && this.pendingGroupChatRequests.length > 0){
+          if(sessionStorage.getItem('pending_req')){
 
-            const exists = this.pendingGroupChatRequests.findIndex(x => x === Number(groupId));
+            const pendingReqs:string[] = JSON.parse(sessionStorage.getItem('pending_req')!)
+           
 
-            if(exists >= 0) return true;
-
-
+            // checks if the user has already sent a join request to the group referenced by the group id, and is now awaiting app
+            return pendingReqs.findIndex(req => Number(req) === Number(groupId)) !== -1;
+          } else {
+            
+            return false
           }
+       
+          
 
-
-          return false
+         
         }
 }
 
