@@ -1,33 +1,111 @@
-<mat-toolbar id="tool-container" >  
+<mat-toolbar id="tool-container">  
+  <mat-form-field id="drop-down-container">  
+    <mat-label>Group Chats</mat-label>  
+    <mat-select class="group-dropdown">  
+      <mat-option class="groups" *ngFor="let chat of groupChatInfo | keyvalue" [value]="chat.value.groupIconUrl" 
+        
+                  [matBadge]="chat.value.unreadChats ? chat.value.unreadChats : ''"   
+                  matBadgeOverlap="false" aria-hidden="false">  
+        <img  class="icon-img" [src]="chat.value.groupIconUrl" alt="">
+        <span (click)="editingMode = false; connectToChat(chat.key, chat.value.groupDescription, chat.value.groupAdminId)" appRightClick (rightClick)="triggerOpenMenu($event, chat)">{{ chat.value.groupName }}</span>  
+      </mat-option>  
+    </mat-select>  
+  </mat-form-field>  
+
+</mat-toolbar>
+
+<!-- For screen display (below 568px) -->
+
+<div  *ngIf="editingMode" id="toolBarDiv">
+  <div style="width: 50%;">
+   <mat-form-field appearance="outline" >
+       <mat-label>Group Name</mat-label>
+       <input #inputField [value]="editableChat.value.groupName" matInput >
+   </mat-form-field>
+  </div>
+ <div style="display: flex;">  
+  <button style="margin-right: 76px;" (click)="cancelEdit()"  class="cancel-edit">Cancel</button>    
+ <button  [hidden]="disableSubmission()" (click)="saveChanges()"  class="save-changes">Save Changes</button>
+
+ </div>  
+ 
+ <button (onMenuClose)="closeMenuTrigger()" [hidden]="hideMenuTrigger" #menuTrigger mat-icon-button [matMenuTriggerFor]="menu" aria-label="Menu">    
+ </button>  
+ 
+ 
+ <mat-menu  #menu="matMenu">  
+ <button *ngIf=" editableChat && isGroupAdmin()" (click)="editingMode=true" style="color: rgb(69, 69, 243);" mat-menu-item>  
+   <mat-icon color="primary" >edit</mat-icon> Edit 
+ </button> 
+ 
+ <button *ngIf=" editableChat && isGroupAdmin()" (click)="deleteGroupChat()" style="color: red;" mat-menu-item>  
+   <mat-icon color="warn">delete</mat-icon> Delete 
+ </button>   
+
+
+ <button (click)="leaveGroup()"  style="color: red;" mat-menu-item>  
+  <mat-icon color="warn">exit_to_app</mat-icon> Leave Group 
+</button>   
+ </mat-menu>  
+ 
+ </div>
+ 
+ 
   
-  <mat-form-field id="drop-down-container" >
-    <mat-label>Group Chats</mat-label>
-    <mat-select class="group-dropdown" >
-      <mat-option *ngFor="let chat of groupChatInfo | keyvalue" [value]="chat.value.groupIconUrl"
-      
-        [matBadge]="chat.value.unreadChats ? chat.value.unreadChats : '' " matBadgeOverlap="false" aria-hidden="false" >
-        <img class="icon-img" [src]="chat.value.groupIconUrl" alt="">
-        {{chat.value.groupName}}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-</mat-toolbar>  
+
+<!-- END for small screen display -->
 
 <mat-sidenav-container class="sidenav-container">  
   <mat-sidenav mode="side" opened class="sidenav">  
     <div class="sidenav-content">  
       <h3>Chat Groups</h3>  
       <mat-list>  
-        <mat-list-item *ngFor="let chat of groupChatInfo | keyvalue" (click)="connectToChat(chat.key, chat.value.groupDescription,  chat.value.groupAdminId)" class="chat-list-item">  
-          <img  [src]="chat.value.groupIconUrl" alt="{{ chat.value.groupName }}" class="icon-img">  
-          <span [matBadge]="chat.value.unreadChats ? chat.value.unreadChats : '' " matBadgeOverlap="false" aria-hidden="false" class="group-name">{{ chat.value.groupName }}</span>  
+        <mat-list-item *ngFor="let chat of groupChatInfo | keyvalue" (click)="editingMode = false; connectToChat(chat.key, chat.value.groupDescription,  chat.value.groupAdminId)" class="chat-list-item">  
+          <img   [src]="chat.value.groupIconUrl" alt="{{ chat.value.groupName }}" class="icon-img">  
+          <span appRightClick (rightClick)="triggerOpenMenu($event, chat)" [matBadge]="chat.value.unreadChats ? chat.value.unreadChats : '' " matBadgeOverlap="false" aria-hidden="false" class="group-name">{{ chat.value.groupName }}</span>  
         </mat-list-item>  
       </mat-list>  
+
+      <span *ngIf="editingMode" style="width: 75%;">
+        <mat-form-field appearance="outline" >
+            <mat-label>Group Name</mat-label>
+            <input #inputField [value]="editableChat.value.groupName" matInput >
+        </mat-form-field>
+    </span>
+
+    <div class="actions">  
+      <button [hidden]="disableSubmission()" (click)="saveChanges()" *ngIf="editingMode" class="save-changes">Save Changes</button>
+      <button (click)="cancelEdit()" *ngIf="editingMode" class="cancel-edit">Cancel</button>    
+     
+  </div>  
+
+
+
     </div>  
+
+    
+  <button (onMenuClose)="closeMenuTrigger()" [hidden]="hideMenuTrigger" #menuTrigger mat-icon-button [matMenuTriggerFor]="menu" aria-label="Menu">    
+  </button>  
+  
+  
+  <mat-menu [yPosition]="'above'"  #menu="matMenu">  
+    <button *ngIf="editableChat && isGroupAdmin()" (click)="editingMode=true" style="color: rgb(69, 69, 243);" mat-menu-item>  
+      <mat-icon color="primary" >edit</mat-icon> Edit 
+    </button> 
+
+    <button *ngIf=" editableChat && isGroupAdmin()" (click)="deleteGroupChat()" style="color: red;" mat-menu-item>  
+      <mat-icon color="warn">delete</mat-icon> Delete 
+    </button>  
+    
+    
+    <button (click)="leaveGroup()" style="color: red;" mat-menu-item>  
+      <mat-icon color="warn">exit_to_app</mat-icon> Leave Group 
+    </button>   
+  </mat-menu>  
   </mat-sidenav>  
 
   <mat-sidenav-content>  
-    <div class="chat-container" >  
+    <div  class="chat-container" >  
       <div class="chat-messages">  
         <router-outlet></router-outlet>  
         <!-- This is where the selected chat messages will be displayed -->  
@@ -35,3 +113,4 @@
     </div>  
   </mat-sidenav-content>  
 </mat-sidenav-container>
+

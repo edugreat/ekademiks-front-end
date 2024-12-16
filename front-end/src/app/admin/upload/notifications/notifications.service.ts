@@ -7,6 +7,8 @@ import { HttpBackend, HttpClient } from '@angular/common/http';
   providedIn: 'root'
 })
 export class NotificationsService {
+  
+  
 
   // Delivers the notifications counts to subscribes
   // This is used to update the number of unread notifications at the app-component
@@ -33,8 +35,10 @@ export class NotificationsService {
 
 
   // Timeout for reconnection to sse notification event 
-  private reconnectionTiming: any;
+  private reconnectionTimeout: any;
 
+  // timer for retry connection
+  private retryCount = 0;
 
   constructor(private zone: NgZone, private authService: AuthService, private http:HttpClient) {
 
@@ -47,7 +51,7 @@ export class NotificationsService {
       } else {
 
         // disconnect from receiving notification if a student has logged out
-        this.disconnectFromNotifications();
+        this.disconnectFromSSE();
       }
 
     })
@@ -84,6 +88,7 @@ export class NotificationsService {
         // checks if there is notification
         if (event) {
 
+          console.log('connected to notifications');
 
           // Parses the received object to its correct json object
           const notification: _Notification = JSON.parse(event.data);
@@ -97,13 +102,25 @@ export class NotificationsService {
     // executes once there is error suc as timeout of the server connection etc
     this.eventSource.onerror = () => {
 
+      console.log('reconnecting to notifications');
+      // ensures time of reconnection does not exceed 30 sec
+      const reconnectionTime = Math.min(1000 * Math.pow(2, this.retryCount), 30000);
+
+      this.retryCount++;
       // close the event source for error, then reconnect after some timing
-      this.reconnectionTiming = setTimeout(() => {
+      this.reconnectionTimeout = setTimeout(() => {
+
 
         // connect back to notification
         this.connectToNotifications();
-      }, 5000);
+      }, reconnectionTime);
 
+    };
+
+    // resets reconnection time once notification begin to come
+    this.eventSource.onopen = () =>{
+
+      this.retryCount = 0;
     }
 
 
@@ -111,13 +128,13 @@ export class NotificationsService {
 
 
 
-  // Disconnects  from the notification
-  private disconnectFromNotifications() {
+  // Disconnects  from the SSE notification
+  public disconnectFromSSE() {
     // check if connection had been made before
     if (this.eventSource) {
 
       this.eventSource.close();
-      clearTimeout(this.reconnectionTiming)
+      clearTimeout(this.reconnectionTimeout)
     }
 
 

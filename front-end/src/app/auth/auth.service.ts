@@ -1,13 +1,13 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse, HttpStatusCode } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, take, tap } from 'rxjs';
 import { Endpoints } from '../end-point';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  
 
 
   // This flag is used to stop anyother requests from proceeding while refresh token process is ongoing, until it completes
@@ -103,17 +103,38 @@ export class AuthService {
 
     // indicates that the current user belong in a group chat. This is used to provide some chat functionalities
     const studentId = Number(sessionStorage.getItem('studentId'));
-    this.isGroupMember(studentId).subscribe((member:boolean) =>{
+    this.isGroupMember(studentId).pipe(take(1)).subscribe((member:boolean) =>{
 
       if(member){
 
         sessionStorage.setItem('groupMember', 'true');
+
+        // fetch the date they joined each of the groups. This is used to control the spinner as previous chats are being fetched.
+        // If a group has previous chats but the logged in user joined the group later than those previous messages, the spinner would not
+        // be displayed to indicate network activity trying to fetch previous chat
+        const studentId:number = Number(sessionStorage.getItem('studentId')!);
+
+        this.groupJoinedDates(studentId).pipe(take(1)).subscribe({
+          next:(val:{[id:number]:Date}) => {
+            if(val){
+
+              sessionStorage.setItem('joinedAt',JSON.stringify(val));
+            }
+          }
+        })
+
       }
     })
   }
 
   
-  
+  private groupJoinedDates(studentId:number):Observable<{[groupId:number]:Date}>{
+
+    
+    return this.http.get<{[groupId:number]:Date}>(`${this.endpoints.grp_joined_at}?id=${studentId}`)
+
+    
+  }
 
    
 
@@ -132,7 +153,12 @@ export class AuthService {
    
   }
 
-  
+  // disconnects the user from the server's SSE (eg notifications and chats messages)
+  disconnectFromServer(studentId: number):Observable<HttpResponse<number>> {
+   
+    return this.http.post<HttpStatusCode>(`http://localhost:8080/auth/disconnect`, studentId, {observe:'response'})
+
+  }
 
   //checks if the current user is an admin
   isAdmin():boolean{

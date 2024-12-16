@@ -33,9 +33,11 @@
 .chat {  
   flex: 1; /* Allow this area to grow */  
   overflow-y: auto; /* Enable vertical scrolling for messages */  
-  
   padding: 10px; /* Padding inside the message area */  
   margin-bottom: 60px; /* Space to prevent overlap with input field */  
+  margin-top: 10px;
+ 
+ 
 }  
 
 .chat-message { 
@@ -56,6 +58,31 @@
   width: fit-content; 
 }  
 
+.chat-message-container{
+
+  display: flex;
+
+}
+
+.reply-icon{
+
+  font-size: 0.9rem; 
+  color: rgb(180, 177, 177); 
+}
+
+.repliedChat{
+
+  font-size: 0.9rem;
+  color: rgb(190, 188, 188); 
+  font-style: italic;
+  font-size: medium;
+ cursor: pointer;
+  
+  
+
+}
+
+
 .sent-at {  
   font-size: 0.75em; /* Smaller font size */  
   color: #777; /* Gray color for timestamp */  
@@ -70,6 +97,7 @@
   background-color: #fff; /* White background for input area */  
   border-top: 1px solid #ddd; /* Light border on top for separation */  
   width: 100%;
+  
 }  
 
 mat-form-field {
@@ -89,3 +117,51 @@ mat-form-field {
 .chat-input button:hover {  
   background-color: #45a049; /* Darker green on hover */  
 } 
+
+.animated-highlight{
+
+  width: fit-content;
+  height: fit-content;
+ background-color: rgb(65, 0, 0, 0);
+ animation: fadeIn 10s forwards;
+  
+}
+
+@keyframes fadeIn{
+  
+  0%{
+    background-color: rgb(65, 0, 0, 0);
+  }
+
+  50%{
+    background-color: rgb(65, 0, 0, 1);
+  }
+
+  100%{
+    background-color: rgb(65, 0, 0, 0);
+  }
+}
+
+.animated-border{
+
+  border-color:  rgb(65, 0, 0, 0);
+  animation: borderFade 10s forwards;
+}
+
+@keyframes borderFade {
+
+  0%{
+    border-color: rgba(248, 0, 0, 0);
+
+  }
+
+  50%{
+
+    border-color: rgb(248, 0, 0,  1);
+  }
+  
+  100%{
+
+    border-color: rgb(248, 0, 0, 0);
+  }
+}

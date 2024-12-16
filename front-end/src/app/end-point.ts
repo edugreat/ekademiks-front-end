@@ -5,11 +5,14 @@ import { Injectable } from "@angular/core";
 })
 // class that provides links to the server endpoints
 export class Endpoints {
+ 
 
 
 
      //routes to the backend server to fetch test based on the request parameters
  private _baseTestUrl = 'http://localhost:8080/tests/start';
+  
+
   
     public get baseTestUrl() {
         return this._baseTestUrl;
@@ -190,11 +193,11 @@ export class Endpoints {
         return this._isGroupMemberUrl;
     }
    
-    private _unreadChatsUrl  = `${this.chatUrl}/unread`;
+    private _groupInfoUrl  = `${this.chatUrl}/group_info`;
 
-    public get unreadChatsUrl() {
+    public get groupInfoUrl() {
 
-        return this._unreadChatsUrl;
+        return this._groupInfoUrl;
     }
 
     private _chatMessagesUrl = `${this.chatUrl}/messages`;
@@ -251,5 +254,55 @@ export class Endpoints {
 
         return this._declineJoinRequestUrl;
     }
+
+    private _editGroupUrl = `${this.chatUrl}/editGroup`;
+    public get editGroupUrl(){
+
+        return this._editGroupUrl;
+    }
    
+   private  _deleteGroupUrl = `${this.chatUrl}/deleteGroup`;
+
+
+   public get deleteGroupUrl(){
+
+    return this._deleteGroupUrl
+   }
+  
+   private _leaveGroupUrl = `${this.chatUrl}/exit`;
+
+   public get leaveGroupUrl(){
+
+    return this._leaveGroupUrl;
+   }
+
+   private _grp_joined_at = `${this.chatUrl}/grp_joined_at`;
+
+   public get grp_joined_at(){
+
+    return this._grp_joined_at;
+   }
+
+   private _anyRecentPosts = `${this.chatUrl}/recent/post`;
+
+   public get anyRecentPosts(){
+
+    return this._anyRecentPosts;
+   }
+  
+
+   private  _editChatUrl = `${this.chatUrl}/modify/msg`;
+
+   public get editChatUrl(){
+
+    return this._editChatUrl;
+   }
+
+   private _deleteChatUrl = `${this.chatUrl}/del_msg`;
+
+   public get deleteChatUrl(){
+
+    return this._deleteChatUrl;
+   }
+ 
 }

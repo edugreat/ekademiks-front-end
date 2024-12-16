@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ConfirmationDialogService } from './confirmation-dialog.service';
 import { ActivityService } from './activity.service';
 import { NotificationsService } from './admin/upload/notifications/notifications.service';
+import { ChatService } from './chat/chat.service';
 
 
 
@@ -28,6 +29,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     private confirmationService: ConfirmationDialogService,
     private activityService:ActivityService,
     private notificationService:NotificationsService,
+    private chatService:ChatService
  
   
     
@@ -73,7 +75,16 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     this.confirmationService.userConfirmationResponse$.pipe(take(1)).subscribe((yes) => {
       if (yes) {
         //reset the user to the generic 'Student' placeholder name
+
+       if(this.isLoggedInStudent()){
+
+        this.disconnectFromServer();
+        
+       }else{
+
         this.authService.logout();
+       }
+       
        
 
         //this is important incase the user wants to logout in the middle of assessment taking
@@ -129,6 +140,27 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
         return Number(sessionStorage.getItem('studentId'));
       }
 
+      // disconnects the user from server's SSE
+      private disconnectFromServer(){
+
+        this.authService.disconnectFromServer(this.studentId).pipe(take(1)).subscribe({
+         
+          complete:() => {
+
+            // disconnects the user from further receiving chat messages
+            this.chatService.disconnectFromSSE();
+
+             // disconnects the user from further receiving notification messages
+            this.notificationService.disconnectFromSSE();
+
+            // finally logs the student out
+            this.authService.logout();
+
+          }
+
+        });
+
+      }
   }
 
 

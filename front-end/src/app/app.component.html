@@ -14,7 +14,7 @@
     <a *ngIf="isLoggedInStudent()" mat-button routerLink="/new-group" class="top-menu-item" ><mat-icon>group_add</mat-icon>new group</a>
     <a *ngIf="isLoggedInStudent() && isGroupMemeber()" mat-button [routerLink]="['/my-groups', studentId]" class="top-menu-item" > <mat-icon>group</mat-icon>my groups</a>
 
-    <a *ngIf="isLoggedInStudent()" [routerLink]="['/group-request']" mat-button  class="top-menu-item" > <mat-icon>person_add</mat-icon>join a groups</a>
+    <a *ngIf="isLoggedInStudent()" [routerLink]="['/group-request']" mat-button  class="top-menu-item" > <mat-icon>person_add</mat-icon>join a group</a>
 
 
     <!-- ADMIN BUTTON -->
