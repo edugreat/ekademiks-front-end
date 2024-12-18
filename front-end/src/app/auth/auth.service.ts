@@ -75,7 +75,7 @@ export class AuthService {
   }
 
   // observable of boolean value that checks if the current user belongs in any group chat
-  isGroupMember(studentId:number):Observable<boolean>{
+  public isGroupMember(studentId:number):Observable<boolean>{
 
   
     return this.http.get<boolean>(`${this.endpoints.isGroupMemberUrl}?id=${studentId}`);
@@ -113,15 +113,7 @@ export class AuthService {
         // If a group has previous chats but the logged in user joined the group later than those previous messages, the spinner would not
         // be displayed to indicate network activity trying to fetch previous chat
         const studentId:number = Number(sessionStorage.getItem('studentId')!);
-
-        this.groupJoinedDates(studentId).pipe(take(1)).subscribe({
-          next:(val:{[id:number]:Date}) => {
-            if(val){
-
-              sessionStorage.setItem('joinedAt',JSON.stringify(val));
-            }
-          }
-        })
+        this.updateGroupJoinedDates(studentId);
 
       }
     })
@@ -134,6 +126,20 @@ export class AuthService {
     return this.http.get<{[groupId:number]:Date}>(`${this.endpoints.grp_joined_at}?id=${studentId}`)
 
     
+  }
+
+  updateGroupJoinedDates(studentId:number){
+
+
+    this.groupJoinedDates(studentId).pipe(take(1)).subscribe({
+      next:(val:{[id:number]:Date}) => {
+        if(val){
+
+          sessionStorage.setItem('joinedAt',JSON.stringify(val));
+        }
+      }
+    })
+
   }
 
    

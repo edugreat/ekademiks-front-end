@@ -69,7 +69,7 @@
       <span *ngIf="editingMode" style="width: 75%;">
         <mat-form-field appearance="outline" >
             <mat-label>Group Name</mat-label>
-            <input #inputField [value]="editableChat.value.groupName" matInput >
+            <input #inputField  matInput >
         </mat-form-field>
     </span>
 
@@ -89,7 +89,7 @@
   
   
   <mat-menu [yPosition]="'above'"  #menu="matMenu">  
-    <button *ngIf="editableChat && isGroupAdmin()" (click)="editingMode=true" style="color: rgb(69, 69, 243);" mat-menu-item>  
+    <button *ngIf="editableChat && isGroupAdmin()" (click)=" editGroupName()" style="color: rgb(69, 69, 243);" mat-menu-item>  
       <mat-icon color="primary" >edit</mat-icon> Edit 
     </button> 
 

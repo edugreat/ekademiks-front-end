@@ -16,6 +16,10 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
 
 
+  // Arbitrary content for deleted chats
+  private  DELETEDCHATCONTENT ='$2a$10$IFch8ji5EgMhuOQdBjdIE.tzyvQbtCEdHSsujbSUALasTHPA87GwO';
+
+
 
   fontSize = '10px';
 
@@ -84,28 +88,30 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
     this.activatedRoute.paramMap.subscribe(params => {
 
-      console.log('inside oninit')
+     
 
 
 
-      const groupId = params.get('group_id');
+      const _groupId = params.get('group_id');
       const groupDescription = params.get('description');
 
 
-      if (groupId && groupDescription) {
-        this.groupId = Number(groupId);
+      if (_groupId && groupDescription) {
+        this.groupId = Number(_groupId);
 
         this.groupDescription = groupDescription;
 
-        this.chatService.groupChatUpdates(Number(groupId), this.loggedInStudentId());
+        // populate the chatMessages with the group's buffered chats(if exists)
+        this.chatMessages = [];
+        this.chatMessages = this.getChatBuffer(Number(_groupId));
+
+
+        this.chatService.groupChatUpdates(Number(_groupId), this.loggedInStudentId());
 
         // checks if the user had recent messages
         this.hadRecentPosts();
 
-        // clear previous chat
-        if (this.chatMessages.length) {
-          this.chatMessages.splice(0)
-        }
+       
 
         this.streamChats();
 
@@ -138,8 +144,11 @@ export class GroupChatComponent implements OnInit, OnDestroy {
       next: (chatMessage: ChatMessage) => {
 
 
+
         // if we got some chats
         if (chatMessage) {
+
+          
 
           this.addToChats(chatMessage);
 
@@ -148,6 +157,58 @@ export class GroupChatComponent implements OnInit, OnDestroy {
       },
 
     })
+
+
+  }
+
+  // persist chat messages to the session storage to show instant messages without waiting for server's response when the 
+  // user navigates between groupchats
+  private bufferMessages(messages:ChatMessage[]){
+
+ 
+    // checks if there are buffers in the storage
+    if(sessionStorage.getItem('chatBuffer')){
+
+      let chatBufferObjs = JSON.parse(sessionStorage.getItem('chatBuffer')!);
+
+      let chatBuffers:Map<number, ChatMessage[]> = new Map<number, ChatMessage[]>(
+
+        Object.entries(chatBufferObjs).map(([key, value]) => [Number(key), value as ChatMessage[]])
+      );
+
+      chatBuffers.set(messages[0].groupId, messages);
+
+      sessionStorage.setItem('chatBuffer', JSON.stringify(Object.fromEntries(chatBuffers)));
+    }else{
+
+      let _buffer = new Map<number, ChatMessage[]>();
+      _buffer.set(messages[0].groupId, messages);
+
+      sessionStorage.setItem('chatBuffer', JSON.stringify(Object.fromEntries(_buffer)));
+     
+    }
+
+  
+  }
+
+  // get the buffered chats for the given group id
+  private getChatBuffer(groupId:number):ChatMessage[]{
+
+    if(sessionStorage.getItem('chatBuffer')){
+
+      const chatBuffersObj = JSON.parse(sessionStorage.getItem('chatBuffer')!);
+
+      let chatBuffers:Map<number, ChatMessage[]> = new Map<number, ChatMessage[]>(
+
+        Object.entries(chatBuffersObj).map(([key, value]) => [Number(key), value as ChatMessage[]])
+      );
+
+      let chats:ChatMessage[] = chatBuffers.get(groupId) || [];
+
+      if(chats.length) return chats.filter(c => c.groupId === groupId);
+    }
+
+    return [];
 
 
   }
@@ -172,7 +233,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
         this.copiedText = chatMessage;
 
-        console.log(`copied: ${this.copiedText}`)
+      
 
         setTimeout(() => {
 
@@ -271,7 +332,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
           if(response.status === HttpStatusCode.Ok){
 
-            // remove the chat from the array if chats
+            // remove the chat from the array of chats
             const index = this.chatMessages.findIndex(msg => msg.id === this.currentlyClickedChat?.id);
 
             if(index >= 0){
@@ -328,28 +389,34 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
      
       // check if it's a deleted chat
-      if (chat.content === "Deleted") {
+      if (chat.content === this.DELETEDCHATCONTENT) {
 
         this.chatMessages.splice(index, 1);
 
-        return;
+        this.bufferMessages(this.chatMessages);
 
-        
       }
        // replace the old chat with the new chat since it's an updated version of the chat message
       else if(chat.content !== updatableChat.content){
 
+        console.log('calling else if{}')
+
         updatableChat.content = chat.content;
 
-        return;
+        this.bufferMessages(this.chatMessages);
+
+       
       }
 
 
-    } else {
+    } else { //this is a new chat message
 
+      console.log('calling else{} for new chat message')
 
 
       this.chatMessages.push(chat);
+
+      this.bufferMessages(this.chatMessages);
 
       // scrolls to the bottom
       setTimeout(() => {
@@ -357,9 +424,12 @@ export class GroupChatComponent implements OnInit, OnDestroy {
       }, 0);
 
       // update online presence of members
-      sessionStorage.setItem('online_members', `${chat.onlineMembers}`)
+      sessionStorage.setItem('online_members', `${chat.onlineMembers}`);
+
+      return;
     }
 
+    sessionStorage.setItem('online_members', `${chat.onlineMembers}`);
   }
 
 
@@ -501,7 +571,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
         this.chatService.sendNewChatMessage(newChatMessage).pipe(take(1)).subscribe({
           next: (response: HttpResponse<number>) => {
-            if (response.status === HttpStatusCode.Ok) console.log('success')
+            if (response.status === HttpStatusCode.Ok) console.log('message sent')
           },
 
           error: (err) => console.log(err)
@@ -541,20 +611,42 @@ export class GroupChatComponent implements OnInit, OnDestroy {
     }
 
   }
+
+  // returns boolean indicating if the chat that has the reply has been deleted from the server or not.
+  // This is used to decide if goToChat() should proceed or not
+  hasBeenDeleted(repliedChatId:number):boolean{
+
+    // get the id if the replied chat
+    const _repliedChatId = this.chatMessages.filter(c => c.id === repliedChatId)[0].repliedTo;
+
+    // check if chat with _repliedChatId still exists in the chat messages array
+
+    return this.chatMessages.filter(chat => chat.id === _repliedChatId)[0] === null;
+
+
+  }
+
 // scrolls to the original chat has a reply
 goToChat(chatId:number) {
-    
+  
+  const x = this.chatMessages.filter(c => c.id === chatId)[0];
+
+  console.log(JSON.stringify(x, null, 1))
+ 
+
   // get the index position of the chat 
   const index = this.chatMessages.findIndex(chat => chat.id === chatId);
   // go the elementRef at the given index
-  if(index >= 0){
+  if(index >= 0 && !this.hasBeenDeleted(chatId)){
 
     // get the element at this index of the querry list
     const element = this.chatMessageRefs.toArray()[index].nativeElement as HTMLElement;
 
     if(element){
 
-      element.scrollIntoView({behavior:'smooth',block:'center'});
+      console.log(`element: ${JSON.stringify(element, null, 1)}`)
+
+      element.scrollIntoView({behavior:'smooth',block:'nearest'});
     
 
       element.classList.add('animated-highlight');
@@ -775,3 +867,4 @@ export class NewMemberNotification {
 
 
 }
+
