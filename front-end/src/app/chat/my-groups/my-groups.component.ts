@@ -18,6 +18,7 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
 
 
 
+
   // an object representing the user's group chat. The key is the group the user belong to and the value is the previous chats
   groupChatInfo?:GroupChatInfo;
 
@@ -113,7 +114,21 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
       this.hideMenuTrigger = true;
       }
    
+
+      editGroupName() {
+
+        this.editingMode = true
+
+       
+      
+        
+      
+      }
+
       deleteGroupChat() {
+
+        if(this.isGroupAdmin()){
+
 
         this.confirmationService.confirmAction(`${this.editableChat.value.groupName} will be deleted`);
 
@@ -133,12 +148,36 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
                }
                
               },
-              error:(err) => console.log(err)
+              error:(err) => console.log(err),
+
+              complete:() => {
+                
+                this.isGroupMember();
+              }
             })
           }
         })
 
       
+        }
+      }
+
+      // use to check if the user still belongs to a group after deleting an existing group. This is especially for the admin
+      private isGroupMember(){
+
+        if(this.studentId()){
+          this.authService.isGroupMember(Number(this.studentId())).pipe(take(1)).subscribe({
+            next:(response:boolean)=>{
+              if(!response){
+
+                sessionStorage.removeItem("groupMember");
+              }
+            }
+          })
+        }
+
+        
+
       }
 
       // determines if the current user the group admin
@@ -163,6 +202,7 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
 
       saveChanges() {
 
+        
         this.confirmationService.confirmAction(`rename group to ${this.inputField.value}?`);
         this.confirmationService.userConfirmationResponse$.pipe(take(1)).subscribe(confirm => {
 
@@ -178,7 +218,7 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
             if(_studentId){
 
              
-              this.chatService.editGroupName(_studentId, this.editableChat.key, this.inputField.value).pipe(take(1)).subscribe({
+              this.chatService.editGroupName(_studentId, this.editableChat.key, currentGroupName).pipe(take(1)).subscribe({
 
                 next:(val:HttpResponse<number>) => {
 
