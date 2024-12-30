@@ -304,5 +304,12 @@ export class Endpoints {
 
     return this._deleteChatUrl;
    }
+
+   private _disconnectUrl = `${this.baseUrl}/auth/disconnect`;
+
+   public get disconnectUrl(){
+
+    return this._disconnectUrl;
+   }
  
 }

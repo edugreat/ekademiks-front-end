@@ -50,7 +50,7 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
 
     if(studentId) {
 
-      console.log('inside my group component');
+    
       this.getGroupInfo(Number(studentId));
 
     }
