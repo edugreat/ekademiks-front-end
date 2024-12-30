@@ -2,6 +2,7 @@ import { HttpClient, HttpResponse, HttpStatusCode } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, take, tap } from 'rxjs';
 import { Endpoints } from '../end-point';
+import { ChatService } from '../chat/chat.service';
 
 @Injectable({
   providedIn: 'root'
@@ -159,12 +160,7 @@ export class AuthService {
    
   }
 
-  // disconnects the user from the server's SSE (eg notifications and chats messages)
-  disconnectFromServer(studentId: number):Observable<HttpResponse<number>> {
-   
-    return this.http.post<HttpStatusCode>(`http://localhost:8080/auth/disconnect`, studentId, {observe:'response'})
-
-  }
+  
 
   //checks if the current user is an admin
   isAdmin():boolean{

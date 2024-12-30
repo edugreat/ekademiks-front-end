@@ -28,8 +28,9 @@
 
         <div class="sender-name">
             
+          <span *ngIf="!(chat.senderId === loggedInStudentId())" style="color: rgb(58, 25, 2);" >{{tilde}}</span>
             <span style="margin-top: -5px; color: #777 ">
-                {{ chat.senderId === loggedInStudentId() ? 'You' : chat.senderName }}
+                {{ chat.senderId === loggedInStudentId() ? 'You' :chat.senderName }}
             </span>
         </div>  
 
@@ -38,9 +39,12 @@
           <mat-icon>more_vert</mat-icon>
         </button>
         <div class="chat-message-container" >
+         <div style="display: flex; flex-direction: column;">
           <span [ngStyle]="{'background-color':chat.senderId === loggedInStudentId() ? '#d2f0c4':'#f5f7f4'}" class="message-content" > {{ chat.content }}</span>
+          <span *ngIf="chat.isEditedChat" style="font-size: 0.5rem; margin-left: 3px; color: rgb(58, 25, 2); " >Edited </span>
+         </div>
           <span class="reply-icon" *ngIf="chat.repliedTo"> <mat-icon>reply</mat-icon> </span>
-          <span (click)="goToChat(chat.repliedTo)" class="repliedChat" *ngIf="chat.repliedTo" >{{chat.repliedToChat}}</span> 
+          <span [matTooltip]="hasBeenDeleted(chat.repliedTo) ? chatDeleter(chat) : '' " (click)="goToChat(chat.repliedTo)" class="repliedChat" *ngIf="chat.repliedTo" >{{chat.repliedToChat}}</span> 
         </div>  
 
         <span *ngIf="copiedText === chat.content" >
@@ -48,8 +52,12 @@
         </span>
  
        </div>
+       
+       
         <div class="sent-at">{{ chat.sentAt | date:'medium' }}</div>  
     </div>
+
+   
 </div> 
 
 

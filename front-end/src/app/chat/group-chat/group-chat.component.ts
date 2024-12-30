@@ -17,7 +17,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
 
   // Arbitrary content for deleted chats
-  private  DELETEDCHATCONTENT ='$2a$10$IFch8ji5EgMhuOQdBjdIE.tzyvQbtCEdHSsujbSUALasTHPA87GwO';
+  private DELETEDCHATCONTENT = '$2a$10$IFch8ji5EgMhuOQdBjdIE.tzyvQbtCEdHSsujbSUALasTHPA87GwO';
 
 
 
@@ -26,11 +26,11 @@ export class GroupChatComponent implements OnInit, OnDestroy {
   currentlyClickedChat?: ChatMessage;
 
   // holds reference to the list of elements in the #chatMessageRef
-  @ViewChildren('chatMessageRef') chatMessageRefs!:QueryList<ElementRef>;
+  @ViewChildren('chatMessageRef') chatMessageRefs!: QueryList<ElementRef>;
 
-  @ViewChild('textAreaDiv') textAreaDiv!:ElementRef<HTMLDivElement>;
+  @ViewChild('textAreaDiv') textAreaDiv!: ElementRef<HTMLDivElement>;
 
-  @ViewChild('textarea') textArea!:ElementRef<HTMLTextAreaElement>
+  @ViewChild('textarea') textArea!: ElementRef<HTMLTextAreaElement>
 
   // indicates if chat message is being edited or not
   editingChat = false;
@@ -53,16 +53,20 @@ export class GroupChatComponent implements OnInit, OnDestroy {
   //  shows if the snack bar is currently opened to display notifications
   private isSnackBarOPen = false;
 
-  private chatSubscription?: Subscription;
+  private chatMessageSub?: Subscription;
+
 
   private joinRequestSub?: Subscription;
 
   newChatContent: string = '';
 
+  groupAdminId?: number;
+
   // an array of both previous and current chat messages belonging to this group chat
   chatMessages: ChatMessage[] = [];
 
 
+  tilde:string ='~'
 
 
   groupId?: number; //the group ID of this group chat
@@ -88,37 +92,65 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
     this.activatedRoute.paramMap.subscribe(params => {
 
-     
-
-
-
+    
       const _groupId = params.get('group_id');
       const groupDescription = params.get('description');
 
+      const _grpAdminId = params.get('group_admin_id')
 
-      if (_groupId && groupDescription) {
+
+      if (_groupId && groupDescription && _grpAdminId) {
+
+        // unsubscribe from the receiving background message for the this group, then subscribe to receiving background message for the previous group
+      this.chatMessageSub?.unsubscribe();
+
+      // emits negative ID value to subscribers to unsubscribes from receiving backgound update for the group chat
+      this.chatService.backgroundChatUpdate.next(-1 * Number(_groupId))
+
+      if(this.groupId){
+
+        // emits group ID to subscribers to subscribe to receiving background messages
+        this.chatService.backgroundChatUpdate.next(this.groupId)
+      }
+
+
         this.groupId = Number(_groupId);
 
         this.groupDescription = groupDescription;
+        this.groupAdminId = Number(_grpAdminId);
 
-        // populate the chatMessages with the group's buffered chats(if exists)
+
+        // get previous chat messages
+
+        let previousMessages = this.chatService.getMessagesFromSession(Number(_groupId));
+
         this.chatMessages = [];
-        this.chatMessages = this.getChatBuffer(Number(_groupId));
+        this.chatMessages = previousMessages
+
+        // this.chatMessages.push(...previousMessages)
 
 
-        this.chatService.groupChatUpdates(Number(_groupId), this.loggedInStudentId());
+
+        this.chatService.connectToChatMessages(this.groupId!, this.loggedInStudentId());
+
+        // subcribe for new messages
+        this.streamChats();
+
+
+
+        // check if the message is chat notification or chat message
 
         // checks if the user had recent messages
         this.hadRecentPosts();
 
-       
 
-        this.streamChats();
+
+
 
       }
     })
 
-    this.joinRequestNotification();
+
 
 
 
@@ -128,90 +160,43 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
 
-    this.chatSubscription?.unsubscribe();
+
     this.joinRequestSub?.unsubscribe();
     clearInterval(this.snackBarTimer);
 
     // disconnect from the receiving chat messages
-    this.chatService.disconnectFromSSE();
+    //this.chatService.disconnectFromSSE();
+
+
   }
 
 
 
-  streamChats() {
-
-    this.chatSubscription = this.chatService.chatMessages$.subscribe({
-      next: (chatMessage: ChatMessage) => {
+  private streamChats() {
 
 
 
-        // if we got some chats
-        if (chatMessage) {
+    this.chatMessageSub = this.chatService.streamChatMessagesFor(this.groupId!).subscribe({
 
-          
+      next: (data: ChatMessage | undefined) => {
 
-          this.addToChats(chatMessage);
+        if (data) {
 
+          this.addToChats(data);
         }
-
       },
 
-    })
+      error: (err) => console.warn(`error streaming chat: ${err}`)
+    });
+
+
+
+
 
 
   }
 
-  // persist chat messages to the session storage to show instant messages without waiting for server's response when the 
-  // user navigates between groupchats
-  private bufferMessages(messages:ChatMessage[]){
 
- 
-    // checks if there are buffers in the storage
-    if(sessionStorage.getItem('chatBuffer')){
-
-      let chatBufferObjs = JSON.parse(sessionStorage.getItem('chatBuffer')!);
-
-      let chatBuffers:Map<number, ChatMessage[]> = new Map<number, ChatMessage[]>(
-
-        Object.entries(chatBufferObjs).map(([key, value]) => [Number(key), value as ChatMessage[]])
-      );
-
-      chatBuffers.set(messages[0].groupId, messages);
-
-      sessionStorage.setItem('chatBuffer', JSON.stringify(Object.fromEntries(chatBuffers)));
-    }else{
-
-      let _buffer = new Map<number, ChatMessage[]>();
-      _buffer.set(messages[0].groupId, messages);
-
-      sessionStorage.setItem('chatBuffer', JSON.stringify(Object.fromEntries(_buffer)));
-     
-    }
-
-  
-  }
-
-  // get the buffered chats for the given group id
-  private getChatBuffer(groupId:number):ChatMessage[]{
-
-    if(sessionStorage.getItem('chatBuffer')){
-
-      const chatBuffersObj = JSON.parse(sessionStorage.getItem('chatBuffer')!);
-
-      let chatBuffers:Map<number, ChatMessage[]> = new Map<number, ChatMessage[]>(
-
-        Object.entries(chatBuffersObj).map(([key, value]) => [Number(key), value as ChatMessage[]])
-      );
-
-      let chats:ChatMessage[] = chatBuffers.get(groupId) || [];
-
-      if(chats.length) return chats.filter(c => c.groupId === groupId);
-    }
-
-    return [];
-
-
-  }
 
   // shows when the mouse right button is clicked
   showChatMenu(chat: ChatMessage) {
@@ -233,7 +218,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
         this.copiedText = chatMessage;
 
-      
+
 
         setTimeout(() => {
 
@@ -261,28 +246,28 @@ export class GroupChatComponent implements OnInit, OnDestroy {
     }
   }
 
-  private scrollToTextArea(){
+  private scrollToTextArea() {
 
-   const element =  this.textAreaDiv.nativeElement;
+    const element = this.textAreaDiv.nativeElement;
 
-   element.scrollIntoView({
-    block:'end',behavior:'smooth'
-  });
+    element.scrollIntoView({
+      block: 'end', behavior: 'smooth'
+    });
 
-  if(this.textArea){
+    if (this.textArea) {
 
-    this.textArea.nativeElement.focus({preventScroll:true})
-  }
+      this.textArea.nativeElement.focus({ preventScroll: true })
+    }
 
-  element.classList.add('animated-border');
+    element.classList.add('animated-border');
 
-  setTimeout(() => {
-    
-    element.classList.remove('animated-border');
+    setTimeout(() => {
 
-  }, 10000);
+      element.classList.remove('animated-border');
 
-    
+    }, 10000);
+
+
   }
 
   editChat() {
@@ -305,48 +290,90 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
   // replies to a chat
   replyToChat() {
-    
+
     //confirm a chat is being replied to
-    if(this.currentlyClickedChat){
+    if (this.currentlyClickedChat) {
 
       this._replyToChat = true;
 
       this.newChatContent = `Your reply...`;
-     this.scrollToTextArea();
-      
+      this.scrollToTextArea();
+
     }
 
-  
-    }
-    
+
+  }
+
 
   deleteChat() {
 
     // only the chat author or the group admin is permitted to delete the chat
-    if(this.currentlyClickedChat?.senderId === this.loggedInStudentId() || this.isGroupAdmin() ){
+    if (this.currentlyClickedChat?.senderId === this.loggedInStudentId() || this.isGroupAdmin()) {
 
-      this.chatService.deleteChatMessage({[this.currentlyClickedChat!.groupId]:this.currentlyClickedChat!.id!})
-      .pipe(take(1)).subscribe({
+      this.chatService.deleteChatMessage({ [this.currentlyClickedChat!.groupId]: this.currentlyClickedChat!.id! }, this.loggedInStudentId())
+        .pipe(take(1)).subscribe({
 
-        next:(response:HttpResponse<number>) => {
+          next: (response: HttpResponse<number>) => {
 
-          if(response.status === HttpStatusCode.Ok){
+            if (response.status === HttpStatusCode.Ok) {
 
-            // remove the chat from the array of chats
-            const index = this.chatMessages.findIndex(msg => msg.id === this.currentlyClickedChat?.id);
+              // remove the chat from the array of chats
+              const index = this.chatMessages.findIndex(msg => msg.id === this.currentlyClickedChat?.id);
 
-            if(index >= 0){
+              if (index >= 0) {
 
-              this.chatMessages.splice(index, 1);
+                const deleteChats = this.chatMessages.splice(index, 1);
+
+
+
+                if (deleteChats.length) {
+
+
+                  // get all the chats that have replied to deleted chat and set who deleted it
+                  const repliers = this.getRepliers(this.currentlyClickedChat!.id!);
+
+                  // update the underlying message with user's that deleted the chat
+                  for (let index = 0; index < repliers.length; index++) {
+
+                    let replier = repliers[index];
+
+                    // update the deleteBy property
+                    replier.deleterId = this.loggedInStudentId();
+
+                    // set deleter's name
+                    (replier.deleter === this.username) ? this.username : undefined;
+
+
+                    // replace the old chat with the updated chat
+                    this.chatMessages.splice(this.chatMessages.findIndex(c => c.id === replier.id), 1, replier);
+
+                  }
+
+
+                }
+
+                this.chatService.saveMessagesToSession(this.groupId!, this.chatMessages); // update session storage
+              }
             }
           }
-        }
-      })
+        })
 
 
     }
 
 
+  }
+
+  // returns logged in username
+  private get username() {
+
+    return sessionStorage.getItem('username');
+  }
+
+  // get the IDs of chat that replied to a given chat
+  private getRepliers(id: number): ChatMessage[] {
+
+    return this.chatMessages.filter(msg => msg.repliedTo === id);
   }
 
   // checks if the logged in was the sender of the chat message
@@ -366,7 +393,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
   // get the number of online members from the session storage
   get onlineMembers(): number | undefined {
 
-    const currentlyOnline = sessionStorage.getItem('online_members');
+    const currentlyOnline = sessionStorage.getItem(`online_members_${this.groupId}`);
 
 
 
@@ -376,60 +403,67 @@ export class GroupChatComponent implements OnInit, OnDestroy {
   }
 
   // adds a chat to the array of chatMessages, if the current chat is not already in the array
-  private addToChats(chat: ChatMessage) {
+  private addToChats(currentMessage: ChatMessage) {
+
+    switch (currentMessage.content) {
+      case this.DELETEDCHATCONTENT:
+
+        // remove from the chat messages this deleted chat
+        this.chatMessages.splice(this.chatMessages.findIndex(c => c.id === currentMessage.id), 1);
+
+        // get all the replies to the deleted message
+        let repliers = this.getRepliers(currentMessage.id!)
+
+        if (repliers.length) {
+          for (let index = 0; index < repliers.length; index++) {
+
+            let replier = repliers[index];
+            replier.deleterId = currentMessage.deleterId;
+            replier.deleter = currentMessage.deleter;
+
+            this.chatMessages.splice(this.chatMessages.findIndex(c => c.id === replier.id), 1, replier)
+
+          }
+
+        }
 
 
+        break;
+
+      default:
+
+        // check for case of chat editing
+        const index = this.chatMessages.findIndex(c => c.id === currentMessage.id);
+
+        if (index >= 0 && currentMessage.content !== this.chatMessages[index].content) {
+
+          // edit the chat content
+          this.chatMessages[index].content = currentMessage.content;
+          this.chatMessages[index].isEditedChat = true;
+        } else if (index < 0) {
+
+          // this is the case of a new message
+          const index = this.chatMessages.findIndex(c => c.id === currentMessage.id);
+          index ? this.chatMessages.push(currentMessage) : '';
 
 
-    const index = this.chatMessages.findIndex(c => c.id === chat.id);
-    if (index >= 0) {
+          // scrolls down to give visibility to the new chat
+          // scrolls to the bottom
+          setTimeout(() => {
+            this.scrollToBottom()
+          }, 0);
+        }
 
 
-      let updatableChat = this.chatMessages[index];
-
-     
-      // check if it's a deleted chat
-      if (chat.content === this.DELETEDCHATCONTENT) {
-
-        this.chatMessages.splice(index, 1);
-
-        this.bufferMessages(this.chatMessages);
-
-      }
-       // replace the old chat with the new chat since it's an updated version of the chat message
-      else if(chat.content !== updatableChat.content){
-
-        console.log('calling else if{}')
-
-        updatableChat.content = chat.content;
-
-        this.bufferMessages(this.chatMessages);
-
-       
-      }
-
-
-    } else { //this is a new chat message
-
-      console.log('calling else{} for new chat message')
-
-
-      this.chatMessages.push(chat);
-
-      this.bufferMessages(this.chatMessages);
-
-      // scrolls to the bottom
-      setTimeout(() => {
-        this.scrollToBottom()
-      }, 0);
-
-      // update online presence of members
-      sessionStorage.setItem('online_members', `${chat.onlineMembers}`);
-
-      return;
     }
 
-    sessionStorage.setItem('online_members', `${chat.onlineMembers}`);
+
+    // update session storage
+    this.chatService.saveMessagesToSession(this.groupId!, this.chatMessages);
+
+    // update number of online users for the group chat
+    sessionStorage.setItem(`online_members_${this.groupId}`, `${currentMessage.onlineMembers}`);
+
   }
 
 
@@ -501,17 +535,15 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
         // get the chat message being edited
         let editableChat = this.chatMessages.find(chat => chat.id === this.currentlyClickedChat!.id);
-        const editedChatIndex = this.chatMessages.findIndex(chat => chat.id === this.currentlyClickedChat!.id);
         if (editableChat) {
 
           //    // update the content of the chat
-          // editableChat!.content = this.newChatContent;
-
           const updatedChat: ChatMessage = {
             id: editableChat.id,
             groupId: editableChat.groupId,
             senderId: editableChat.senderId,
             content: this.newChatContent,
+            isEditedChat:true,
             sentAt: editableChat.sentAt
 
           }
@@ -524,6 +556,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
                 // replace existing chat with the edited chat
                 editableChat!.content = this.newChatContent;
+                editableChat!.isEditedChat =true;
 
                 this.newChatContent = '';
 
@@ -532,10 +565,10 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
             },
             error: (err) => {
-              console.log(`could not edit chat`);
+              console.log(`could not edit chat ${err}`);
 
               editableChat = undefined;
-            this.newChatContent = '';
+              this.newChatContent = '';
 
             },
 
@@ -552,7 +585,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
         }
 
         // handle differently if this is a reply chat
-      }else if(this.currentlyClickedChat && this._replyToChat){
+      } else if (this.currentlyClickedChat && this._replyToChat) {
 
         const newChatMessage: ChatMessage = {
           id: 0,//not actually a required field, but to prevent server reporting error 
@@ -560,8 +593,9 @@ export class GroupChatComponent implements OnInit, OnDestroy {
           senderId: Number(senderId),
           senderName: '',//not actually a required field, but to prevent server reporting error 
           content: this.newChatContent,
-          repliedTo:this.currentlyClickedChat.id,
-          repliedToChat:this.currentlyClickedChat.content,
+          isEditedChat: false,
+          repliedTo: this.currentlyClickedChat.id,
+          repliedToChat: this.currentlyClickedChat.content,
           sentAt: new Date()
         };
 
@@ -570,8 +604,8 @@ export class GroupChatComponent implements OnInit, OnDestroy {
         this._replyToChat = false;
 
         this.chatService.sendNewChatMessage(newChatMessage).pipe(take(1)).subscribe({
-          next: (response: HttpResponse<number>) => {
-            if (response.status === HttpStatusCode.Ok) console.log('message sent')
+          next: () => {
+
           },
 
           error: (err) => console.log(err)
@@ -584,12 +618,15 @@ export class GroupChatComponent implements OnInit, OnDestroy {
       // handle differently for fresh chat message
       else {
 
+        console.log(`new message`)
+
         const newChatMessage: ChatMessage = {
           id: 0,//not actually a required field, but to prevent server reporting error 
           groupId: Number(this.groupId),
           senderId: Number(senderId),
           senderName: '',//not actually a required field, but to prevent server reporting error 
           content: this.newChatContent,
+          isEditedChat:false,
           sentAt: new Date()
         };
 
@@ -598,13 +635,21 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
         this.chatService.sendNewChatMessage(newChatMessage).subscribe({
           next: (response: HttpResponse<number>) => {
-            if (response.status === HttpStatusCode.Ok) console.log('success')
+            if (response.status === HttpStatusCode.Ok) {
+
+             // this.chatMessages.push(newChatMessage)
+
+              console.log('success');
+            }
+
+
           },
 
-          error: (err) => console.log(err)
+          error: (err) => console.log(err),
+
         })
 
-        
+
       }
 
 
@@ -612,60 +657,63 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
   }
 
-  // returns boolean indicating if the chat that has the reply has been deleted from the server or not.
+  // returns boolean indicating if the chat that has a reply has been deleted from the server or not.
   // This is used to decide if goToChat() should proceed or not
-  hasBeenDeleted(repliedChatId:number):boolean{
+  hasBeenDeleted(repliedChatId: number): boolean {
 
-    // get the id if the replied chat
-    const _repliedChatId = this.chatMessages.filter(c => c.id === repliedChatId)[0].repliedTo;
-
-    // check if chat with _repliedChatId still exists in the chat messages array
-
-    return this.chatMessages.filter(chat => chat.id === _repliedChatId)[0] === null;
+    // returns true if chat with repliedChatId couldn't be found in the chatMessages array
+    return this.chatMessages.findIndex(c => c.id === repliedChatId) < 0;
 
 
   }
 
-// scrolls to the original chat has a reply
-goToChat(chatId:number) {
-  
-  const x = this.chatMessages.filter(c => c.id === chatId)[0];
+  // returns the name of a user who deleted a given chat
+  public chatDeleter(chat: ChatMessage): string {
 
-  console.log(JSON.stringify(x, null, 1))
- 
+    if (chat.deleterId === this.loggedInStudentId()) return `deleted by you`;
+    else if (chat.deleterId === this.groupAdminId) return `deleted by admin`;
 
-  // get the index position of the chat 
-  const index = this.chatMessages.findIndex(chat => chat.id === chatId);
-  // go the elementRef at the given index
-  if(index >= 0 && !this.hasBeenDeleted(chatId)){
+    return `deleted by ${chat.deleter!}`;
+  }
 
-    // get the element at this index of the querry list
-    const element = this.chatMessageRefs.toArray()[index].nativeElement as HTMLElement;
 
-    if(element){
+  // scrolls to the original chat has a reply
+  goToChat(chatId: number) {
 
-      console.log(`element: ${JSON.stringify(element, null, 1)}`)
 
-      element.scrollIntoView({behavior:'smooth',block:'nearest'});
-    
 
-      element.classList.add('animated-highlight');
+    // get the index position of the chat 
+    const index = this.chatMessages.findIndex(chat => chat.id === chatId);
+    // go the elementRef at the given index
+    if (index >= 0) {
 
-      setTimeout(() => {
-        
-        element.classList.remove('animated-highlight')
+      // get the element at this index of the querry list
+      const element = this.chatMessageRefs.toArray()[index].nativeElement as HTMLElement;
 
-      }, 10000);
+      if (element) {
+
+
+
+        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+
+        element.classList.add('animated-highlight');
+
+        setTimeout(() => {
+
+          element.classList.remove('animated-highlight')
+
+        }, 10000);
+      }
     }
-  }
   }
 
   // checks if the logged in user is the group admin
   isGroupAdmin(): boolean {
 
-    const groupAdminId = this.activatedRoute.snapshot.paramMap.get('group_admin_id');
 
-    return groupAdminId ? Number(groupAdminId) === this.loggedInStudentId() : false;
+
+    return this.groupAdminId === this.loggedInStudentId();
   }
 
   // validates chat message to enable or disable the sent button
@@ -688,32 +736,13 @@ goToChat(chatId:number) {
       if (index >= 0) {
 
         this.requestNotifications.splice(index, 1);
-      } else {
-        console.log(`could not find index: ${index}`)
       }
-    } else console.log(`notification is undefined:`)
+    }
 
 
   }
 
-  private joinRequestNotification() {
 
-    this.joinRequestSub = this.chatService.joinGroupRequest$.subscribe({
-      next: (notification: _Notification) => {
-
-        if (notification) {
-
-          // this.requestNotifications.push(notification);
-
-          this.addToNotifications(notification);
-        }
-
-
-      }
-    })
-
-
-  }
 
   // method that ensures non-duplicate notifications a re added to the notifications array
   addToNotifications(currentNotification: _Notification) {
@@ -731,7 +760,7 @@ goToChat(chatId:number) {
         break;
 
       case 'new member':
-        console.log('new member')
+
 
 
         const _index: number = this.newMemberNotifications.findIndex(notification => notification.id === currentNotification.id);
@@ -868,3 +897,9 @@ export class NewMemberNotification {
 
 }
 
+export function isChatMessage(data: any): data is ChatMessage {
+
+  return (
+    typeof data.content === 'string' && typeof data.groupId === 'number'
+  )
+}

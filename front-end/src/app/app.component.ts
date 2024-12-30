@@ -78,16 +78,13 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
        if(this.isLoggedInStudent()){
 
-        this.disconnectFromServer();
-        
-       }else{
-
         this.authService.logout();
+        
        }
        
        
-
-        //this is important incase the user wants to logout in the middle of assessment taking
+        //this is important incase the user wants to logout in the middle of assessment taking, so the app can allow them to logout
+        // without enforcing the canDeactivate route guard
        this.activityService.currentAction('logout');
         this.router.navigate(['login'])
       }
@@ -140,27 +137,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
         return Number(sessionStorage.getItem('studentId'));
       }
 
-      // disconnects the user from server's SSE
-      private disconnectFromServer(){
-
-        this.authService.disconnectFromServer(this.studentId).pipe(take(1)).subscribe({
-         
-          complete:() => {
-
-            // disconnects the user from further receiving chat messages
-            this.chatService.disconnectFromSSE();
-
-             // disconnects the user from further receiving notification messages
-            this.notificationService.disconnectFromSSE();
-
-            // finally logs the student out
-            this.authService.logout();
-
-          }
-
-        });
-
-      }
+   
   }
 
 

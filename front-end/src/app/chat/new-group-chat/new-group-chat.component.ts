@@ -43,6 +43,8 @@ export class NewGroupChatComponent implements OnInit {
 
     groupAdminId: new FormControl<number>(0),
 
+    isGroupLocked: new FormControl<boolean>(false),
+
 
   });
 
@@ -88,10 +90,6 @@ export class NewGroupChatComponent implements OnInit {
     return this.groupChatForm.get('groupAdminId') as FormControl;
   }
 
-  private get createdAt(){
-
-    return this.groupChatForm.get('createdAt') as FormControl;
-  }
 
   // validates the form before allowing for submission to the server
   canCreateGroup():boolean{

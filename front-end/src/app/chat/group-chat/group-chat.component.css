@@ -52,10 +52,11 @@
 
 .message-content {  
  
-  padding: 8px; /* Padding inside the message bubble */  
+  
   border-radius: 5px; /* Rounded corners for message bubble */  
   margin-top: 2px; /* Small space above the message content */  
-  width: fit-content; 
+  width: fit-content;
+  margin-bottom: 0; 
 }  
 
 .chat-message-container{
