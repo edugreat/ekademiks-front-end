@@ -51,7 +51,7 @@ export class TestFetchInfoComponent implements OnInit, OnDestroy {
       if (id) {
 
 
-        console.log(id)
+      
         this.fetchAssessments(Number(id))
       }
     })

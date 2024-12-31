@@ -4,6 +4,7 @@ import { defer, Observable, of, Subject, Subscription } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpResponse, HttpStatusCode } from '@angular/common/http';
 import { AuthService } from '../auth/auth.service';
 import { _Notification as _Notification } from '../admin/upload/notifications/notifications.service';
+import { ChatCacheService } from './chat-cache.service';
 
 @Injectable({
   providedIn: 'root'
@@ -61,7 +62,7 @@ export class ChatService implements OnDestroy {
 
 
   constructor(private endpoints: Endpoints,
-    private http: HttpClient, private zone: NgZone, private authService: AuthService) {
+    private http: HttpClient, private zone: NgZone, private authService: AuthService, private chatCachedService:ChatCacheService) {
 
     // disconnect from receiving chat messages once the user logs out
     this.loginSub = this.authService.studentLoginObs$.subscribe(isLoggedIn => {
@@ -344,11 +345,9 @@ export class ChatService implements OnDestroy {
 
   }
 
-  private addToChats(incomingChat: ChatMessage) {
+  private async addToChats(incomingChat: ChatMessage) {
 
-    console.log(`background chat ${JSON.stringify(incomingChat, null, 1)}`)
-
-    let savedChats = this.getMessagesFromSession(incomingChat.groupId);
+    let savedChats = await this.getCachedChats(incomingChat.groupId);
 
     switch (incomingChat.content) {
       case this.DELETEDCHATCONTENT:
@@ -402,9 +401,9 @@ export class ChatService implements OnDestroy {
    
     // update the session storage
     console.log(`saving the chat`)
-    this.saveMessagesToSession(incomingChat.groupId, savedChats);
+    this.cachedMessage(incomingChat.groupId, savedChats);
 
-    console.log(`saved chat: ${JSON.stringify(this.getMessagesFromSession(incomingChat.groupId))}`)
+    console.log(`saved chat: ${JSON.stringify(this.getCachedChats(incomingChat.groupId))}`)
 
 
     
@@ -458,18 +457,16 @@ export class ChatService implements OnDestroy {
   }
 
   //save messages to session storage
-  saveMessagesToSession(groupId: number, messages: ChatMessage[]): void {
+  async cachedMessage(groupId: number, messages: ChatMessage[]){
 
-    sessionStorage.setItem(`group_${groupId}_messages`, JSON.stringify(messages));
+   await this.chatCachedService.saveChat(`${groupId}`, messages)
 
   }
 
   // retrieves messages from session storage if there's any, or empty array if there's none
-  getMessagesFromSession(groupId: number): ChatMessage[] {
+  getCachedChats(groupId: number) {
 
-    const data = sessionStorage.getItem(`group_${groupId}_messages`);
-
-    return data ? (JSON.parse(data) as Array<ChatMessage>) : [];
+    return this.chatCachedService.getCachedChat(`${groupId}`)
   }
 
   // provides mechanism for sorting chat messages by date

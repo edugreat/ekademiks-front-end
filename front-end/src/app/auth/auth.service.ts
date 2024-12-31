@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, take, tap } from 'rxjs';
 import { Endpoints } from '../end-point';
 import { ChatService } from '../chat/chat.service';
+import { ChatCacheService } from '../chat/chat-cache.service';
 
 @Injectable({
   providedIn: 'root'
@@ -28,7 +29,7 @@ export class AuthService {
   //Get the observable version of the behabvior subject to ensure it only emits directly to this observable which subsequently notofies subscribers
   //The of this is to not allow subscribers directly subscribe to the Behavior subject so as not to emit unintended values by calling the subject's 'next' method upon subscription
   public userName$: Observable<string> ;
-  constructor(private http: HttpClient, private endpoints:Endpoints) {
+  constructor(private http: HttpClient, private endpoints:Endpoints, private chatCachedService:ChatCacheService) {
 
     this.currentUserName = new BehaviorSubject<string>(sessionStorage.getItem('username')! || 'Student');
     this.userName$= this.currentUserName.asObservable();
@@ -155,6 +156,8 @@ export class AuthService {
  logout():void{
     //clears the user roles stored in memory once the user logs out
    sessionStorage.clear();
+
+    this.chatCachedService.clearAllChats();
     this.currentUserName.next('Student');
     this.studentLoginSubject.next(false);
    
