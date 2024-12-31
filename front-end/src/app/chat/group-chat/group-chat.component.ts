@@ -6,6 +6,7 @@ import { HttpResponse, HttpStatusCode } from '@angular/common/http';
 import { _Notification as _Notification } from '../../admin/upload/notifications/notifications.service';
 import { MAT_SNACK_BAR_DATA, MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
+import { ChatCacheService } from '../chat-cache.service';
 
 @Component({
   selector: 'app-group-chat',
@@ -83,7 +84,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
 
 
-  constructor(private chatService: ChatService, private activatedRoute: ActivatedRoute) { }
+  constructor(private chatService: ChatService, private activatedRoute: ActivatedRoute, private chatCachedService:ChatCacheService) { }
 
 
 
@@ -120,25 +121,8 @@ export class GroupChatComponent implements OnInit, OnDestroy {
         this.groupAdminId = Number(_grpAdminId);
 
 
-        // get previous chat messages
-
-        let previousMessages = this.chatService.getMessagesFromSession(Number(_groupId));
-
-        this.chatMessages = [];
-        this.chatMessages = previousMessages
-
-        // this.chatMessages.push(...previousMessages)
-
-
-
-        this.chatService.connectToChatMessages(this.groupId!, this.loggedInStudentId());
-
-        // subcribe for new messages
-        this.streamChats();
-
-
-
-        // check if the message is chat notification or chat message
+        // load chats for the given group
+       this.loadChats(_groupId);
 
         // checks if the user had recent messages
         this.hadRecentPosts();
@@ -154,6 +138,21 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
 
 
+  }
+  async loadChats(_groupId: string) {
+   
+    // try loading cached chats first
+
+    this.chatMessages = await this.chatCachedService.getCachedChat(_groupId);
+
+    if(this.chatMessages.length === 0){
+
+      this.chatService.connectToChatMessages(Number(_groupId), this.loggedInStudentId());
+
+     
+    }
+
+    this.streamChats();
   }
 
 
@@ -352,7 +351,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
                 }
 
-                this.chatService.saveMessagesToSession(this.groupId!, this.chatMessages); // update session storage
+                this.chatService.cachedMessage(this.groupId!, this.chatMessages); // update session storage
               }
             }
           }
@@ -459,7 +458,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
 
     // update session storage
-    this.chatService.saveMessagesToSession(this.groupId!, this.chatMessages);
+    this.chatService.cachedMessage(this.groupId!, this.chatMessages);
 
     // update number of online users for the group chat
     sessionStorage.setItem(`online_members_${this.groupId}`, `${currentMessage.onlineMembers}`);
