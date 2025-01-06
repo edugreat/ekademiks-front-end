@@ -59,6 +59,8 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
   private joinRequestSub?: Subscription;
 
+  chatNotificationSub?: Subscription;
+
   newChatContent: string = '';
 
   groupAdminId?: number;
@@ -80,6 +82,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
 
   @ViewChild('chatContainer') chatContainer!: ElementRef;
+  
 
 
 
@@ -153,8 +156,14 @@ export class GroupChatComponent implements OnInit, OnDestroy {
     }
 
     this.streamChats();
+
+    this.streamChatNotifications(_groupId);
+
+    
   }
 
+
+  
 
 
   ngOnDestroy(): void {
@@ -163,12 +172,29 @@ export class GroupChatComponent implements OnInit, OnDestroy {
     this.joinRequestSub?.unsubscribe();
     clearInterval(this.snackBarTimer);
 
+    this.chatNotificationSub?.unsubscribe();
+
     // disconnect from the receiving chat messages
     //this.chatService.disconnectFromSSE();
 
 
   }
 
+
+  streamChatNotifications(groupId:string) {
+    
+    this.chatNotificationSub = this.chatService.streamChatNotificationsFor(Number(groupId)).subscribe({
+      next: (data:_Notification | undefined) => {
+
+        if(data){
+
+          this.addToNotifications(data);
+        }
+
+
+      }
+    })
+  }
 
 
   private streamChats() {
@@ -564,7 +590,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
             },
             error: (err) => {
-              console.log(`could not edit chat ${err}`);
+             
 
               editableChat = undefined;
               this.newChatContent = '';
@@ -617,7 +643,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
       // handle differently for fresh chat message
       else {
 
-        console.log(`new message`)
+        
 
         const newChatMessage: ChatMessage = {
           id: 0,//not actually a required field, but to prevent server reporting error 

@@ -24,6 +24,7 @@
     "bootstrap": "^5.3.3",
     "chart.js": "^4.4.4",
     "dexie": "^4.0.10",
+    "event-source-polyfill": "^1.0.31",
     "mathjax": "^3.2.2",
     "ng-event-source": "^1.0.14",
     "rxjs": "~7.8.0",
