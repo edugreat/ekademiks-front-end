@@ -5,6 +5,7 @@ import { HttpClient, HttpHeaders, HttpResponse, HttpStatusCode } from '@angular/
 import { AuthService } from '../auth/auth.service';
 import { _Notification as _Notification } from '../admin/upload/notifications/notifications.service';
 import { ChatCacheService } from './chat-cache.service';
+import { EventSourcePolyfill } from 'ng-event-source';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +22,7 @@ export class ChatService implements OnDestroy {
   private loginSub?: Subscription;
 
   // map of key , groupId and value Event source
-  private eventSources: Map<number, EventSource> = new Map();
+  private eventSources: Map<number, EventSourcePolyfill> = new Map();
 
   public chatMessageSubjects: Map<number, Subject<ChatMessage>> = new Map();
 
@@ -34,6 +35,14 @@ export class ChatService implements OnDestroy {
 
   // keeps try of the number of reconnection counts when server sent event connection is lost
   private retryCount = 0;
+
+
+  //initial retry backoff time of 1sec
+  private retryDelay = 45000;
+
+  private MAX_RECONNECTION_ATTEMPT = 10; //Only after 10 unsuccessful reconnection attempts would the cient stop further attempts
+
+  private reconnectionAttempt = 0; //tracks the number of attempts at re-establishing connection
 
 
 
@@ -59,6 +68,7 @@ export class ChatService implements OnDestroy {
  private backgroundSubscriptions = new Map<number, Subscription>();
 
  _backgroundSubscriptions?:Subscription;
+ 
 
 
   constructor(private endpoints: Endpoints,
@@ -107,9 +117,6 @@ export class ChatService implements OnDestroy {
 
   // send new chat messages to the server which then broadcasts the chats in realtime to all members online
   sendNewChatMessage(newChat: ChatMessage): Observable<HttpResponse<number>> {
-
-    console.log(`sending ${JSON.stringify(newChat, null, 1)}`)
-
 
 
 
@@ -180,6 +187,8 @@ export class ChatService implements OnDestroy {
   // method that establishes a unidirectional messaging system where the server forwards previous chat messages to the client via the server sent event emitter client
   connectToChatMessages(groupId: number, studentId: number) {
 
+    const jwtToken = sessionStorage.getItem('accessToken');
+
        //  create new event source for the group if there was non
     if (this.eventSources.has(groupId)) {
 
@@ -213,19 +222,43 @@ export class ChatService implements OnDestroy {
 
               }
       // create new event source for the group
-      const eventSource = new EventSource(`${this.endpoints.chatMessagesUrl}?group=${groupId}&student=${studentId}`);
+      const eventSource = new EventSourcePolyfill(`${this.endpoints.chatMessagesUrl}?group=${groupId}&student=${studentId}`,{
+
+        headers: {
+          'authorization': `Bearer ${jwtToken}`
+        }, 
+        heartbeatTimeout:this.retryDelay,
+        connectionTimeout:5000
+      });
 
       // add the event source to the map of event sources
       this.eventSources.set(groupId, eventSource);
 
 
+      // sets up hearbeat event listener
+      eventSource.addEventListener('heartbeat',(evt:Event) => {
 
-      eventSource.addEventListener('chats', (event: MessageEvent<any>) => {
+        // resets all thresholds
+        if(evt){
+
+
+          console.log('received hearbeat ')
+          this.retryDelay = 35000
+        }
+      })
+
+
+
+      eventSource.addEventListener('chats', (event: Event) => {
         this.zone.run(() => {
 
+          const messageEvent = event as MessageEvent;
+
           // check if any message has been received
-          if (event) {
-            const data = JSON.parse(event.data);
+          if (messageEvent) {
+
+            
+            const data = JSON.parse(messageEvent.data);
  
 
             // process for the case where the message a request to join the group chat
@@ -233,6 +266,7 @@ export class ChatService implements OnDestroy {
 
                       
 
+              console.log(`emitting chat notification: ${data}`)
              
 
               // emit current chat notification to subscribers
@@ -256,22 +290,30 @@ export class ChatService implements OnDestroy {
               //  disconnect group from notifications on account of error
         eventSource.onerror = () => {
 
-          console.log(`event source error`)
+          console.log(`event source error `)
 
           // disconnect the erring group
           this.disconnectFromGroup(groupId);
 
           // retry network connection
 
-          const retryDelay = Math.min(1000 * Math.pow(2, this.retryCount), 30000);
+         this.retryDelay = Math.min(1000 * Math.pow(2, this.retryCount), 60000);
 
           this.retryCount++;
-          this.reconnectionTiming = setTimeout(() => {
 
-            console.log('reconnecting to chat')
+          ++this.reconnectionAttempt;
 
-            this.connectToChatMessages(groupId, studentId);
-          }, retryDelay);
+          console.log(`reconnection attempt: ${this.reconnectionAttempt}`)
+
+          // stop further reconnection attempts once reconnection limit is reached or exceeded
+          if(this.reconnectionAttempt >= this.MAX_RECONNECTION_ATTEMPT) eventSource.close()
+
+          // this.reconnectionTiming = setTimeout(() => {
+
+          //   console.log('reconnecting to chat')
+
+          //   this.connectToChatMessages(groupId, studentId);
+          // }, retryDelay);
 
         };
 
@@ -279,7 +321,13 @@ export class ChatService implements OnDestroy {
         eventSource.onmessage = () => {
           console.log('connected to chats');
           this.retryCount = 0;
+
+          this.retryDelay = 35000
         }
+
+        
+
+        
 
 
 
@@ -400,11 +448,10 @@ export class ChatService implements OnDestroy {
 
    
     // update the session storage
-    console.log(`saving the chat`)
+  
     this.cachedMessage(incomingChat.groupId, savedChats);
 
-    console.log(`saved chat: ${JSON.stringify(this.getCachedChats(incomingChat.groupId))}`)
-
+   
 
     
   }
@@ -417,6 +464,8 @@ export class ChatService implements OnDestroy {
   }
 
   public streamChatNotificationsFor(groupId: number):Observable<_Notification | undefined> {
+
+    console.log(`received notification: `)
 
     return defer(() => {
 
