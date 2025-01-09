@@ -1,22 +1,21 @@
 
 #registrationLabel{
-
   display: flex;
   justify-content: center;
-  align-items: center;
   font-size: 1.5rem;
   margin-top: 15px;
-  margin-bottom: 10px;
+  padding-right: 95px !important;
+  
 }
+
+
 .signup-container {
   
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  
-  background-color: #f5f5f5; /* Light grey background */
-  padding: 0 20px;
-  
+   max-width: 600px;
+    margin: 0 auto;
+    padding: 1em;
+   
+    border-radius: 5px;
   
 }
 

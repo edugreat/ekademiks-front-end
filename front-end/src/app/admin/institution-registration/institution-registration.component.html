@@ -1,0 +1,48 @@
+
+<div id="thumpsIcon" class="hide" >
+ 
+
+    <mat-icon color="primary"  >thumb_up</mat-icon>
+ 
+
+</div>
+
+<div class="container">
+    <h2>Register Your Institution</h2>
+    <form [formGroup]="registrationForm!" (ngSubmit)="onSubmit()">
+      <div>
+        <label for="name">Institution Name:</label>
+        <input style="width: 97%;" type="text" id="name" formControlName="name" required>
+      </div>
+  
+      <div>
+        <label for="state">State:</label>
+        <select id="state" formControlName="state" required>
+          <option *ngFor="let state of states" [value]="state">{{state}}</option>
+        </select>
+      </div>
+  
+      <div>
+        <label for="lga">LGA:</label>
+        <select id="lga" formControlName="localGovt" required>
+          <option *ngFor="let lga of localGovts" [value]="lga">{{lga}}</option>
+        </select>
+      </div>
+  
+      <div class="example-button-row">
+        <button [disabled]="!canSubmit()" mat-flat-button>Submit</button>
+
+        <button mat-flat-button>Go Back</button>
+
+        </div>
+     
+    </form>
+  </div>
+
+  <div class="add-container">
+
+    <button [routerLink]="['/sign-up']" mat-flat-button >Register your students</button>
+
+    <button (click)="addStudent()" mat-flat-button >Add your students</button>
+
+  </div>

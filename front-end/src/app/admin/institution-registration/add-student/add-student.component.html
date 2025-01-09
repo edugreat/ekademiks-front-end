@@ -1,0 +1,45 @@
+
+<h3 style="display: flex; justify-content: center;" >Add Your Students' Details</h3>
+
+<div id="thumpsIcon" class="hide" >
+    <mat-icon color="primary"  >thumb_up</mat-icon>
+</div>
+
+<form [formGroup]="addStudentForm" (ngSubmit)="onSubmit()" class="add-student-form">
+    <mat-form-field appearance="fill">
+      <mat-label>Institution</mat-label>
+      <mat-select [(value)]="selectedInstitution">
+        <mat-option *ngFor="let institution of institutions" [value]="institution.id">
+          {{ institution.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  
+    <div formArrayName="records">
+      <div *ngFor="let record of records.controls; let i = index" [formGroupName]="i" class="form-record">
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email" placeholder="Enter email">
+        </mat-form-field>
+  
+        <mat-form-field appearance="outline">
+            <button (click)="togglePasswordVisibility()" matSuffix mat-icon-button >
+                <mat-icon *ngIf="!passwordState" >visibility</mat-icon>
+
+                <mat-icon *ngIf="passwordState" >visibility_off</mat-icon>
+            </button>
+          <mat-label>Password</mat-label>
+          <input matInput formControlName="password" [type]="dynamicType" placeholder="Enter password">
+        </mat-form-field>
+        
+        <button mat-icon-button color="warn" type="button" (click)="deleteRecord(i)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+  
+    <button mat-raised-button color="primary" type="button" (click)="addRecord()">Add Student</button>
+   
+    <button [disabled]=" !records.length || hasFormError || !selectedInstitution" mat-raised-button color="primary" type="submit">Submit</button>
+  </form>
+  

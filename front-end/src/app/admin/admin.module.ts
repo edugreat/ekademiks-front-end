@@ -20,6 +20,8 @@ import { StudentListComponent } from './fetch/student-list/student-list.componen
 import { StudentDetailsPageComponent } from './fetch/student-list/student-details-page/student-details-page.component';
 import { TestFetchInfoComponent } from './fetch/test-fetch-info/test-fetch-info.component';
 import { AssessmentQuestionsComponent } from './fetch/assessment-questions/assessment-questions.component';
+import { InstitutionRegistrationComponent } from './institution-registration/institution-registration.component';
+import { AddStudentComponent } from './institution-registration/add-student/add-student.component';
 
 const uploadComponents = [
  
@@ -39,7 +41,7 @@ const fetchComponents = [
 const bankComponents = [QuestionBankComponent, OptionsBankComponent];
 
 @NgModule({
-  declarations: [ AdminComponent, uploadComponents, fetchComponents, bankComponents, PreviewTestComponent, InstructionsComponent, NotificationsComponent, StudentListComponent, StudentDetailsPageComponent, TestFetchInfoComponent, AssessmentQuestionsComponent],
+  declarations: [ AdminComponent, uploadComponents, fetchComponents, bankComponents, PreviewTestComponent, InstructionsComponent, NotificationsComponent, StudentListComponent, StudentDetailsPageComponent, TestFetchInfoComponent, AssessmentQuestionsComponent, InstitutionRegistrationComponent, AddStudentComponent],
   imports: [CommonModule, SharedModule, AdminRoutingModule],
 })
 export class AdminModule {}

@@ -2,7 +2,9 @@
   
 
 <div *ngIf="!wait" id="registrationLabel">
+
     <label>PLEASE CREATE ACCOUNT</label>
+   
 </div>
 <div *ngIf="errorMessage" class="error">
   <p class="error-message" >{{errorMessage}}!</p>
@@ -90,14 +92,18 @@
         <!-- Password input field -->
         <div>
             <mat-form-field appearance="outline">
+
+              
+
+
                <!-- The password visibility is only shown if the property 'showPassword' is false -->
-             @if (!showPassword) {
+             @if (showPassword) {
 
               <button matSuffix mat-icon-button
               
               (click)="toggleShowPassword()"
               >
-                <mat-icon >visibility</mat-icon>
+                <mat-icon >visibility_off</mat-icon>
               </button>
              }
 
@@ -107,13 +113,13 @@
               matInput placeholder="Password">
              
               <!-- The password visibility off is only shown if the property 'showPassword' is true -->
-               @if (showPassword ) {
+               @if (!showPassword ) {
 
                 <button matSuffix mat-icon-button
               
                 (click)="toggleShowPassword()"
                 >
-                  <mat-icon >visibility_off</mat-icon>
+                  <mat-icon >visibility</mat-icon>
                 </button>
                }
 

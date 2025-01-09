@@ -11,6 +11,8 @@ export class Endpoints {
 
      //routes to the backend server to fetch test based on the request parameters
  private _baseTestUrl = 'http://localhost:8080/tests/start';
+ 
+  
   
 
   
@@ -175,6 +177,28 @@ export class Endpoints {
 
     public get setTestUrl() {
         return this._setTestUrl;
+    }
+
+    private _newRegistrationUrl = `${this._baseUrl}/admins/register`;
+
+    public get newRegistrationUrl(){
+
+        return this._newRegistrationUrl;
+    }
+
+    private _institutionsUrl = `${this.baseUrl}/admins/institutions`;
+
+    public get institutionsUrl(){
+
+        return this._institutionsUrl;
+    }
+
+
+    private _addStudent_Records = `${this.baseUrl}/admins/register_student`;
+
+    public get addStudent_Records(){
+
+        return this._addStudent_Records;
     }
 
 
