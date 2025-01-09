@@ -22,6 +22,8 @@ import { MyGroupsComponent } from '../chat/my-groups/my-groups.component';
 import { GroupChatComponent } from '../chat/group-chat/group-chat.component';
 import { GroupRequestComponent } from '../chat/group-request/group-request.component';
 import { authGuard } from '../chat/auth.guard';
+import { InstitutionRegistrationComponent } from '../admin/institution-registration/institution-registration.component';
+import { AddStudentComponent } from '../admin/institution-registration/add-student/add-student.component';
 
 
 
@@ -73,6 +75,17 @@ const routes: Routes = [
     component: TestComponent,
     
   },
+
+  {path: 'register', component: InstitutionRegistrationComponent,
+    canActivate:[adminGuard],
+    canMatch: [adminGuard]
+  },
+
+  {path: 'add_student/:admin', component: AddStudentComponent,
+    canActivate: [adminGuard],
+    canMatch:[adminGuard]
+  },
+  
   { path: 'no-access/:code', component: AccessDeniedComponent },
 
   {path: 'admin/:parameter',

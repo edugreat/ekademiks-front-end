@@ -1,8 +1,7 @@
-import { HttpClient, HttpResponse, HttpStatusCode } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, take, tap } from 'rxjs';
 import { Endpoints } from '../end-point';
-import { ChatService } from '../chat/chat.service';
 import { ChatCacheService } from '../chat/chat-cache.service';
 
 @Injectable({
@@ -94,7 +93,7 @@ export class AuthService {
       sessionStorage.setItem('refreshToken', user.refreshToken);
     }
 
-    sessionStorage.setItem("studentId", `${user.id}`)
+    
     sessionStorage.setItem('username', user.firstName);
    sessionStorage.setItem('roles', JSON.stringify(user.roles));
     this.currentUserName.next(sessionStorage.getItem('username')!);
@@ -103,7 +102,17 @@ export class AuthService {
 
     }
 
-    // indicates that the current user belong in a group chat. This is used to provide some chat functionalities
+    if(this.isAdmin()){
+
+      sessionStorage.setItem('adminId',`${user.id}`)
+    }else {
+      sessionStorage.setItem("studentId", `${user.id}`)
+    }
+
+    if(this.isLoggedInStudent()){
+
+
+      // indicates that the current user belong in a group chat. This is used to provide some chat functionalities
     const studentId = Number(sessionStorage.getItem('studentId'));
     this.isGroupMember(studentId).pipe(take(1)).subscribe((member:boolean) =>{
 
@@ -119,6 +128,7 @@ export class AuthService {
 
       }
     })
+    }
   }
 
   

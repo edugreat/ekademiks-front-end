@@ -6,15 +6,17 @@
     <span id="menuTitle"> <b>e-</b><i>Kademiks</i> </span>
     
 
-    <a mat-button routerLink="/home" class="top-menu-item" ><mat-icon>home</mat-icon>Home</a>
-    <a mat-button routerLink="/assessments" class="top-menu-item"><mat-icon>school</mat-icon>Assessments</a>
-    <a mat-button routerLink="/supports" class="top-menu-item"><mat-icon>help</mat-icon>Help/Supports</a>
-    <a mat-button routerLink="/contact" class="top-menu-item" ><mat-icon>call</mat-icon>Contact</a>
+    <a *ngIf="!isAdmin()" mat-button routerLink="/home" class="top-menu-item" ><mat-icon>home</mat-icon>Home</a>
+    <a *ngIf="!isAdmin()" mat-button routerLink="/assessments" class="top-menu-item"><mat-icon>school</mat-icon>Assessments</a>
+    <a *ngIf="!isAdmin()" mat-button routerLink="/supports" class="top-menu-item"><mat-icon>help</mat-icon>Help/Supports</a>
+    <a *ngIf="!isAdmin()" mat-button routerLink="/contact" class="top-menu-item" ><mat-icon>call</mat-icon>Contact</a>
 
     <a *ngIf="isLoggedInStudent()" mat-button routerLink="/new-group" class="top-menu-item" ><mat-icon>group_add</mat-icon>new group</a>
     <a *ngIf="isLoggedInStudent() && isGroupMemeber()" mat-button [routerLink]="['/my-groups', studentId]" class="top-menu-item" > <mat-icon>group</mat-icon>my groups</a>
 
     <a *ngIf="isLoggedInStudent()" [routerLink]="['/group-request']" mat-button  class="top-menu-item" > <mat-icon>person_add</mat-icon>join a group</a>
+
+    <a matTooltip="Register your institution" *ngIf="isAdmin()" mat-button [routerLink]="['/register']" class="top-menu-item" ><mat-icon>school</mat-icon>Register</a>
 
 
     <!-- ADMIN BUTTON -->
@@ -93,12 +95,12 @@
       <div *ngIf="!isAdmin()" >
         <a (click)="sidenav.close()" mat-button routerLink="/assessments"class="side-menu-item"> <mat-icon>school</mat-icon> Assessments</a>
       </div>
-        <div>
+        <div *ngIf="!isAdmin()">
             <a (click)="sidenav.close()" mat-button routerLink="/supports" class="side-menu-item"> <mat-icon>help</mat-icon> Help/Supports</a>
    
         </div>
 
-        <div>
+        <div *ngIf="!isAdmin()">
             <a (click)="sidenav.close()" mat-button routerLink="/contact" class="side-menu-item"> <mat-icon>call</mat-icon> Contact</a>
    
         </div>
@@ -120,9 +122,7 @@
         <div *ngIf="isLoggedInStudent()"  >
             <a  (click)="sidenav.close()" [routerLink]="['/group-request']"   mat-button class="side-menu-item"> <mat-icon>person_add</mat-icon>join a group</a>
         </div>
-        <div >
-            <a (click)="logout()" *ngIf="loggedIn()" (click)="sidenav.close()" mat-button class="side-menu-item"> <mat-icon>logout</mat-icon> Logout</a>
-        </div>
+      
 
         <div>
             <a *ngIf="isAdmin()"  mat-button (click)="sidenav.close()" [matMenuTriggerFor]="admins" aria-label="Example icon-button with a menu" class="side-menu-item" >
@@ -132,6 +132,22 @@
                 Admin
             </a>
 
+        </div>
+
+       
+        <div matTooltip="Register you school" >
+            <a *ngIf="isAdmin()"  mat-button (click)="sidenav.close()" [routerLink]="['/register']" class="side-menu-item"  >
+
+                <mat-icon >school</mat-icon>
+                
+                Register
+            </a>
+
+        </div>
+
+
+        <div >
+            <a (click)="logout()" *ngIf="loggedIn()" (click)="sidenav.close()" mat-button class="side-menu-item"> <mat-icon>logout</mat-icon> Logout</a>
         </div>
     </div>
         </mat-sidenav>

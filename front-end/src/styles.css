@@ -77,3 +77,37 @@ input.ng-dirty.ng-valid {
   font-size: 1.5em;
   margin-right: 0.5em; 
 }
+
+
+.thumpsUp{
+
+   
+  display: flex !important; 
+  justify-content: center !important; 
+  margin-bottom: 10px !important; 
+
+  animation: fadeIn 10s forwards;
+}
+
+.hide{
+
+  display: none;
+  
+
+}
+
+@keyframes fadeIn{
+
+   0%{
+    opacity: 0.5;
+   }
+
+   50%{
+    opacity: 1;
+   }
+
+   100%{
+
+    opacity: 0;
+   }
+}
