@@ -131,6 +131,14 @@ export class AuthService {
     }
   }
 
+  // special method that tests if the logged in user is a super admin
+  isSuperAdmin(){
+
+    const roles:string[] = (sessionStorage.getItem('roles') ? JSON.parse(sessionStorage.getItem('roles')!)  : []);
+
+    return roles.some(role => role.toLowerCase() === 'superadmin');
+  }
+
   
   private groupJoinedDates(studentId:number):Observable<{[groupId:number]:Date}>{
 
@@ -179,7 +187,7 @@ export class AuthService {
   isAdmin():boolean{
     const roles:string[] = (sessionStorage.getItem('roles') ? JSON.parse(sessionStorage.getItem('roles')!)  : [])
    
-    return roles.some(role => role.toLowerCase() === 'admin');
+    return roles.some(role => role.toLowerCase() === 'admin' ||  roles.toLocaleString() === 'superadmin');
 
    
   }

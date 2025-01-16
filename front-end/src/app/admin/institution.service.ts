@@ -120,6 +120,7 @@ export interface Institution {
   state?:string,
   localGovt?:string,
   createdBy?:number,
-  students?:string[]
+  students?:string[],
+  studentPopulation?:number
 
 }

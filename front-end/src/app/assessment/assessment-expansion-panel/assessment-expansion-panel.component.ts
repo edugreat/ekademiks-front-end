@@ -34,19 +34,42 @@ export class AssessmentExpansionPanelComponent implements OnInit{
 
      this.subject = this.activatedRoute.snapshot.params['subject'];
      this.category = this.activatedRoute.snapshot.params['category'];
+     const studentId = this.studentId;
     
     if(this.subject && this.category){
 
-      this.topicsAndDurations$ = this.assessmentService.getTopicsAndDurations(this.subject, this.category);
-      // converts to lowercase case except the initial letter
-      this.level =  this.category.substring(0, 1)+''+(this.category.substring(1)).toLowerCase()
+      if(!this.assessmentService.getSelectedTopicAndDuration(`${this.subject}_${this.category}`)){
 
+        
+
+        this.topicsAndDurations$ = this.assessmentService.getTopicsAndDurations(this.subject, this.category, studentId);
+
+        this.assessmentService.setTopicAndDuration(`${this.subject}_${this.category}`, this.topicsAndDurations$);
+        // converts to lowercase case except the initial letter
+        this.level =  this.category.substring(0, 1)+''+(this.category.substring(1)).toLowerCase()
+  
+      }else{
+        
+
+        this.topicsAndDurations$ = this.assessmentService.getSelectedTopicAndDuration(`${this.subject}_${this.category}`);
+        this.level =  this.category.substring(0, 1)+''+(this.category.substring(1)).toLowerCase()
+      }
+
+     
      
 
     }
 
     
   
+  }
+
+  // returns the student's id or zero if the current user is a guest
+  private get studentId(){
+
+    const id = sessionStorage.getItem('studentId');
+
+    return id ? Number(id) : 0;
   }
 
   //Triggers the commencement of test

@@ -1,11 +1,11 @@
+<div *ngIf="institutions.length; else noInstitutions">
+  <h3 style="display: flex; justify-content: center;">Add Your Students' Details</h3>
 
-<h3 style="display: flex; justify-content: center;" >Add Your Students' Details</h3>
+  <div id="thumpsIcon" class="hide">
+    <mat-icon color="primary">thumb_up</mat-icon>
+  </div>
 
-<div id="thumpsIcon" class="hide" >
-    <mat-icon color="primary"  >thumb_up</mat-icon>
-</div>
-
-<form [formGroup]="addStudentForm" (ngSubmit)="onSubmit()" class="add-student-form">
+  <form [formGroup]="addStudentForm" (ngSubmit)="onSubmit()" class="add-student-form">
     <mat-form-field appearance="fill">
       <mat-label>Institution</mat-label>
       <mat-select [(value)]="selectedInstitution">
@@ -14,32 +14,44 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
-  
+
     <div formArrayName="records">
       <div *ngFor="let record of records.controls; let i = index" [formGroupName]="i" class="form-record">
         <mat-form-field appearance="outline">
           <mat-label>Email</mat-label>
           <input matInput formControlName="email" type="email" placeholder="Enter email">
         </mat-form-field>
-  
-        <mat-form-field appearance="outline">
-            <button (click)="togglePasswordVisibility()" matSuffix mat-icon-button >
-                <mat-icon *ngIf="!passwordState" >visibility</mat-icon>
 
-                <mat-icon *ngIf="passwordState" >visibility_off</mat-icon>
-            </button>
+        <mat-form-field appearance="outline">
+          <button (click)="togglePasswordVisibility()" matSuffix mat-icon-button>
+            <mat-icon *ngIf="!passwordState">visibility</mat-icon>
+
+            <mat-icon *ngIf="passwordState">visibility_off</mat-icon>
+          </button>
           <mat-label>Password</mat-label>
           <input matInput formControlName="password" [type]="dynamicType" placeholder="Enter password">
         </mat-form-field>
-        
+
         <button mat-icon-button color="warn" type="button" (click)="deleteRecord(i)">
           <mat-icon>delete</mat-icon>
         </button>
       </div>
     </div>
-  
+
     <button mat-raised-button color="primary" type="button" (click)="addRecord()">Add Student</button>
-   
-    <button [disabled]=" !records.length || hasFormError || !selectedInstitution" mat-raised-button color="primary" type="submit">Submit</button>
+
+    <button [disabled]=" !records.length || hasFormError || !selectedInstitution" mat-raised-button color="primary"
+      type="submit">Submit</button>
   </form>
-  
+
+</div>
+
+<!-- There are no institutions registered by the admin -->
+<ng-template #noInstitutions>
+  <div class="no-institutions">
+    <div class="icon-container"> <mat-icon>report_problem</mat-icon> </div>
+    <div class="message-container"> <label>Sorry, but we could not find any matching institution.</label>
+    </div>
+    <div class="action-container"> <button [routerLink]="['/register']" routerLinkActive="router-link-active"  mat-raised-button color="primary" type="button">Register an
+        Institution</button> </div>
+  </div>

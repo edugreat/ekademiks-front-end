@@ -2,8 +2,13 @@ import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/cor
 import { ActivatedRoute } from '@angular/router';
 import { AdminService } from '../../admin.service';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatCheckbox } from '@angular/material/checkbox';
+import { MatCheckbox, MatCheckboxChange } from '@angular/material/checkbox';
 import { HttpResponse, HttpStatusCode } from '@angular/common/http';
+import { Institution, InstitutionService } from '../../institution.service';
+import { pipe, take } from 'rxjs';
+import { MatOptionSelectionChange } from '@angular/material/core';
+import { MatSelect } from '@angular/material/select';
+import { AuthService } from '../../../auth/auth.service';
 
 @Component({
   selector: 'app-notifications',
@@ -15,6 +20,8 @@ import { HttpResponse, HttpStatusCode } from '@angular/common/http';
 export class NotificationsComponent implements OnInit, AfterViewInit{
 
 
+
+
   // Id for the event that is being notified about.
   // The event can be assessment upload, result releases etc
   @Input()
@@ -24,6 +31,8 @@ export class NotificationsComponent implements OnInit, AfterViewInit{
   @Input()
   typeOfTask?:string;
 
+  myInstitutions:Institution[] = [];
+
   // Object representing new notification we intend to forward to the server alerting student of important information
   newNotification:NotificationDTO | undefined;
 
@@ -32,28 +41,40 @@ export class NotificationsComponent implements OnInit, AfterViewInit{
   // If the audience checkbox was checked
   private isChecked = false;
 
+  // sets true when the check box is being clicked check. This is used to stop unckeck action by the processInstitutionChangeEvent() method
+  // which is also called once the check box is checked.
+   isCheckBoxJustClicked = false;
+
+  
   @ViewChild('audienceCheck') audienceCheck?:MatCheckbox;
+
+  @ViewChild('institutionSelect') institutionSelect!:MatSelect;
+
+
+  
 
 // Used to disable the input fields during form submission to avoid re-submission 
   disableFields = false;
+selectedInstitution?: number;
 
  
 
-  public constructor(private adminService:AdminService, private fb:FormBuilder){}
+  public constructor(private adminService:AdminService, private fb:FormBuilder, 
+    private institutionService:InstitutionService, private authService:AuthService){}
 
   ngOnInit(): void {
    
    this.getDetailsAboutNotification();
+
+  //  fetch admin's registered insitutions if any exists
+  this.getInstitutions();
 
 
   }
 
 ngAfterViewInit(): void {
   
-  this.audienceCheck?.change.subscribe(() =>{
-
-    this.isChecked = !this.isChecked;
-  });
+  
 this.audienceInputChange();
  
 }
@@ -75,18 +96,50 @@ this.audienceInputChange();
         // Initialize the notification form group
         this.notificationForm = this.fb.group({
           message: new FormControl<string>('', Validators.required),
-          audience: new FormControl<string|undefined>('')
+          audience: new FormControl<string|undefined>(''),
         })
        
       }
   
   }
+
+ 
+    
+    processCheckedBtn($event: MatCheckboxChange) {
+
+     
+   
+      this.isChecked = $event.checked;
+      if($event.checked){
+
+       if(this.institutionSelect.value){
+        this.institutionSelect?.writeValue(null);
+       }
+
+      
+      }
+
+      if(this.audienceTextArea.value){
+
+        this.audienceTextArea.setValue('');
+      }
+
+    }
+
+    isSuperAdmin(){
+     
+      return this.authService.isSuperAdmin()
+      }
+
+    
 // Immediately send notification
   notify() {
     
       this.processInput();
 
-      this.adminService.sendNotifications(this.newNotification!).subscribe({
+      
+      const institutionId = this.selectedInstitution ? this.selectedInstitution : 0;
+      this.adminService.sendNotifications(this.newNotification!,  institutionId).pipe(take(1)).subscribe({
 
         // Set milestone to 3 once we are sure notification was sent successfully
         next:(response:HttpResponse<void>) => {
@@ -107,26 +160,45 @@ this.audienceInputChange();
 
     }
 
+    // change event fired when select change is on the selection input
+    processInstitutionChangeEvent($event: MatOptionSelectionChange<number>) {
+      
+    
+
+      if(this.audienceTextArea.value) this.audienceTextArea.setValue('');
+      if(this.audienceCheck?.checked && !this.isCheckBoxJustClicked) this.audienceCheck.toggle()
+
+
+     
+
+      }
+
     // Processes the notification form and determines if the inputs align with the requirements
      canSubmit():boolean{
 
       const anyMessage = this.notificationForm?.get('message')?.value;
+
+      const institutionSelected = this.institutionSelect?.value;
+
+      const audienceTyped = this.notificationForm?.get('audience')?.value;
       
       if(!anyMessage) return false;
       
-      if(anyMessage &&  this.isChecked) return true;
+      if(anyMessage &&  (this.isChecked || institutionSelected || audienceTyped)) return true;
 
-      const audienceInput = this.notificationForm?.get('audience')?.value;
-      
-      if(!audienceInput) return false;
-      
+     
+        return false;
+    }
 
-        return true;
+    private get audienceTextArea():FormControl{
+
+      return this.notificationForm?.get('audience') as FormControl;
     }
 
     // Process the audience input as the user types, just to ensure non-zero leading input
     private audienceInputChange(){
 
+     
       
       let arr:string[];
       this.notificationForm?.get('audience')?.valueChanges.subscribe(() =>{
@@ -138,12 +210,15 @@ this.audienceInputChange();
         // calls split method on the input string returning all values delimited by one or more white spaces
         input.split(/\s+/).forEach(x =>{
 
-          // checks if the input is zero-leading, the it removes the zero prefix
+          // checks if the input is zero-leading, then removes the zero prefix
           if(x.charAt(0) === '0'){
            arr.push(x.substring(1));
+
+          
           }
           else{
             arr.push(x);
+           
           }
         })
 
@@ -153,6 +228,15 @@ this.audienceInputChange();
         
         this.notificationForm?.get('audience')?.setValue(arr.join(' '),{emitEvent:false});
       }
+
+
+      if(this.audienceCheck?.checked && !this.isCheckBoxJustClicked){
+
+        this.audienceCheck.toggle();
+        
+      }
+
+      if( this.institutionSelect.value)  this.institutionSelect?.writeValue(null);
       })
     }
     // processess the inputs received
@@ -161,7 +245,7 @@ this.audienceInputChange();
       // sets disableFields to true just to disable the input fields to avoid form re-submission
       this.disableFields = true;
 
-      // get the value for audience
+      // get the notification message
       this.newNotification!.message = this.notificationForm?.get('message')!.value;
       
       // If audience was provided
@@ -184,6 +268,23 @@ this.audienceInputChange();
 
      
 
+
+    }
+
+    private get adminId(){
+
+      return Number(sessionStorage.getItem('adminId'));
+    }
+
+    // get a list of institutions registered by this admin
+    private getInstitutions(){
+
+      this.institutionService.getRegisteredInstitutions(this.adminId).pipe(take(1)).subscribe({
+        next:(data:Institution[]) => {
+
+          this.myInstitutions = data;
+        }
+      })
 
     }
 

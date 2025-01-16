@@ -17,11 +17,14 @@ export class AssessmentComponent implements OnInit, OnDestroy{
 
   networkBusy = true;//flag that controls that spinning effect of the spinner
 
-  //subject names received from the network call
+
+ 
+  // subject names based on the user selecte category
   subjectNames:string[] = [];
+ 
 
   //number of subjects returned for each level of academic assessment
-  totalSubject:number = 0;
+  totalSubjects = 0;
 
   subjectNamesSub:Subscription | undefined;
 
@@ -73,34 +76,31 @@ export class AssessmentComponent implements OnInit, OnDestroy{
   //gets the subject names for the assessment for the user selected academic level
   getSubjectNames(){
 
-    this.selectedLevel = this.activatedRoute.snapshot.params['level'];
+    this.selectedLevel = this.activatedRoute.snapshot.params['level'] ? this.activatedRoute.snapshot.params['level'] : this.DEFAULT_LEVEL ;
 
-    if(this.selectedLevel){//when activated router is a result of user's selection of a particular assessment
+    if(!this.assessmentService.getSubjects(this.selectedLevel)){//when activated router is a result of user's selection of a particular assessment
 
+   
       
    this.subjectNamesSub =  this.assessmentService.fetchSubjectNames(this.selectedLevel).pipe(
     finalize(() => this.networkBusy = false)
     
    ).subscribe( subjectNames =>{
 
-    this.subjectNames = subjectNames;
-    this.totalSubject = subjectNames.length;
+     this.subjectNames = subjectNames;
+
+   
+    this.totalSubjects = subjectNames.length;
+    this.assessmentService.subjects(this.selectedLevel, subjectNames);
 
     this.updateGridSettings(); //updates the mat-grid-list setting
 
    });
-    } else {//if there was no user selection for assessment level, then default to 'JUNIOR' category assessments
+    } else {
+   
+      this.subjectNames = this.assessmentService.getSubjects(this.selectedLevel)!
+      this.networkBusy = !this.networkBusy;
 
-      this.selectedLevel = this.DEFAULT_LEVEL; //set selected level to the default value
-      this.subjectNamesSub = this.assessmentService.fetchSubjectNames(this.selectedLevel).pipe(
-        finalize(() => this.networkBusy = false)
-      ).subscribe(subjectNames =>{
-
-        this.subjectNames = subjectNames;
-        this.totalSubject= subjectNames.length;
-
-        this.updateGridSettings(); //updates the mat-grid-list setting
-      })
     }
   }
 
@@ -111,7 +111,7 @@ export class AssessmentComponent implements OnInit, OnDestroy{
       this.col = 1;
     }else{
 
-      this.col = Math.max(1, Math.ceil(this.totalSubject/2));
+      this.col = Math.max(1, Math.ceil(this.totalSubjects/2));
     }
   }
 

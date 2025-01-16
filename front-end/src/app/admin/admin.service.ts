@@ -52,7 +52,9 @@ export class AdminService {
   // method that posts new created assessment to the server
   postAssessment(test:TestDTO):Observable<HttpResponse<number>>{
 
-    return this.http.post<HttpStatusCode>(this.endpoints.setTestUrl, test,{observe:'response'});
+    return this.http.post<HttpStatusCode>(this.endpoints.setTestUrl, test,{
+      observe:'response',
+     });
 
 
   }
@@ -230,9 +232,21 @@ deleteCategory(category: number):Observable<HttpResponse<number>> {
  }
 
 // sends notifications to the students
-sendNotifications(notification:NotificationDTO):Observable<HttpResponse<void>>{
+sendNotifications(notification: NotificationDTO, institutionId?: number):Observable<HttpResponse<void>>{
 
-  return this.http.post<void>(this.endpoints.notificationUrl, notification,{observe:'response'});
+  console.log(`institution id: ${institutionId}`)
+  return this.http.post<void>(this.endpoints.notificationUrl, notification,
+    
+    {
+      observe:'response',
+    
+    headers:{
+      'institutionId': institutionId ? `${institutionId}` : '0' 
+    }
+  
+  }
+  
+  );
 }
 
 }

@@ -1,12 +1,40 @@
 
 <!-- <div *ngIf="!previewTest" > -->
-    <div *ngIf="!previewTest; else prevTest" >
+    <div style="margin-top: -150px;" *ngIf="!previewTest; else prevTest" >
+
+        <div *ngIf="(studentPopulation) && (isSuperAdmin  || myInstitutions.length ) ; else noInstitutions" >
+        
+
+            <div class="institution" *ngIf="myInstitutions.length">
+                <span>Assessment for <b>{{selectedInstitution?.name}}</b> students</span>
+        
+            </div>
+
+            <div class="institution" *ngIf="myInstitutions.length > 1">
+             <form>
+
+                <h3>Select your institution.</h3>
+                <mat-form-field>
+                    <mat-label>Institutions</mat-label>
+                    <mat-select (selectionChange)="processInstitutionChange($event)"  [(ngModel)]="selectedInstitution" name="institution" >
+                    <mat-option>None</mat-option>
+                    <mat-option [value]="inst.name" *ngFor="let inst of myInstitutions"  >
+                        {{inst.name}}
+                    </mat-option>
+
+                </mat-select>
+                </mat-form-field>
+             </form>
 
 
-    <h5 class="info">Fill The Test Form</h5>
+            </div>
+        
 
+    <h5 class="info">Fill The Assessment Data</h5>
+
+   
     <!-- Test container -->
-    <div class="container"  >
+    <div  class="container"  >
         <div class="form" [formGroup]="testUploadForm" >
     
     
@@ -171,6 +199,25 @@
         </div>
       </div>
     
+
+    </div>
+
+    <!-- The admin has no institutions linked to them, also not a superadmin -->
+    <ng-template #noInstitutions>
+        <div class="noInstitutions" >
+            <h3>Sorry, but some information is missing.</h3>
+        <div>
+            <button style="margin-bottom: 5px;" color="primary" [routerLink]="['/add_student', adminId]" routerLinkActive="router-link-active"  mat-raised-button >Add your students.</button>
+        </div>
+        
+        <div>
+            <button color="primary" [routerLink]="['/register']" routerLinkActive="router-link-active"  mat-raised-button >Register your institution.</button>
+        </div>
+
+    </div>
+
+
+    </ng-template>
 
 </div>
 

@@ -9,7 +9,13 @@ export class AssessmentsService {
 
   baseUrl = `http://localhost:8080/learning/levels`;
   subjectNameUrl = `http://localhost:8080/tests/level`;
-  testUrl = `http://localhost:8080/tests`
+  testUrl = `http://localhost:8080/tests`;
+
+  // a map of which key is the academic level the given subject belongs. This is mean to provide cache to prevent excessive server interaction when users switch between subjects
+  private _subjectMap = new Map<string, string[]>();
+
+  // caches the assessment topic and its duration, for the assessment the user selected
+  private _topicAndDurationMap = new Map<string, Observable<TopicAndDuration[]>>();
 
   constructor(private http:HttpClient) { }
 
@@ -39,10 +45,34 @@ export class AssessmentsService {
     }))
   }
 
-  //fetches from the server test topics and durations for the given subject and category
-  getTopicsAndDurations(subjectName:string, category:string):Observable<TopicAndDuration[]>{
+  public subjects(category:string, subjects:string[]){
 
-    return this.http.get<Array<{testName:string, duration:number}>>(`${this.testUrl}?subject=${subjectName}&category=${category}`).pipe(
+    this._subjectMap.set(category, subjects);
+  }
+
+  public getSubjects(category:string){
+
+    return this._subjectMap.get(category)
+  }
+
+  public setTopicAndDuration(category:string, data:Observable<TopicAndDuration[]>){
+
+    this._topicAndDurationMap.set(category,data);
+  }
+
+  public getSelectedTopicAndDuration(category:string){
+
+    return this._topicAndDurationMap.get(category)!
+  }
+
+  //fetches from the server test topics and durations for the given subject and category
+  getTopicsAndDurations(subjectName:string, category:string, studentId:number):Observable<TopicAndDuration[]>{
+
+    return this.http.get<Array<{testName:string, duration:number}>>(`${this.testUrl}?subject=${subjectName}&category=${category}`, {
+      headers:{
+        'studentId':`${studentId}`
+      }
+    }).pipe(
       map((results) => results.map(result =>{
 
         return {topic:result.testName, duration:result.duration}
