@@ -76,11 +76,11 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
       if (yes) {
         //reset the user to the generic 'Student' placeholder name
 
-       if(this.isLoggedInStudent()){
+       
 
         this.authService.logout();
         
-       }
+       
        
        
         //this is important incase the user wants to logout in the middle of assessment taking, so the app can allow them to logout

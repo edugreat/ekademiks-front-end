@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Option, Question, TestDTO } from './upload-test.component';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subscription, take } from 'rxjs';
 import { AdminService } from '../admin.service';
 import { HttpResponse, HttpStatusCode } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -441,10 +441,7 @@ export class PreviewTestComponent implements OnInit, OnDestroy {
   // Uploads assessment
   uploadNow() {
 
-
-    
-   
-    this.adminService.postAssessment(this.testForm!.value).subscribe({
+    this.adminService.postAssessment(this.testForm!.value).pipe(take(1)).subscribe({
 
     
       next: (response: HttpResponse<number>) => {

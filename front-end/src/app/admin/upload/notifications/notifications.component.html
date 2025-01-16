@@ -23,17 +23,38 @@
                 </button>
               </span>
              <div class="audience">
+               
+
+              <div>
 
               <mat-form-field >
-                <textarea appNumeric [disabled]="disableFields" id="text-area" placeholder="number or space separated numbers" matInput formControlName="audience"></textarea>
+                <textarea (click)="isCheckBoxJustClicked = false"  appNumeric [disabled]="disableFields" id="text-area" placeholder="number or space separated numbers" matInput formControlName="audience"></textarea>
               </mat-form-field>
+              </div>
+             
+                <div *ngIf="isSuperAdmin()" id="allStudents">
+                  <span>All students</span>
+                  <span (click)="isCheckBoxJustClicked = true" > <mat-checkbox  (change)="processCheckedBtn($event)" [disabled]="disableFields" #audienceCheck color="primary" [disableRipple]="true" ></mat-checkbox></span>
+                </div>
 
-              <span id="checkbox" >
-                <mat-checkbox [disabled]="disableFields" #audienceCheck color="primary" [disableRipple]="true" ></mat-checkbox>
-                <span>All</span>
-              </span>
+               <div>
+                <mat-form-field  (click)="isCheckBoxJustClicked = false" appearance="outline">
+                  <mat-label>my institution</mat-label>
+                  <mat-select [disabled]="disableFields"  #institutionSelect [(value)]="selectedInstitution" >
+                    <mat-option>None</mat-option>
+                    <mat-option  (onSelectionChange)="processInstitutionChangeEvent($event)" *ngFor="let insitution of myInstitutions" [value]="insitution.id" >
+                    {{insitution.name}}
+                    </mat-option>
+  
+                  </mat-select>
+  
+                </mat-form-field>
+               </div>
+           
              
              </div>
+
+            
              
               <button #notifyBtn [disabled]="!canSubmit() || disableFields" (click)="notify()" mat-raised-button>
               

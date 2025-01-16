@@ -34,15 +34,23 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
     
 
 }
 
-.audience #checkbox{
+#allStudents{
+
+    display: flex;
+    align-content: center;
+}
+
+  #checkbox{
 
     margin-left: 0px !important;
     display: flex;
     flex-direction: column;
+    
     
 }
 .audience #checkbox span{

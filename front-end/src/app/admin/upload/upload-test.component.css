@@ -13,6 +13,43 @@
   margin-bottom: 1px;
 }
 
+
+
+.noInstitutions {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center horizontally */
+  justify-content: center; /* Center vertically */
+  text-align: center; /* Center text within elements */
+  min-height: 200px; /* Ensure a minimum height for vertical centering to work well */
+  padding: 20px; /* Add some padding around the content */
+  width: 90%; /* Occupy 90% of the parent's width */
+  max-width: 500px; /* Set a maximum width to prevent excessive stretching on large screens */
+  margin: 20px auto; /* Center the container itself */
+}
+
+.noInstitutions > div {
+  margin-bottom: 15px; /* Add spacing between buttons */
+  width: 100%; /* Make buttons take full width of their container */
+  max-width: 300px; /* Limit button width */
+}
+
+
+
+.noInstitutions button {
+  width: 100%; /* Ensure buttons fill their container */
+  box-sizing: border-box; /* Include padding and border in element's total width and height */
+}
+
+
+.institution{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+
+}
+
 .container {
   display: flex;
   justify-content: center;
@@ -72,4 +109,15 @@
  }
 
 
+}
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .noInstitutions {
+    padding: 10px; /* Reduce padding on smaller screens */
+    width: 95%;
+  }
+
+  .noInstitutions > div {
+    margin-bottom: 10px;
+  }
 }

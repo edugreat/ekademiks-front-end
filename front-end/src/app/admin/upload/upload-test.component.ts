@@ -1,6 +1,9 @@
-import { Component, computed, OnInit, Signal, signal } from '@angular/core';
+import { AfterViewInit, Component, computed, OnInit, Signal, signal } from '@angular/core';
 import { AdminService, CategoryObject, SubjectObject } from '../admin.service';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Institution, InstitutionService } from '../institution.service';
+import { AuthService } from '../../auth/auth.service';
+import { MatSelectChange } from '@angular/material/select';
 
 //Declares an object type Option
 export type Option = { text: string | undefined; letter: string | undefined };
@@ -21,6 +24,7 @@ export type TestDTO = {
   testName: string | undefined;
   duration: number | undefined;
   questions: Question[];
+  institutionId?:number
   
 };
 
@@ -29,7 +33,8 @@ export type TestDTO = {
   templateUrl: './upload-test.component.html',
   styleUrl: './upload-test.component.css',
 })
-export class UploadTestComponent implements OnInit {
+export class UploadTestComponent implements OnInit{
+
   //an array of test categories received from the server
   // This is used to prepopulate the subject selection input so admin can make a choice that subsequently instantiate the necessary form control
   categories?: string[];
@@ -55,6 +60,9 @@ export class UploadTestComponent implements OnInit {
 
   // declare an object of TestDTO and initialize to undefined
  testDTO?: TestDTO;
+
+//  an array of institutions registered by or identifiable with the given admin
+ myInstitutions:Institution[] = [];
 
   // signal that signals the number of options already provided for a particular question number
   // Once the number of options have reached five ie [A-E], that current question number is removed from view
@@ -88,8 +96,12 @@ export class UploadTestComponent implements OnInit {
 
   // declares an instruction form group to hold all instructional guides to the test
   instructionsForm?:FormGroup;
+    selectedInstitution?:Institution;
+    studentPopulation?:number = Number.MAX_SAFE_INTEGER; //the population of students for the selected institution
 
-  constructor(private adminService: AdminService, private fb:FormBuilder) {}
+  constructor(private adminService: AdminService, private fb:FormBuilder, 
+    private institutionService:InstitutionService, private authService:AuthService
+  ) {}
 
   //Test form for collecting basic information about the test from the admin
   testUploadForm = this.fb.group({
@@ -180,12 +192,33 @@ export class UploadTestComponent implements OnInit {
 
   ngOnInit(): void {
     
-    this.fetchTestUploadInfo();
-    this.adjustFormStatus();
-    // Set current task description to 'upload'
-    // This event is received by the AdminComponet to trigger mat-stepper progress for the 'upload' task
-    this.adminService.taskDescription('upload-test');
+    this._myInstitutions();
+
   }
+
+
+  processInstitutionChange($event: MatSelectChange) {
+
+    if(!this.isSuperAdmin){
+
+      // dynamically set the target institution based on user's interaction with the input selection
+      this.testDTO!.institutionId = $event.value ? ($event.value as Institution).id : 0
+
+      if(!$event.value) this.studentPopulation = undefined;
+
+      else if($event.value) {
+
+        this.studentPopulation = this.selectedInstitution?.studentPopulation 
+                                ? 
+                this.selectedInstitution.studentPopulation
+                                :
+                             undefined;
+      }
+    }
+   
+  }
+    
+
 
   //get the data required for test upload. Such data include the test category and the subject for which the Test is intended
   private fetchTestUploadInfo() {
@@ -229,6 +262,11 @@ export class UploadTestComponent implements OnInit {
 
      
   }
+
+   get isSuperAdmin(){
+
+    return this.authService.isSuperAdmin();
+  }
   
   // Since we're storing subjects for both senior & junior into a single array, there's need to remove duplicates if any exists.
    removeDuplicateSubjectNames(subjectNames: string[]) {
@@ -247,6 +285,42 @@ export class UploadTestComponent implements OnInit {
       
     }
   }
+
+  get adminId(){
+
+    return Number(sessionStorage.getItem('adminId'));
+  }
+
+  private _myInstitutions(){
+
+    this.institutionService.getRegisteredInstitutions(this.adminId).subscribe({
+      next:(value:Institution[]) => {
+
+        
+        
+        if(value.length === 1){
+         this.selectedInstitution = value[0];
+         
+        //  super admins are given the privilege to set assessments for students which might not necessarily be of their institutions
+         if(!this.isSuperAdmin){
+
+          this.studentPopulation = this.selectedInstitution.studentPopulation;
+         }
+        }
+
+        this.myInstitutions = value
+
+        this.fetchTestUploadInfo();
+      },
+      complete:() => {
+        this.adjustFormStatus();
+          // Set current task description to 'upload'
+      // This event is received by the AdminComponet to trigger mat-stepper progress for the 'upload' task
+      this.adminService.taskDescription('upload-test');
+      }
+    })
+  }
+
   // Sorts subject list in asceding alphabetical order
 
   private sortSubjectList(x:string, y:string):number{
@@ -276,6 +350,15 @@ export class UploadTestComponent implements OnInit {
   //For instance, when category is yet to get selected, other parts of the form should be disabled
   private adjustFormStatus() {
   
+
+    if(!this.selectedInstitution && !this.isSuperAdmin){
+
+      this.categoryInput.disable();
+    }else {
+
+      this.categoryInput.enable()
+    }
+
     //reset the form groups each time the user makes changes on the selected category
     this.categoryInput.valueChanges.subscribe((currentValue) => {
       this.subjectInput.reset();
@@ -288,6 +371,8 @@ export class UploadTestComponent implements OnInit {
         ? this.subjectInput.enable()
         : this.subjectInput.disable();
     });
+
+
 
     //reset all inputs below the subject input each time there is a change in the subject selection
     this.subjectInput.valueChanges.subscribe((currentValue) => {
@@ -317,22 +402,22 @@ export class UploadTestComponent implements OnInit {
 
     this.totalInput.valueChanges.subscribe(() => {
       this.indexInput.reset();
-      this.quesstionInput.reset();
+      this.questionInput.reset();
       this.answerInput.reset();
       this.optionForm.reset();
       // (currentValue !==  undefined && currentValue.length) ? indexInput.enable() : indexInput.disable();
     });
 
     this.indexInput.valueChanges.subscribe((currentValue) => {
-      this.quesstionInput.reset();
+      this.questionInput.reset();
       this.answerInput.reset();
       this.optionForm.reset();
       currentValue !== undefined
-        ? this.quesstionInput.enable()
-        : this.quesstionInput.disable();
+        ? this.questionInput.enable()
+        : this.questionInput.disable();
     });
 
-    this.quesstionInput.valueChanges.subscribe((currentValue) => {
+    this.questionInput.valueChanges.subscribe((currentValue) => {
       this.answerInput.reset();
       this.optionForm.reset();
       currentValue !== undefined && currentValue.length
@@ -387,7 +472,7 @@ export class UploadTestComponent implements OnInit {
     return this.questionForm.get('index')!;
   }
 
-  private get quesstionInput(){
+  private get questionInput(){
 
     return this.questionForm.get('question')!;
   }
@@ -451,6 +536,7 @@ export class UploadTestComponent implements OnInit {
         testName: this.titleInput.value,
         duration: Number(this.durationInput.value),
         questions: [currentQuestion],
+        institutionId: this.myInstitutions.length === 1 ? this.myInstitutions[0].id : 0
       };
 
       //sets the optionCounter to 1 indicating an option has been added for question number one
@@ -525,7 +611,7 @@ export class UploadTestComponent implements OnInit {
   private currentQuestion(currentNumber: number): Question {
     const currentQuestion: Question = {
       questionNumber: currentNumber,
-      question: this.quesstionInput.value,
+      question: this.questionInput.value,
       answer: this.answerInput.value,
       options: [],
     };
