@@ -16,6 +16,8 @@ import { HttpErrorResponse } from '@angular/common/http';
   
 })
 export class SignUpComponent implements OnInit {
+selectedStatus?:string;
+status  = ['Junior','Senior'];
 
   constructor(private signupService:SignUpService,
     private successSnackBar:MatSnackBar,
