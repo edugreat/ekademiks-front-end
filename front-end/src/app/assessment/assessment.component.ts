@@ -4,6 +4,7 @@ import { AssessmentsService } from './assessments.service';
 import { Observable, Subscription, finalize } from 'rxjs';
 import { MediaService } from '../media-service';
 import { MediaChange } from '@angular/flex-layout';
+import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-assessment',
@@ -13,7 +14,7 @@ import { MediaChange } from '@angular/flex-layout';
 export class AssessmentComponent implements OnInit, OnDestroy{
 
   //academic assessment level the component should serve to the html component
-  selectedLevel = '';
+  selectedLevel:string = '';
 
   networkBusy = true;//flag that controls that spinning effect of the spinner
 
@@ -42,7 +43,8 @@ export class AssessmentComponent implements OnInit, OnDestroy{
 
   constructor(private activatedRoute: ActivatedRoute,
               private assessmentService:AssessmentsService,
-              private mediaService: MediaService
+              private mediaService: MediaService, 
+              private authService:AuthService
   ){}
 
   ngOnInit(): void {
@@ -73,35 +75,61 @@ export class AssessmentComponent implements OnInit, OnDestroy{
 
   }
 
+  // gets the student's academic level(or status)
+  private get status(){
+
+    const level = this.activatedRoute.snapshot.params['level'] ? this.activatedRoute.snapshot.params['level'] : this.DEFAULT_LEVEL ;
+
+    console.log(`the level ${level}`)
+
+    return sessionStorage.getItem('status') ? sessionStorage.getItem('status')! : level;;
+  }
+
+  
   //gets the subject names for the assessment for the user selected academic level
   getSubjectNames(){
 
-    this.selectedLevel = this.activatedRoute.snapshot.params['level'] ? this.activatedRoute.snapshot.params['level'] : this.DEFAULT_LEVEL ;
-
-    if(!this.assessmentService.getSubjects(this.selectedLevel)){//when activated router is a result of user's selection of a particular assessment
+   
+   
+    this.selectedLevel = this.status;
 
    
-      
-   this.subjectNamesSub =  this.assessmentService.fetchSubjectNames(this.selectedLevel).pipe(
-    finalize(() => this.networkBusy = false)
+
     
-   ).subscribe( subjectNames =>{
-
-     this.subjectNames = subjectNames;
+      if(!this.assessmentService.getSubjects(this.selectedLevel)){//when activated router is a result of user's selection of a particular assessment
 
    
-    this.totalSubjects = subjectNames.length;
-    this.assessmentService.subjects(this.selectedLevel, subjectNames);
+        this.subjectNamesSub =  this.assessmentService.fetchSubjectNames(this.selectedLevel).pipe(
+         finalize(() => this.networkBusy = false)
+         
+        ).subscribe( subjectNames =>{
 
-    this.updateGridSettings(); //updates the mat-grid-list setting
+          console.log(`selected level : ${this.selectedLevel}`)
 
-   });
-    } else {
+          console.log(subjectNames === null)
+     
+          this.subjectNames = subjectNames;
+     
+        
+         this.totalSubjects = subjectNames.length;
+         this.assessmentService.subjects(this.selectedLevel, subjectNames);
+     
+         this.updateGridSettings(); //updates the mat-grid-list setting
+     
+        });
+         }
+         else {
+
+          console.log(`else block`)
+        
+           this.subjectNames = this.assessmentService.getSubjects(this.selectedLevel)!
+           this.networkBusy = !this.networkBusy;
+     
+         }
+    
+
    
-      this.subjectNames = this.assessmentService.getSubjects(this.selectedLevel)!
-      this.networkBusy = !this.networkBusy;
 
-    }
   }
 
   //methods that updates number of columns the grid should occupy based on device sizes and number of subjects returned by the server

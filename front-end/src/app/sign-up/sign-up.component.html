@@ -170,6 +170,17 @@
             </mat-form-field>
           </div>
 
+          <div style="margin-top: 0px;">
+            <mat-radio-group
+          aria-labelledby="example-radio-group-label"
+          class="example-radio-group"
+          [(ngModel)]="selectedStatus">
+  
+    <mat-radio-button color="primary" *ngFor="let _status of status " class="example-radio-button" [value]="_status">{{_status}}</mat-radio-button>
+  
+</mat-radio-group>
+          </div>
+
       <div>
 
         <!-- Submit button -->

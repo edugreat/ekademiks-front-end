@@ -94,8 +94,29 @@ private authService:AuthService
   //calls the service to retrieve the academic levels
   getAcademicLevels(){
 
-     this.levels$ = this.assessmentService.getAssessmentLevels();
-    
+    if(!this.isGuestUser()){
+
+      const level = this.authService.status;
+
+      console.log('level '+level)
+
+      if(level) this.router.navigate(['/assessments', level]);
+    } else {
+
+      if(! this.assessmentService.assessmentLevels){
+     
+        this.levels$ = this.assessmentService.getAssessmentLevels();
+         this.assessmentService.assessmentLevels = this.levels$;
+  
+      }else{
+         
+        this.levels$ = this.assessmentService.assessmentLevels;
+  
+      }
+    }
+
+   
+     
   }
 
   //handles user selection of choice of academic level for assessment to proceed
@@ -110,12 +131,7 @@ private authService:AuthService
     this.welcomeMessages$ = this.homeService.getWelecomeMessages();
   }
 
-  goBack() {
-    
-   this.levels$ = undefined;
-   this.router.navigate(['/home'])
-    
-  }
+  
 
   isAdmin(): boolean {
     return this.authService.isAdmin();

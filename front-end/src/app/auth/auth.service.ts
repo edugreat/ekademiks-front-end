@@ -40,7 +40,11 @@ export class AuthService {
 
     
     return this.http.post<User>(`${this.endpoints.baseSignInUrl}?role=${role}`, {email:`${email}`, password:`${password}`}).pipe(
-      tap(user => this.saveToSession(user))
+      tap(user =>{
+
+         this.saveToSession(user)
+
+      })
     )
 
 
@@ -84,7 +88,8 @@ export class AuthService {
   }
   //saves the just logged in user's token to the session storage
   private saveToSession(user:User){
-  
+
+   
     sessionStorage.setItem("accessToken", user.accessToken);
    
     // sets the refresh token once as it serves only for requesting new tokens
@@ -97,6 +102,7 @@ export class AuthService {
     sessionStorage.setItem('username', user.firstName);
    sessionStorage.setItem('roles', JSON.stringify(user.roles));
     this.currentUserName.next(sessionStorage.getItem('username')!);
+    sessionStorage.setItem('status', user.status);
     if(this.isLoggedInStudent()){
       this.studentLoginSubject.next(true);//send browser reload notification once a user successfully logs
 
@@ -146,6 +152,11 @@ export class AuthService {
     return this.http.get<{[groupId:number]:Date}>(`${this.endpoints.grp_joined_at}?id=${studentId}`)
 
     
+  }
+
+  public get status(){
+
+    return sessionStorage.getItem('status');
   }
 
   updateGroupJoinedDates(studentId:number){
@@ -223,8 +234,10 @@ export interface User{
   mobileNumber: string,
   email:string,
   statusCode:number,
+  status:string //SENIOR or JUNIOR
   accessToken:string,
   refreshToken:string,
   signInErrorMessage:string,
-  roles:string[]
+  roles:string[],
+  
 }

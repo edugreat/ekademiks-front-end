@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, asyncScheduler, map, of, scheduled } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +13,8 @@ export class AssessmentsService {
 
   // a map of which key is the academic level the given subject belongs. This is mean to provide cache to prevent excessive server interaction when users switch between subjects
   private _subjectMap = new Map<string, string[]>();
+
+  private _assessmentLevels?:Observable<Levels[]>;
 
   // caches the assessment topic and its duration, for the assessment the user selected
   private _topicAndDurationMap = new Map<string, Observable<TopicAndDuration[]>>();
@@ -30,8 +32,24 @@ export class AssessmentsService {
 
   }
 
+  public set assessmentLevels(levels: Observable<Levels[]>){
+
+    this._assessmentLevels =  levels;
+
+  }
+
+
+  public get assessmentLevels(): Observable<Levels[]>|undefined {
+
+    return this._assessmentLevels
+  }
+
+  
+
   //fetches subject names for the given level argument
   public fetchSubjectNames(level:string):Observable<string[]>{
+
+    
     
     return this.http.get<[]>(`${this.subjectNameUrl}?level=${level}`);
   }

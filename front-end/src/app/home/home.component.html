@@ -1,17 +1,6 @@
 
 
-<div
-  *ngIf="levels$"
-  id="back"
-  matTooltip="Go back"
-  matTooltipShowDelay="1000"
-  matTooltipPosition="below"
-  matTooltipHideDelay="2000"
->
-  <a mat-button (click)="goBack()">
-    <mat-icon>arrow_back</mat-icon>
-  </a>
-</div>
+
 
 <div class="container" *ngIf="!levels$; else selectionMade">
   <section style="padding-top: 1px" class="welcome">
