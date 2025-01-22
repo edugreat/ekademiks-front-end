@@ -95,7 +95,6 @@ export class UploadTestComponent implements OnInit{
   });
 
   // declares an instruction form group to hold all instructional guides to the test
-  instructionsForm?:FormGroup;
     selectedInstitution?:Institution;
     studentPopulation?:number = Number.MAX_SAFE_INTEGER; //the population of students for the selected institution
 

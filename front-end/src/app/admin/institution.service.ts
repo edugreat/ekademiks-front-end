@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Endpoints } from '../end-point';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { HttpClient, HttpResponse, HttpStatusCode } from '@angular/common/http';
 
 @Injectable({
@@ -11,6 +11,9 @@ export class InstitutionService {
   
 
   private _region: Map<string, string[]> = new Map();
+
+  // provides cache for all institutions reistered by a given admin
+  private registeredInstitutions = new Map<number, Institution[]>()
 
   constructor(private urlEndpoints:Endpoints, private http:HttpClient) {
 
@@ -27,8 +30,15 @@ export class InstitutionService {
 
   getRegisteredInstitutions(adminId: number):Observable<Institution[]> {
 
-   return this.http.get<Institution[]>(this.urlEndpoints.institutionsUrl, { headers:{'adminId':`${adminId}`}});
+   return this.http.get<Institution[]>(this.urlEndpoints.institutionsUrl, { headers:{'adminId':`${adminId}`}}).pipe(
+    tap(val => this.registeredInstitutions.set(adminId, val))
+   );
 
+  }
+
+  public getInstitutions(adminId:number):Institution[] | undefined{
+
+    return this.registeredInstitutions.get(adminId);
   }
 
   addStudentRecords(selectedInstitution: number, records: any[]):Observable<HttpResponse<number>> {
