@@ -1,0 +1,91 @@
+<div class="container">
+    <div class="row">
+      <div class="col-md-6" id="assignment-details">
+        <h2>Assignment Details</h2>
+        <form [formGroup]="assignmentForm!" (ngSubmit)="onSubmit()">
+          <mat-form-field appearance="fill">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" required>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Type</mat-label>
+            <mat-select formControlName="type" required>
+              <mat-option value="objective">Objective</mat-option>
+              <mat-option value="theory">Theory</mat-option>
+              <mat-option value="pdf">PDF Upload</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Subject</mat-label>
+            <input matInput formControlName="subject" required>
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" type="submit">Submit</button>
+        </form>
+      </div>
+
+      <div class="col-md-6" id="assignment-section">
+        <div *ngIf="assignmentForm!.get('type')!.value === 'objective'">
+            <h2>Objective Questions</h2>
+            <div *ngFor="let question of objectiveQuestions; let i = index">
+              <form [formGroup]="questionForm[i]">
+                <mat-form-field appearance="fill">
+                  <mat-label>Problem</mat-label>
+                  <input matInput formControlName="problem" required>
+                </mat-form-field>
+          
+                <mat-form-field appearance="fill">
+                  <mat-label>Option A</mat-label>
+                  <input matInput formControlName="options.A" required>
+                </mat-form-field>
+          
+                <mat-form-field appearance="fill">
+                  <mat-label>Option B</mat-label>
+                  <input matInput formControlName="options.B" required>
+                </mat-form-field>
+          
+                <mat-form-field appearance="fill">
+                  <mat-label>Option C</mat-label>
+                  <input matInput formControlName="options.C" required>
+                </mat-form-field>
+          
+                <mat-form-field appearance="fill">
+                  <mat-label>Option D</mat-label>
+                  <input matInput formControlName="options.D" required>
+                </mat-form-field>
+          
+                <mat-form-field appearance="fill">
+                  <mat-label>Answer</mat-label>
+                  <input matInput formControlName="answer" required>
+                </mat-form-field>
+              </form>
+            </div>
+          </div>
+
+          <div *ngIf="assignmentForm!.get('type')!.value === 'theory'">
+            <h2>Theory Questions</h2>
+            <div *ngFor="let question of theoryQuestions; let i = index">
+              <form [formGroup]="questionForm[i]">
+                <mat-form-field appearance="fill">
+                  <mat-label>Problem</mat-label>
+                  <input matInput formControlName="problem" required>
+                </mat-form-field>
+          
+                <mat-form-field appearance="fill">
+                  <mat-label>Answer</mat-label>
+                  <textarea matInput formControlName="answer" required></textarea>
+                </mat-form-field>
+              </form>
+            </div>
+          </div>
+
+          <div *ngIf="assignmentForm!.get('type')!.value === 'pdf'">
+            <h2>PDF Upload</h2>
+            <input type="file" accept=".pdf"> 
+          </div>
+      </div>
+    </div>
+  </div>
+  

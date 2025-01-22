@@ -23,7 +23,7 @@
         <!-- Admin cam post assignments -->
         <div  *ngIf="isAdmin()">
           <mat-icon>ios_share</mat-icon>
-          <a disabled style="margin-right: 25px;" mat-button>Post Assignment</a>
+          <a [routerLink]="['/assignment']" style="margin-right: 25px;" mat-button>Post Assignment</a>
         </div>
         <!--  -->
       </mat-grid-tile>

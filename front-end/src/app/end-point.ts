@@ -336,4 +336,13 @@ export class Endpoints {
     return this._disconnectUrl;
    }
  
+   // ASSIGNMENT ENDPOINTS
+   private _assignment = `${this.baseUrl}/assignments`;
+
+   public get assignment(){
+
+    return this._assignment;
+   }
 }
+
+

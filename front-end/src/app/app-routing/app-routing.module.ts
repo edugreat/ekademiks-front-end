@@ -24,6 +24,7 @@ import { GroupRequestComponent } from '../chat/group-request/group-request.compo
 import { authGuard } from '../chat/auth.guard';
 import { InstitutionRegistrationComponent } from '../admin/institution-registration/institution-registration.component';
 import { AddStudentComponent } from '../admin/institution-registration/add-student/add-student.component';
+import { AssignmentComponent } from '../admin/assignment/assignment.component';
 
 
 
@@ -84,6 +85,12 @@ const routes: Routes = [
   {path: 'add_student/:admin', component: AddStudentComponent,
     canActivate: [adminGuard],
     canMatch:[adminGuard]
+  },
+
+  {
+   path: 'assignment', component: AssignmentComponent,
+   canActivate:[adminGuard],
+   canMatch: [adminGuard]
   },
   
   { path: 'no-access/:code', component: AccessDeniedComponent },

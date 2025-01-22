@@ -1,0 +1,14 @@
+
+  
+  
+  @media (min-width: 768px) {
+    #assignment-details,
+    #assignment-section {
+      flex: 0 0 50%; 
+    }
+  }
+  
+  
+  .container {
+    margin-top: 20px;
+  }
