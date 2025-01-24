@@ -1,91 +1,175 @@
 <div class="container">
-    <div class="row">
-      <div class="col-md-6" id="assignment-details">
-        <h2>Assignment Details</h2>
-        <form [formGroup]="assignmentForm!" (ngSubmit)="onSubmit()">
-          <mat-form-field appearance="fill">
-            <mat-label>Name</mat-label>
-            <input matInput formControlName="name" required>
-          </mat-form-field>
+  <div class="row">
+    <div class="col-md-6" id="assignment-details">
+      <h2>Assignment Details</h2>
+      <form [formGroup]="assignmentForm" *ngIf="assignmentForm" (ngSubmit)="onSubmit()">
 
-          <mat-form-field appearance="fill">
-            <mat-label>Type</mat-label>
-            <mat-select formControlName="type" required>
-              <mat-option value="objective">Objective</mat-option>
-              <mat-option value="theory">Theory</mat-option>
-              <mat-option value="pdf">PDF Upload</mat-option>
-            </mat-select>
-          </mat-form-field>
+        <!-- Name of assignment -->
+        <mat-form-field appearance="outline">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" required>
+        </mat-form-field>
 
-          <mat-form-field appearance="fill">
-            <mat-label>Subject</mat-label>
-            <input matInput formControlName="subject" required>
-          </mat-form-field>
+        <!-- Type of assignment (theory, objectives, pdf upload etc) -->
+        <mat-form-field appearance="outline">
+          <mat-label>Type</mat-label>
+          <mat-select formControlName="type" required>
+            <mat-option *ngFor="let type of _assignmentType" [value]="type" >{{type | uppercase}}</mat-option>
+           
+          </mat-select>
+        </mat-form-field>
 
-          <button mat-raised-button color="primary" type="submit">Submit</button>
-        </form>
+        <!-- Subject the assignment is based on -->
+        <mat-form-field appearance="outline">
+          <mat-label>Subject</mat-label>
+          <input matInput formControlName="subject" required>
+        </mat-form-field>
+
+        <!-- Category of students the assignment target -->
+
+        <mat-form-field appearance="outline">
+          <mat-label>Category</mat-label>
+          <mat-select formControlName="category" required>
+            <mat-option *ngFor="let category of categories" [value]="category">{{category | uppercase}} STUDENTS</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+
+        <!-- Institution that owns the assignment -->
+        <mat-form-field appearance="outline">
+          <mat-label>Institution</mat-label>
+          <mat-select formControlName="institution" required>
+            <mat-option value="A">Institution A</mat-option>
+            <mat-option value="B">Institution B</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+
+
+        <!-- Allocated mark for the given assignment -->
+        <mat-form-field appearance="outline">
+          <mat-label>Mark allocation</mat-label>
+          <input matInput formControlName="allocatedMark" required>
+        </mat-form-field>
+
+
+        <!-- Date assignment was posted -->
+        <mat-form-field appearance="outline" class="example-full-width">
+          <mat-label>Posted on</mat-label>
+          <input [min]="today" [max]="today"  formControlName="creationDate" matInput [matDatepicker]="picker1">
+          <mat-hint>MM/DD/YYYY</mat-hint>
+          <mat-datepicker-toggle matIconSuffix [for]="picker1">
+            <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+          </mat-datepicker-toggle>
+          <mat-datepicker #picker1></mat-datepicker>
+        </mat-form-field>
+
+        <!-- Last submission date for assignment -->
+        <mat-form-field appearance="outline" class="example-full-width">
+          <mat-label>Submission ends</mat-label>
+          <input [min]="today"  formControlName="submissionEnds" matInput [matDatepicker]="picker2">
+          <mat-hint>MM/DD/YYYY</mat-hint>
+          <mat-datepicker-toggle matIconSuffix [for]="picker2">
+            <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+          </mat-datepicker-toggle>
+          <mat-datepicker #picker2></mat-datepicker>
+        </mat-form-field>
+        
+
+
+
+        <button mat-raised-button color="primary" type="submit">Submit</button>
+      </form>
+    </div>
+
+    <div [formGroup]="assignmentForm" *ngIf="assignmentForm" class="col-md-6" id="assignment-section">
+
+      <div formArrayName="assignment">
+
+        <div *ngIf="assignmentForm!.get('type')!.value === 'objectives'">
+          <h2>Objective Questions</h2>
+          <div
+            *ngFor="let objective of assignment.controls; let i = index"
+            [formGroupName]="i">
+
+
+            <mat-form-field appearance="outline">
+              <mat-label>Num</mat-label>
+              <input type="number" matInput formControlName="_index" required>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Problem</mat-label>
+              <input matInput formControlName="problem" required>
+            </mat-form-field>
+
+            <div formGroupName="options">
+              <mat-form-field appearance="outline">
+                <mat-label>Option A</mat-label>
+                <input matInput formControlName="A" required>
+              </mat-form-field>
+      
+              <mat-form-field appearance="outline">
+                <mat-label>Option B</mat-label>
+                <input matInput formControlName="B" required>
+              </mat-form-field>
+      
+              <mat-form-field appearance="outline">
+                <mat-label>Option C</mat-label>
+                <input matInput formControlName="C" required>
+              </mat-form-field>
+      
+              <mat-form-field appearance="outline">
+                <mat-label>Option D</mat-label>
+                <input matInput formControlName="D" required>
+              </mat-form-field>
+            </div>
+      
+            <mat-form-field appearance="outline">
+              <mat-label>Answer</mat-label>
+              <input matInput formControlName="answer" required>
+            </mat-form-field>
+
+            <button (click)="deleteRecord(i)" matTooltip="delete" class="bin" mat-icon-button >
+              <mat-icon>delete</mat-icon>
+              </button>
+          </div>
+        </div>
+
+        <div *ngIf="assignmentForm!.get('type')!.value === 'theory'">
+          <h2>Theory Questions</h2>
+          <div
+            *ngFor="let theory of assignment.controls; let i = index"
+            [formGroupName]="i">
+            <mat-form-field appearance="outline">
+              <mat-label>Problem</mat-label>
+              <input matInput formControlName="problem" required>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Answer</mat-label>
+              <textarea matInput formControlName="answer" required></textarea>
+            </mat-form-field>
+
+            <button (click)="deleteRecord(i)" matTooltip="delete" class="bin" mat-icon-button >
+              <mat-icon>delete</mat-icon>
+              </button>
+          </div>
+         
+
+        </div>
+
+        <div *ngIf="assignmentForm!.get('type')!.value === 'pdf'">
+          <h2>PDF Upload</h2>
+          <input type="file" accept=".pdf">
+
+          
+        </div>
       </div>
 
-      <div class="col-md-6" id="assignment-section">
-        <div *ngIf="assignmentForm!.get('type')!.value === 'objective'">
-            <h2>Objective Questions</h2>
-            <div *ngFor="let question of objectiveQuestions; let i = index">
-              <form [formGroup]="questionForm[i]">
-                <mat-form-field appearance="fill">
-                  <mat-label>Problem</mat-label>
-                  <input matInput formControlName="problem" required>
-                </mat-form-field>
-          
-                <mat-form-field appearance="fill">
-                  <mat-label>Option A</mat-label>
-                  <input matInput formControlName="options.A" required>
-                </mat-form-field>
-          
-                <mat-form-field appearance="fill">
-                  <mat-label>Option B</mat-label>
-                  <input matInput formControlName="options.B" required>
-                </mat-form-field>
-          
-                <mat-form-field appearance="fill">
-                  <mat-label>Option C</mat-label>
-                  <input matInput formControlName="options.C" required>
-                </mat-form-field>
-          
-                <mat-form-field appearance="fill">
-                  <mat-label>Option D</mat-label>
-                  <input matInput formControlName="options.D" required>
-                </mat-form-field>
-          
-                <mat-form-field appearance="fill">
-                  <mat-label>Answer</mat-label>
-                  <input matInput formControlName="answer" required>
-                </mat-form-field>
-              </form>
-            </div>
-          </div>
-
-          <div *ngIf="assignmentForm!.get('type')!.value === 'theory'">
-            <h2>Theory Questions</h2>
-            <div *ngFor="let question of theoryQuestions; let i = index">
-              <form [formGroup]="questionForm[i]">
-                <mat-form-field appearance="fill">
-                  <mat-label>Problem</mat-label>
-                  <input matInput formControlName="problem" required>
-                </mat-form-field>
-          
-                <mat-form-field appearance="fill">
-                  <mat-label>Answer</mat-label>
-                  <textarea matInput formControlName="answer" required></textarea>
-                </mat-form-field>
-              </form>
-            </div>
-          </div>
-
-          <div *ngIf="assignmentForm!.get('type')!.value === 'pdf'">
-            <h2>PDF Upload</h2>
-            <input type="file" accept=".pdf"> 
-          </div>
-      </div>
+      <button mat-raised-button color="primary" (click)="addQuestion()">
+        Add Question
+      </button>
     </div>
   </div>
-  
+</div>
