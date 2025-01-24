@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AssignmentService } from '../assignment.service';
 import { Institution, InstitutionService } from '../institution.service';
-import { range, Subject, take, toArray } from 'rxjs';
+import { range, take, toArray } from 'rxjs';
 import { Router } from '@angular/router';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../auth/auth.service';
@@ -14,6 +14,8 @@ import { provideNativeDateAdapter } from '@angular/material/core';
   providers:[provideNativeDateAdapter()]
 })
 export class AssignmentComponent implements OnInit {
+
+
 deleteRecord(_t229: number) {
 throw new Error('Method not implemented.');
 }
@@ -27,6 +29,8 @@ throw new Error('Method not implemented.');
    _assignmentType = ['objectives','theory','pdf'];
    _totalQuestion?:number;
    categories = ['junior','senior'];
+
+   private isPdfSelected = false;
 
   //  stores an array of number matching question number according to the number of question admin wants to ask
    countStore:number[] = []
@@ -73,6 +77,37 @@ throw new Error('Method not implemented.');
 
   }
 
+  // whether the submit button should be disabled or not
+  get shouldDisable(): boolean{
+
+   let isValid = false;
+   if(this.type.value !== 'pdf'){
+
+    isValid = !this.assignment.invalid;
+
+   }else{
+
+    isValid = this.isPdfSelected;
+   }
+
+   return !this.validForm() //&& !isValid
+
+  }
+
+  onFileSelected(fileInput: HTMLInputElement) {
+
+    if(fileInput && fileInput.files?.length){
+
+      this.isPdfSelected = true;
+    }else{
+
+      this.isPdfSelected = false;
+    }
+
+    
+
+    }
+
   // fetches admin's registered institutions
   private getRegisteredInstitutions(adminId:number){
 
@@ -97,7 +132,7 @@ throw new Error('Method not implemented.');
          
       }else{
 
-        this.router.navigate(['/error','please register your institution first and add your students.'])
+        this.router.navigate(['/register','acion_needed'])
       }
     }
 
@@ -114,6 +149,12 @@ throw new Error('Method not implemented.');
   private get type():FormControl{
 
     return this.assignmentForm?.get('type') as FormControl;
+  }
+
+  private get institution(): FormControl{
+
+    return this.assignmentForm?.get('institution') as FormControl;
+    
   }
 
   processFormChanges(){
@@ -220,6 +261,38 @@ throw new Error('Method not implemented.');
     return this.assignmentForm?.get('totalQuestion') as FormControl;
   }
 
+  private get name():FormControl{
+
+    return this.assignmentForm?.get('name') as FormControl;
+  }
+
+  private get subject():FormControl{
+
+    return this.assignmentForm?.get('subject') as FormControl;
+  }
+
+  private get category():FormControl{
+
+    return this.assignmentForm?.get('category') as FormControl;
+  }
+
+  private get allocatedMark():FormControl{
+
+    return this.assignmentForm?.get('allocatedMark') as FormControl;
+  }
+
+  private get submissionEnds():FormControl{
+
+    return this.assignmentForm?.get('submissionEnds') as FormControl;
+  }
+
+  private validForm():boolean{
+
+    return (!this.name.invalid && !this.type.invalid && !this.subject.invalid
+           && !this.category.invalid && !this.institution.invalid && !this.totalQuestion.invalid
+           && !this.allocatedMark.invalid)
+
+  }
 
 
 

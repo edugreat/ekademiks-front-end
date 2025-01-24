@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { Institution, InstitutionService } from '../institution.service';
 import { take } from 'rxjs';
 import { HttpStatusCode } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-institution-registration',
@@ -19,6 +19,9 @@ export class InstitutionRegistrationComponent implements OnInit {
 
   registrationForm?:FormGroup;
 
+  // routed message(if any), to determine whether the user was informed they do not have registered institution yet or haven't added their students
+  msg:string|null = null;
+
   // an array of states
   states:string[] = [];
 
@@ -27,11 +30,17 @@ export class InstitutionRegistrationComponent implements OnInit {
 
 
   constructor(private fb:FormBuilder, private institionService:InstitutionService,
-    private router:Router
+    private router:Router, private activatedRoute:ActivatedRoute
   ){}
  
   ngOnInit(): void {
 
+
+   this.activatedRoute.paramMap.subscribe(val =>{
+   
+    this.msg = val.get('msg') ? val.get('msg') : null;
+   })
+    
     this.createRegistrationForm();
 
     this.processStateChangeEvent();
@@ -124,7 +133,7 @@ export class InstitutionRegistrationComponent implements OnInit {
 
   }
 
-  private get adminId(){
+   get adminId(){
 
     return Number(sessionStorage.getItem('adminId')!)
   }

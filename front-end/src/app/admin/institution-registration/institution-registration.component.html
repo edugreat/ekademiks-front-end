@@ -7,6 +7,12 @@
 
 </div>
 
+<div style="display: flex; justify-content: center; " *ngIf="msg === 'acion_needed'" >
+ 
+  <h3>Please register your institution here or <a style="text-decoration: none;" [routerLink]="['/add_student', adminId]">Add your students.</a></h3>
+
+</div>
+
 <div class="container">
     <h2>Register Your Institution</h2>
     <form [formGroup]="registrationForm!" (ngSubmit)="onSubmit()">
