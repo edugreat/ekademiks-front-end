@@ -36,11 +36,10 @@
 
 
         <!-- Institution that owns the assignment -->
-        <mat-form-field appearance="outline">
+        <mat-form-field *ngIf="institutions.length" appearance="outline">
           <mat-label>Institution</mat-label>
           <mat-select formControlName="institution" required>
-            <mat-option value="A">Institution A</mat-option>
-            <mat-option value="B">Institution B</mat-option>
+            <mat-option *ngFor="let institution of institutions; let i = index" [value]="institution" >{{institution.name}}</mat-option>
           </mat-select>
         </mat-form-field>
 
@@ -78,7 +77,8 @@
 
 
 
-        <button mat-raised-button color="primary" type="submit">Submit</button>
+        <button *ngIf="!shouldDisable"  mat-raised-button color="primary" type="submit">Submit</button>
+        <button *ngIf="shouldDisable" mat-raised-button disabled>Submit</button>
       </form>
     </div>
 
@@ -161,7 +161,7 @@
 
         <div *ngIf="assignmentForm!.get('type')!.value === 'pdf'">
           <h2>PDF Upload</h2>
-          <input type="file" accept=".pdf">
+          <input #fileInput type="file" accept=".pdf" (change)="onFileSelected(fileInput)" >
 
           
         </div>

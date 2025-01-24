@@ -82,6 +82,13 @@ const routes: Routes = [
     canMatch: [adminGuard]
   },
 
+  {path: 'register/msg', component: InstitutionRegistrationComponent,
+    canActivate:[adminGuard],
+    canMatch: [adminGuard]
+  },
+
+
+
   {path: 'add_student/:admin', component: AddStudentComponent,
     canActivate: [adminGuard],
     canMatch:[adminGuard]
