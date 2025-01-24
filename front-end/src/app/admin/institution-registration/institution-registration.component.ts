@@ -97,9 +97,7 @@ export class InstitutionRegistrationComponent implements OnInit {
       
     }
 
-    goBack() {
-      throw new Error('Method not implemented.');
-      }
+   
 
   private createRegistrationForm(){
 

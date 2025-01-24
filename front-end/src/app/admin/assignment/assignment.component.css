@@ -1,14 +1,122 @@
+/* General Styles */
 
-  
-  
-  @media (min-width: 768px) {
-    #assignment-details,
-    #assignment-section {
-      flex: 0 0 50%; 
-    }
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #ffffff;
+ 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* Ensure the container takes up a reasonable size on smaller screens */
+  width: 100%;
+}
+
+/* Heading Styles */
+h2 {
+  margin-bottom: 20px;
+  color: #0d47a1;
+  font-size: 1.8rem;
+  border-bottom: 2px solid #0d47a1;
+  padding-bottom: 10px;
+}
+
+/* Row Layout */
+.row {
+  display: flex;
+ 
+  justify-content: center;
+ 
+  flex-wrap: wrap;
+  gap: 20px;
+ 
+}
+
+/* Column Layout */
+.col-md-6 {
+  flex: 1 1 calc(50% - 20px);
+  max-width: calc(50% - 20px);
+}
+
+
+/* Form and Input Styling */
+mat-form-field {
+  width: 100%;
+  margin-bottom: 0px;
+ 
+}
+
+input, mat-select, textarea {
+  font-size: 1rem;
+}
+
+button:not(.bin) {
+  display: block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  background-color: #0d47a1;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+
+.bin {
+  background: none !important; /* Removes background */
+  padding: 0 !important; /* Removes padding */
+  position: -5px !important;
+  margin: 0 !important; /* Removes margin */
+  color: rgb(165, 121, 121) !important; /* Sets the desired color */
+  display: flex !important; /* Ensures the display type */
+  margin-left: auto !important;
+  margin-right: auto !important;
+  min-width: fit-content !important; /* Resets minimum width */
+  max-width: fit-content !important; /* Resets maximum width */
+  height: auto !important; /* Resets height */
+  box-shadow: none !important; /* Removes any Material shadow */
+  border: none !important; /* Removes any border */
+}
+
+
+
+
+button:not(.bin):hover{
+  background-color: #1565c0;
+}
+
+/* Section Specific */
+#assignment-details {
+  background-color: #e3f2fd;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+#assignment-section {
+  background-color: #e8f5e9;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .col-md-6 {
+    flex: 1 1 100%;
+    max-width: 100%;
   }
-  
-  
-  .container {
-    margin-top: 20px;
+
+  h2 {
+    font-size: 1.5rem;
   }
+
+  button:not(.bin) {
+    width: 100%;
+  }
+}

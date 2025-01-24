@@ -5,22 +5,28 @@ import { range, Subject, take, toArray } from 'rxjs';
 import { Router } from '@angular/router';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../auth/auth.service';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 @Component({
   selector: 'app-assignment',
   templateUrl: './assignment.component.html',
-  styleUrl: './assignment.component.css'
+  styleUrl: './assignment.component.css',
+  providers:[provideNativeDateAdapter()]
 })
 export class AssignmentComponent implements OnInit {
+deleteRecord(_t229: number) {
+throw new Error('Method not implemented.');
+}
+today = new Date();
 onSubmit() {
 throw new Error('Method not implemented.');
 }
 
-  institutions?:Institution[];
+  institutions:Institution[] = [];
   assignmentForm?:FormGroup;
-
    _assignmentType = ['objectives','theory','pdf'];
    _totalQuestion?:number;
+   categories = ['junior','senior'];
 
   //  stores an array of number matching question number according to the number of question admin wants to ask
    countStore:number[] = []
@@ -32,7 +38,23 @@ throw new Error('Method not implemented.');
   constructor(private assignmentService:AssignmentService, private institutionService:InstitutionService,
 
     private router:Router, private fb:FormBuilder, private authService:AuthService
-  ){}
+  ){
+
+    this.assignmentForm = this.fb.group({
+      name: new FormControl('', Validators.required),
+      type: new FormControl('', Validators.required),
+      admin: new FormControl(null),
+      subject: new FormControl('', Validators.required),
+      category: new FormControl('', Validators.required),
+      institution: new FormControl(null, Validators.required),
+      allocatedMark: new FormControl(null, Validators.required),
+      totalQuestion: new FormControl(null, [Validators.required, Validators.min(1)]),
+      creationDate: new FormControl(new Date()),
+      submissionEnds: new FormControl(null, Validators.required),
+      assignment: this.fb.array([])
+    });
+    
+  }
 
   ngOnInit(): void {
    
@@ -46,7 +68,8 @@ throw new Error('Method not implemented.');
 
 
 
-    this.numberOfQuestionsChange();
+   this.numberOfQuestionsChange();
+   this.processFormChanges()
 
   }
 
@@ -70,25 +93,8 @@ throw new Error('Method not implemented.');
       // process if the admin has registered institutions
       if(this.institutions?.length || this.isSuperAdmin){
 
-        this.assignmentForm = this.fb.group({
-
-          name: new FormControl<string>('', Validators.required),
-          type:new FormControl<string>('',Validators.required), //drop box
-          admin:new FormControl<number>(adminId),
-          subject:new FormControl<string>('',Validators.required),
-          category:new FormControl<string>('',Validators.required),//drop box
-          institution:new FormControl<number|undefined>(undefined, Validators.required),
-          allocatedMark:new FormControl<number|undefined>(undefined, Validators.required),
-          totalQuestion:new FormControl<number|undefined>(undefined,[Validators.required, Validators.min(1)]),
-          creationDate:new FormControl<Date>(new Date()),
-          submissionEnds:new FormControl<Date|undefined>(undefined, Validators.required),
-          assignment:this.fb.group([])
-
-
-
-        })
-
-
+        this.assignmentForm?.get('admin')?.setValue(adminId);
+         
       }else{
 
         this.router.navigate(['/error','please register your institution first and add your students.'])
@@ -100,10 +106,24 @@ throw new Error('Method not implemented.');
 
   }
 
-  private get assignment():FormArray{
+  get assignment(): FormArray {
 
-    return this.assignmentForm?.get('assignment') as FormArray;
+    return (this.assignmentForm?.get('assignment') as FormArray) || this.fb.array([]);
   }
+
+  private get type():FormControl{
+
+    return this.assignmentForm?.get('type') as FormControl;
+  }
+
+  processFormChanges(){
+
+    // resets assignments on type selection change
+    this.type.valueChanges.subscribe(change => this.assignment.clear())
+
+
+  }
+  
 
   private createObjQuestion():FormGroup{
 
@@ -155,11 +175,15 @@ throw new Error('Method not implemented.');
     switch (this.assignmentType) {
       case 'objectives':
 
+      console.log('objectives clicked')
+
       this.assignment.push(this.createObjQuestion())
         
         break;
 
         case 'theory':
+
+        console.log('thery clicked')
           this.assignment.push(this.createTheoryQuestion())
 
           break;
@@ -176,6 +200,7 @@ throw new Error('Method not implemented.');
 
     
 
+   if(this.totalQuestion){
     this.totalQuestion.valueChanges.subscribe(val => {
 
       // returns a range of numbers from 1 to the inputed number, then stores in the countStore
@@ -186,6 +211,7 @@ throw new Error('Method not implemented.');
 
     })
 
+   }
 
   }
 

@@ -24,6 +24,7 @@ import { MatSelectModule } from '@angular/material/select';
 import {MatStepperModule} from '@angular/material/stepper'; 
 import {MatBadgeModule} from '@angular/material/badge'; 
 import {MatListModule} from '@angular/material/list'; 
+import {MatDatepickerModule} from '@angular/material/datepicker';
 
 
 
@@ -57,7 +58,8 @@ const materials = [
   MatButtonModule,
   MatStepperModule,
   MatBadgeModule,
-  MatListModule
+  MatListModule,
+  MatDatepickerModule
 
   
 ]
