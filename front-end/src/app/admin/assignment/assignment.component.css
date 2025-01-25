@@ -68,9 +68,57 @@ button:not(.bin) {
   transition: background-color 0.3s ease;
 }
 
+.hiding-icon{
+
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.hiding-icon:hover{
+
+  color: #1976d2;
+  transform: scale(1.2);
+
+}
+
+.paginator-arrow{
+ 
+  display: flex;
+  justify-content: flex-end !important;
+  margin-right: 0px;
+  margin-left: 550px;
+  width: fit-content;
+  
+}
+
+.paginator-arrow button{
+
+  padding: 0px;
+  background: none;
+}
+
+.paginator-arrow button{
+
+  background-color: #e8f5e9;
+  color: #599cdf;
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.3s ease;
+
+
+}
+
+.paginator-arrow button:hover{
+
+  background-color: #e8f5e9;
+  transform: scale(1.2);
+
+}
+
 
 .bin {
   background: none !important; /* Removes background */
+  cursor: pointer  !important;
+  transition: color 0.3s ease, transform 0.3s ease;
   padding: 0 !important; /* Removes padding */
   position: -5px !important;
   margin: 0 !important; /* Removes margin */
@@ -85,7 +133,11 @@ button:not(.bin) {
   border: none !important; /* Removes any border */
 }
 
+.bin:hover{
 
+  color: rgb(169, 97, 97);
+  transform: scale(1.2);
+}
 
 
 button:not(.bin):hover{

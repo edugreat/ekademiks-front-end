@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col-md-6" id="assignment-details">
       <h2>Assignment Details</h2>
-      <form [formGroup]="assignmentForm" *ngIf="assignmentForm" (ngSubmit)="onSubmit()">
+      <form [formGroup]="assignmentForm" *ngIf="assignmentForm" (ngSubmit)="postAssignment()">
 
         <!-- Name of assignment -->
         <mat-form-field appearance="outline">
@@ -14,8 +14,8 @@
         <mat-form-field appearance="outline">
           <mat-label>Type</mat-label>
           <mat-select formControlName="type" required>
-            <mat-option *ngFor="let type of _assignmentType" [value]="type" >{{type | uppercase}}</mat-option>
-           
+            <mat-option *ngFor="let type of _assignmentType" [value]="type">{{type | uppercase}}</mat-option>
+
           </mat-select>
         </mat-form-field>
 
@@ -30,7 +30,8 @@
         <mat-form-field appearance="outline">
           <mat-label>Category</mat-label>
           <mat-select formControlName="category" required>
-            <mat-option *ngFor="let category of categories" [value]="category">{{category | uppercase}} STUDENTS</mat-option>
+            <mat-option *ngFor="let category of categories" [value]="category">{{category | uppercase}}
+              STUDENTS</mat-option>
           </mat-select>
         </mat-form-field>
 
@@ -39,8 +40,19 @@
         <mat-form-field *ngIf="institutions.length" appearance="outline">
           <mat-label>Institution</mat-label>
           <mat-select formControlName="institution" required>
-            <mat-option *ngFor="let institution of institutions; let i = index" [value]="institution" >{{institution.name}}</mat-option>
+            <mat-option *ngFor="let institution of institutions; let i = index"
+              [value]="institution">{{institution.name}}</mat-option>
           </mat-select>
+        </mat-form-field>
+
+        <!-- Number of questions asked -->
+        <mat-form-field appearance="outline">
+          <mat-label>No of questions</mat-label>
+          <input [readOnly]="hideIcon" #input matInput formControlName="totalQuestion" required>
+          <mat-icon class="hiding-icon" matTooltip="proceed" *ngIf="!hideIcon" matSuffix
+            (click)="processTotalQuestionChanges(input)">send</mat-icon>
+          <mat-icon class="hiding-icon" matTooltip="edit" matSuffix *ngIf="hideIcon"
+            (click)="toggleHide()">edit</mat-icon>
         </mat-form-field>
 
 
@@ -48,14 +60,14 @@
         <!-- Allocated mark for the given assignment -->
         <mat-form-field appearance="outline">
           <mat-label>Mark allocation</mat-label>
-          <input matInput formControlName="allocatedMark" required>
+          <input matInput type="number" formControlName="allocatedMark" required>
         </mat-form-field>
 
 
         <!-- Date assignment was posted -->
         <mat-form-field appearance="outline" class="example-full-width">
           <mat-label>Posted on</mat-label>
-          <input [min]="today" [max]="today"  formControlName="creationDate" matInput [matDatepicker]="picker1">
+          <input [min]="today" [max]="today" formControlName="creationDate" matInput [matDatepicker]="picker1">
           <mat-hint>MM/DD/YYYY</mat-hint>
           <mat-datepicker-toggle matIconSuffix [for]="picker1">
             <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
@@ -64,20 +76,19 @@
         </mat-form-field>
 
         <!-- Last submission date for assignment -->
-        <mat-form-field appearance="outline" class="example-full-width">
+
+        <mat-form-field appearance="outline">
           <mat-label>Submission ends</mat-label>
-          <input [min]="today"  formControlName="submissionEnds" matInput [matDatepicker]="picker2">
+          <input [min]="today" formControlName="submissionEnds" matInput [matDatepicker]="dp3" readonly="">
           <mat-hint>MM/DD/YYYY</mat-hint>
-          <mat-datepicker-toggle matIconSuffix [for]="picker2">
-            <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
-          </mat-datepicker-toggle>
-          <mat-datepicker #picker2></mat-datepicker>
+          <mat-datepicker-toggle matIconSuffix [for]="dp3"></mat-datepicker-toggle>
+          <mat-datepicker #dp3 disabled="false"></mat-datepicker>
         </mat-form-field>
-        
 
 
 
-        <button *ngIf="!shouldDisable"  mat-raised-button color="primary" type="submit">Submit</button>
+
+        <button *ngIf="!shouldDisable" mat-raised-button color="primary" type="submit">Submit</button>
         <button *ngIf="shouldDisable" mat-raised-button disabled>Submit</button>
       </form>
     </div>
@@ -86,16 +97,15 @@
 
       <div formArrayName="assignment">
 
+        <!-- OBJECTIVE BASED ASSIGNMENT -->
         <div *ngIf="assignmentForm!.get('type')!.value === 'objectives'">
           <h2>Objective Questions</h2>
-          <div
-            *ngFor="let objective of assignment.controls; let i = index"
-            [formGroupName]="i">
+          <div *ngFor="let objective of assignment.controls; let i = index" [formGroupName]="i">
 
 
             <mat-form-field appearance="outline">
               <mat-label>Num</mat-label>
-              <input type="number" matInput formControlName="_index" required>
+              <input type="number" readonly matInput formControlName="_index" required>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
@@ -104,43 +114,37 @@
             </mat-form-field>
 
             <div formGroupName="options">
-              <mat-form-field appearance="outline">
-                <mat-label>Option A</mat-label>
-                <input matInput formControlName="A" required>
-              </mat-form-field>
-      
-              <mat-form-field appearance="outline">
-                <mat-label>Option B</mat-label>
-                <input matInput formControlName="B" required>
-              </mat-form-field>
-      
-              <mat-form-field appearance="outline">
-                <mat-label>Option C</mat-label>
-                <input matInput formControlName="C" required>
-              </mat-form-field>
-      
-              <mat-form-field appearance="outline">
-                <mat-label>Option D</mat-label>
-                <input matInput formControlName="D" required>
-              </mat-form-field>
+
+              <div *ngFor="let option of objOptions; let i =  index">
+                <mat-form-field appearance="outline">
+                  <mat-label>Option {{option}}</mat-label>
+                  <input [value]="option" matInput [formControlName]="option" required>
+                </mat-form-field>
+              </div>
+
             </div>
-      
+
             <mat-form-field appearance="outline">
               <mat-label>Answer</mat-label>
               <input matInput formControlName="answer" required>
             </mat-form-field>
 
-            <button (click)="deleteRecord(i)" matTooltip="delete" class="bin" mat-icon-button >
+            <button (click)="deleteQuestion(i)" matTooltip="delete" class="bin" mat-icon-button>
               <mat-icon>delete</mat-icon>
-              </button>
+            </button>
           </div>
         </div>
 
+        <!-- THEORY BASED ASSIGNMENT -->
         <div *ngIf="assignmentForm!.get('type')!.value === 'theory'">
           <h2>Theory Questions</h2>
-          <div
-            *ngFor="let theory of assignment.controls; let i = index"
-            [formGroupName]="i">
+          <div *ngFor="let theory of assignment.controls | slice :startPageIndex:endPageIndex; let i = index" [formGroupName]="i">
+
+            <mat-form-field appearance="outline">
+              <mat-label>Num</mat-label>
+              <input type="number" readonly matInput formControlName="_index" required>
+            </mat-form-field>
+
             <mat-form-field appearance="outline">
               <mat-label>Problem</mat-label>
               <input matInput formControlName="problem" required>
@@ -151,23 +155,32 @@
               <textarea matInput formControlName="answer" required></textarea>
             </mat-form-field>
 
-            <button (click)="deleteRecord(i)" matTooltip="delete" class="bin" mat-icon-button >
+            <button (click)="deleteQuestion(i)" matTooltip="delete" class="bin" mat-icon-button>
               <mat-icon>delete</mat-icon>
-              </button>
-          </div>
-         
+            </button>
+
+           
+
 
         </div>
 
         <div *ngIf="assignmentForm!.get('type')!.value === 'pdf'">
           <h2>PDF Upload</h2>
-          <input #fileInput type="file" accept=".pdf" (change)="onFileSelected(fileInput)" >
+          <input #fileInput type="file" accept=".pdf" (change)="onFileSelected(fileInput)">
 
-          
+
         </div>
       </div>
 
-      <button mat-raised-button color="primary" (click)="addQuestion()">
+      <div class="paginator-arrow" >
+        <button (click)="previousPage()" matTooltip="back" mat-icon-button > <mat-icon>arrow_back_ios</mat-icon> </button>
+        <button (click)="nextPage()" [disabled]="assignment.length <= PAGE_SIZE" matTooltip="forward" mat-icon-button >
+          <mat-icon>arrow_forward_ios</mat-icon>
+        </button>
+      </div>
+    </div>
+
+      <button [disabled]="!type.value || !countStore.length" mat-raised-button color="primary" (click)="addQuestion()">
         Add Question
       </button>
     </div>
