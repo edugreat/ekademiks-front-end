@@ -15,6 +15,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 })
 export class AssignmentComponent implements OnInit {
 
+
   today = new Date();
 
 
@@ -28,14 +29,18 @@ export class AssignmentComponent implements OnInit {
 
   objOptions = ['A', 'B', 'C', 'D']
 
-  private isPdfSelected = false;
+  private isPdfSelected = true;
 
   hideIcon = false
 
-  startPageIndex = 0;
-  endPageIndex = 0;
-  PAGE_SIZE = 4;
-  currentPageIndex = 0;
+  startingPageIndex = 0; //starting index for slice pipe
+  endingPageIndex = 0;  // ending index for slice pipe
+  PAGE_SIZE = 4;    // default page size
+  
+  currentPage = -1; // the current page at which we're
+  totalPage = 0;
+
+  
 
 
 
@@ -167,6 +172,7 @@ export class AssignmentComponent implements OnInit {
       for (let index = 0; index < this.assignment.length; index++) {
 
         if (this.assignment.at(index).invalid) {
+          
 
           validity = false;
           break;
@@ -197,15 +203,38 @@ export class AssignmentComponent implements OnInit {
   processFormChanges() {
 
     // resets assignments on type selection change
-    this.type.valueChanges.subscribe(change => this.assignment.clear());
+    this.assignmentTypeChange();
 
 
     this.processMarkAllocationChanges();
 
+    this.processTotalQuestionChange();
+    
 
 
 
 
+
+
+  }
+
+  private assignmentTypeChange() {
+    this.type.valueChanges.subscribe(change => {
+      
+      this.assignment.clear();
+      this.resetPagination();
+
+
+    });
+  }
+
+  private resetPagination(){
+
+    this.currentPage = -1;
+    this.startingPageIndex = 0;
+    this.endingPageIndex = 0;
+    this.totalPage = 0;
+    this._totalQuestion = undefined;
 
   }
 
@@ -277,13 +306,15 @@ export class AssignmentComponent implements OnInit {
   // dynamically adds question based on the assignment type
   public addQuestion() {
 
+   
+
     switch (this.assignmentType) {
       case 'objectives':
 
 
 
         this.assignment.push(this.createObjQuestion())
-        this.processPagination()
+        // this.processPagination()
 
 
         break;
@@ -292,7 +323,7 @@ export class AssignmentComponent implements OnInit {
 
 
         this.assignment.push(this.createTheoryQuestion())
-         this.processPagination()
+         
 
         break;
 
@@ -302,43 +333,97 @@ export class AssignmentComponent implements OnInit {
         break;
     }
 
+    this.processPagination();
+
 
   }
 
 
   nextPage() {
 
+    if((this.currentPage + 1) === this.totalPage) return;
+
+    this.currentPage++;
+    this.endingPageIndex = (1 + this.currentPage)*this.PAGE_SIZE;
+
+    console.log(`current page: ${this.currentPage} : ending page: ${this.endingPageIndex}`)
   }
 
   previousPage() {
 
+    if((this.currentPage - 1) === -1) return;
 
+    this.currentPage--;
+
+    this.endingPageIndex = (1 + this.currentPage) * this.PAGE_SIZE;
+
+
+    console.log(`...current page: ${this.currentPage} : ending page: ${this.endingPageIndex}`)
   }
+
+  private  computeTotalPages() {
+   
+    const _totalPages = this.assignment.length;
+    if(_totalPages > 0 && _totalPages < this.PAGE_SIZE) this.totalPage = 1;
+   const quotient = Math.floor(_totalPages / this.PAGE_SIZE);
+    const remainder = _totalPages % this.PAGE_SIZE;
+  
+    this.totalPage = quotient + (remainder > 0 ? 1 : 0);
+
+    
+
+    }
 
   private processPagination(){
 
-    if(this.assignment.length < this.PAGE_SIZE) {
-      this.endPageIndex = this.assignment.length;
-      this.currentPageIndex = this.endPageIndex - 1;
+    // while array length is less than pageSize, endingPageIndex = pageSize
+   
+    // maintain startingPageIndex and curentPage at default values of 0
+    const arraySize = this.assignment.length;
+    if(arraySize <= this.PAGE_SIZE){
+     
+      this.endingPageIndex = this.PAGE_SIZE;
+      this.currentPage = 0;
+
     }
-     else {
-      this.startPageIndex = this.currentPageIndex + 1;
 
-      if(this.startPageIndex + this.PAGE_SIZE < this.assignment.length){
+    // else:
+    // get the current array size
 
-        this.endPageIndex = this.currentPageIndex + this.PAGE_SIZE;
-      }else{
+    // get the current page by running Math.floor(array size / page size)
+     
+    // Determine if the page has reached page size by running (arraySize)%pageSize
 
-        const difference = this.startPageIndex + this.PAGE_SIZE - this.assignment.length;
-        this.endPageIndex = this.startPageIndex+difference;
+    // Increment current page if modulo operation returns non-zero value, or decrement the value if modulo returns zero
 
-        this.currentPageIndex = this.endPageIndex;
-      }
-      // this.endPageIndex = this.startPageIndex + this.PAGE_SIZE;
-      // this.currentPageIndex = this.assignment.length - 1;
-     }
+    // Update startingPageIndex according by executing startingPageIndex = currentPage * pageSize, for array slice operation
 
-  console.log(`start: ${this.startPageIndex}, end: ${this.endPageIndex}`)
+    // Update last page index accordingly by execting lastPageIndex = startingPageIndex + pageSize, for array slice operation
+
+
+
+
+    else{
+
+      const floor = Math.floor(arraySize / this.PAGE_SIZE);
+
+      const remainder = arraySize % this.PAGE_SIZE;
+
+     
+      if(remainder > 0) this.currentPage = floor;
+      else this.currentPage = floor - 1;
+
+      this.startingPageIndex = this.currentPage * this.PAGE_SIZE;
+      this.endingPageIndex = this.startingPageIndex + this.PAGE_SIZE;
+
+
+
+    }
+
+   
+    this.computeTotalPages();
+
+    
     
   }
 
@@ -377,25 +462,34 @@ export class AssignmentComponent implements OnInit {
 
   }
   processTotalQuestionChanges(input: HTMLInputElement) {
+
+    const currentTotal = Number(input.value);
     this.hideIcon = true;
 
     // guards against unnecessary code execution where changes were not made
-    if (this._totalQuestion === Number(input.value)) return;
-    else this._totalQuestion = Number(input.value);
+    if (this._totalQuestion === currentTotal) return;
+    else this._totalQuestion = currentTotal;
 
 
 
 
     // process when the user enters non numeric values or values less than or equal to zero
-    if (isNaN(Number(input.value)) || Number(input.value) <= 0) {
+    if (isNaN(Number(input.value)) || currentTotal <= 0) {
 
 
       this.totalQuestion.setValue(undefined);
+      this.countStore = [];
+      return;
 
 
 
     } else { //process when positive non-zero integer has been entered
 
+      if(currentTotal < this._totalQuestion){
+
+        this.assignment.clear();
+        
+      }
 
 
       // get the highest question number already asked or zero if non
@@ -414,24 +508,40 @@ export class AssignmentComponent implements OnInit {
 
       // populate the countStore
       range(startFrom + 1, count).pipe(toArray()).subscribe(val => this.countStore.push(...val));
+      this._totalQuestion += count; //update the total number of questions to ask
 
     }
 
-
-    if (!input.value) {
-
-      // empty the array if number of questions got cleared
-      this.countStore = [];
-    }
-
-
-    // this.totalQuestion.disable()
+    
   }
+  
 
+  deleteAssignmentAt(index: number) {
+
+    if(this.assignment.at(index)) this.assignment.removeAt(index);
+   
+  }
 
   private get totalQuestion(): FormControl {
 
     return this.assignmentForm?.get('totalQuestion') as FormControl;
+  }
+
+  private processTotalQuestionChange(){
+
+    let isProcessing = false;
+    this.totalQuestion.valueChanges.subscribe(val => {
+     if(isProcessing)return;
+
+     isProcessing = true;
+     if(isNaN(val))this.totalQuestion.setValue(undefined);
+     else this.totalQuestion.setValue(val)
+
+     isProcessing = false;
+     
+
+    })
+
   }
 
   private get name(): FormControl {
