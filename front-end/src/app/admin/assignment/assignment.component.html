@@ -98,9 +98,9 @@
       <div formArrayName="assignment">
 
         <!-- OBJECTIVE BASED ASSIGNMENT -->
-        <div *ngIf="assignmentForm!.get('type')!.value === 'objectives'">
+        <div *ngIf="type.value === 'objectives'">
           <h2>Objective Questions</h2>
-          <div *ngFor="let objective of assignment.controls; let i = index" [formGroupName]="i">
+          <div *ngFor="let objective of assignment.controls| slice :startingPageIndex:endingPageIndex; let i = index" [formGroupName]="(currentPage*PAGE_SIZE)+i">
 
 
             <mat-form-field appearance="outline">
@@ -136,9 +136,9 @@
         </div>
 
         <!-- THEORY BASED ASSIGNMENT -->
-        <div *ngIf="assignmentForm!.get('type')!.value === 'theory'">
+        <div *ngIf="type.value === 'theory'">
           <h2>Theory Questions</h2>
-          <div *ngFor="let theory of assignment.controls | slice :startPageIndex:endPageIndex; let i = index" [formGroupName]="i">
+          <div *ngFor="let theory of assignment.controls | slice :startingPageIndex:endingPageIndex; let i = index" [formGroupName]="(currentPage*PAGE_SIZE)+i">
 
             <mat-form-field appearance="outline">
               <mat-label>Num</mat-label>
@@ -163,18 +163,21 @@
 
 
         </div>
+      </div>
 
-        <div *ngIf="assignmentForm!.get('type')!.value === 'pdf'">
+       
+        <div *ngIf="type.value === 'pdf'" >
           <h2>PDF Upload</h2>
           <input #fileInput type="file" accept=".pdf" (change)="onFileSelected(fileInput)">
 
 
         </div>
-      </div>
+      
 
-      <div class="paginator-arrow" >
-        <button (click)="previousPage()" matTooltip="back" mat-icon-button > <mat-icon>arrow_back_ios</mat-icon> </button>
-        <button (click)="nextPage()" [disabled]="assignment.length <= PAGE_SIZE" matTooltip="forward" mat-icon-button >
+      <div  class="paginator-arrow" >
+        <button (click)="previousPage()" [disabled]="currentPage <= 0" matTooltip="back" mat-icon-button > <mat-icon>arrow_back_ios</mat-icon> </button>
+        <i>page {{currentPage + 1}} of {{totalPage}}</i>
+        <button (click)="nextPage()" [disabled]="1 + currentPage == totalPage" matTooltip="forward" mat-icon-button >
           <mat-icon>arrow_forward_ios</mat-icon>
         </button>
       </div>
