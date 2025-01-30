@@ -105,7 +105,7 @@
         <!-- Objective-based assignment -->
         <div *ngIf="type.value === 'objectives'">
           <h2>Objective Questions</h2>
-          <div *ngFor="let objective of paginatedQuestions; let i = index" [formGroupName]="i">
+          <div *ngFor="let objective of assignment.controls | slice :sublistStart:sublistEnd; let i = index" [formGroupName]="(pageIndex * paginator.pageSize)+i">
             <!-- Objective question fields -->
             <mat-form-field appearance="outline">
               <mat-label>Num</mat-label>
@@ -140,7 +140,7 @@
         <!-- Theory-based assignment -->
         <div *ngIf="type.value === 'theory'">
           <h2>Theory Questions</h2>
-          <div *ngFor="let theory of assignment.controls | slice:sublistStart:sublistEnd; let i = index" [formGroupName]="(pageIndex * PAGE_SIZE) + i">
+          <div *ngFor="let theory of assignment.controls | slice :sublistStart:sublistEnd; let i = index" [formGroupName]="(pageIndex * paginator.pageSize) + i">
             <!-- Theory question fields -->
             <mat-form-field appearance="outline">
               <mat-label>Num</mat-label>
@@ -171,14 +171,14 @@
       </div>
 
       <!-- Material Paginator -->
-      <mat-paginator
-        [pageSizeOptions]="[2, 10, 20]"
+      <mat-paginator *ngIf="type.value !== 'pdf'"
+        [pageSizeOptions]="[2,4, 10, 20]"
         [length]="assignment.controls.length"
         (page)="onPageChange($event)">
  
     </mat-paginator>
 
-      <button
+      <button *ngIf="type.value !== 'pdf'"
         [disabled]="!type.value || !countStore.length"
         mat-raised-button
         color="primary"
