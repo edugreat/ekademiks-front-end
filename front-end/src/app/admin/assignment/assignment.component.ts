@@ -18,7 +18,7 @@ export class AssignmentComponent implements OnInit {
 
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-  
+
 
 
   today = new Date();
@@ -38,22 +38,17 @@ export class AssignmentComponent implements OnInit {
 
   hideIcon = false
 
-  paginatedQuestions:any = [];
-  
-  PAGE_SIZE = 0;    // default page size
-  
-  // next paginator page is disabled by default while assignment is being added
-  
-  
+
+
   sublistStart = 0;
   sublistEnd = 0;
-  
+
   totalPage = 0;
 
   // current page index
   pageIndex = 0;
 
-  
+
   //  stores an array of number matching question number according to the number of question admin wants to ask
   countStore: number[] = []
 
@@ -68,7 +63,7 @@ export class AssignmentComponent implements OnInit {
 
 
   constructor(private assignmentService: AssignmentService, private institutionService: InstitutionService,
-    public paginatorIntl:MatPaginatorIntl,
+    public paginatorIntl: MatPaginatorIntl,
 
     private router: Router, private fb: FormBuilder, private authService: AuthService
   ) {
@@ -107,50 +102,49 @@ export class AssignmentComponent implements OnInit {
 
     this.processFormChanges();
 
-   
+
   }
 
-  
+
 
   // updates pagination when assignments are being added
-  private updatePaginationOnAddition(){
+  private updatePaginationOnAddition() {
 
     const pageSize = this.paginator.pageSize;
 
-    this.sublistStart = (Math.ceil(this.assignment.length/pageSize) - 1) * pageSize;
+    // start parameter of slice pipe
+    this.sublistStart = (Math.ceil(this.assignment.length / pageSize) - 1) * pageSize;
 
-    this.sublistEnd = this.sublistStart+pageSize;
+    // end parameter of slice pipe
+    this.sublistEnd = this.sublistStart + pageSize;
 
-    this.pageIndex = Math.ceil(this.assignment.length/pageSize) - 1;
+    // current page index
+    this.pageIndex = Math.ceil(this.assignment.length / pageSize) - 1;
 
-    this.PAGE_SIZE = this.paginator.pageSize;
 
+    // programmatically update paginator's page index
     this.paginator.pageIndex = this.pageIndex;
 
-    console.log(`start: ${this.sublistStart}, end: ${this.sublistEnd}: page index: ${this.pageIndex}`)
-
-    console.log(`paginator pageIndex: ${this.paginator.pageIndex}`)
 
   }
 
 
-  
-  
- 
 
+
+
+  // method that gets called on page index change
   onPageChange(event: PageEvent): void {
 
-   
-   const totalPage = Math.ceil(this.assignment.length/this.paginator.pageSize);
 
-   
+    const totalPage = Math.ceil(this.assignment.length / this.paginator.pageSize);
 
-    this.sublistStart = event.pageIndex - 1;
+    this.pageIndex = this.paginator.pageIndex;
 
-    this.sublistEnd = this.sublistStart + this.PAGE_SIZE;
+    this.sublistStart = this.pageIndex * this.paginator.pageSize;
 
-  
-  
+    this.sublistEnd = this.sublistStart + this.paginator.pageSize;
+
+
   }
 
 
@@ -235,7 +229,7 @@ export class AssignmentComponent implements OnInit {
       for (let index = 0; index < this.assignment.length; index++) {
 
         if (this.assignment.at(index).invalid) {
-          
+
 
           validity = false;
           break;
@@ -272,7 +266,7 @@ export class AssignmentComponent implements OnInit {
     this.processMarkAllocationChanges();
 
     this.processTotalQuestionChange();
-    
+
 
 
 
@@ -283,15 +277,15 @@ export class AssignmentComponent implements OnInit {
 
   private assignmentTypeChange() {
     this.type.valueChanges.subscribe(change => {
-      
+
       this.assignment.clear();
-     
+
 
 
     });
   }
 
-  
+
   // returns the highest question nunber set so far
   get highestIndex(): number | undefined {
 
@@ -360,22 +354,22 @@ export class AssignmentComponent implements OnInit {
   // dynamically adds question based on the assignment type
   public addQuestion() {
 
-   
+
 
     switch (this.assignmentType) {
       case 'objectives':
 
 
-        
-       this.assignment.push(this.createObjQuestion())
-      
+
+        this.assignment.push(this.createObjQuestion())
+
         break;
 
       case 'theory':
 
 
         this.assignment.push(this.createTheoryQuestion())
-         
+
 
         break;
 
@@ -385,7 +379,7 @@ export class AssignmentComponent implements OnInit {
         break;
     }
 
-   this.updatePaginationOnAddition();
+    this.updatePaginationOnAddition();
 
 
   }
@@ -394,20 +388,8 @@ export class AssignmentComponent implements OnInit {
     return this.assignment.length < this.totalQuestion.value
   }
 
-  private  computeTotalPages() {
-   
-    const _totalPages = this.assignment.length;
-    if(_totalPages > 0 && _totalPages < this.PAGE_SIZE) this.totalPage = 1;
-   const quotient = Math.floor(_totalPages / this.PAGE_SIZE);
-    const remainder = _totalPages % this.PAGE_SIZE;
-  
-    this.totalPage = quotient + (remainder > 0 ? 1 : 0);
 
-    
 
-    }
-
-  
 
   // processes change in the mark allocation form input
   processMarkAllocationChanges() {
@@ -455,7 +437,7 @@ export class AssignmentComponent implements OnInit {
 
 
     // process when the user enters non numeric values or values less than or equal to zero
-    if (isNaN(Number(input.value)) || currentTotal <= 0) {
+    if (currentTotal <= 0) {
 
 
       this.totalQuestion.setValue(undefined);
@@ -466,20 +448,22 @@ export class AssignmentComponent implements OnInit {
 
     } else { //process when positive non-zero integer has been entered
 
-      if(currentTotal < this._totalQuestion){
+      if (currentTotal < this._totalQuestion) {
 
         this.assignment.clear();
-        
+
       }
 
 
       // get the highest question number already asked or zero if non
       let startFrom = this.highestIndex || 0;
 
-      let count = Number(input.value);
+      // used to process the rxjs range to populate the countStore variable
+      let rangeCount = currentTotal;
 
-      if (this.highestIndex && this.highestIndex < count) {
-        count -= this.highestIndex;
+      if (this.highestIndex && this.highestIndex < currentTotal) {
+
+        rangeCount -= this.highestIndex;
 
       }
 
@@ -488,21 +472,21 @@ export class AssignmentComponent implements OnInit {
       if (startFrom === 0 && this.countStore.length) this.countStore = [];
 
       // populate the countStore
-      range(startFrom + 1, count).pipe(toArray()).subscribe(val => this.countStore.push(...val));
-      this._totalQuestion += count; //update the total number of questions to ask
+      range(startFrom + 1, rangeCount).pipe(toArray()).subscribe(val => this.countStore.push(...val));
+      this._totalQuestion += rangeCount; //update the total number of questions to ask
 
     }
 
-    
+
   }
-  
+
 
   deleteAssignmentAt(index: number) {
 
-    if(this.assignment.at(index)){
+    if (this.assignment.at(index)) {
       this.assignment.removeAt(index);
-   
-      
+
+
     }
 
   }
@@ -512,18 +496,18 @@ export class AssignmentComponent implements OnInit {
     return this.assignmentForm?.get('totalQuestion') as FormControl;
   }
 
-  private processTotalQuestionChange(){
+  private processTotalQuestionChange() {
 
     let isProcessing = false;
     this.totalQuestion.valueChanges.subscribe(val => {
-     if(isProcessing)return;
+      if (isProcessing) return;
 
-     isProcessing = true;
-     if(isNaN(val))this.totalQuestion.setValue(undefined);
-     else this.totalQuestion.setValue(val)
+      isProcessing = true;
+      if (isNaN(val)) this.totalQuestion.setValue(undefined);
+      else this.totalQuestion.setValue(val)
 
-     isProcessing = false;
-     
+      isProcessing = false;
+
 
     })
 
