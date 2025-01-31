@@ -108,7 +108,7 @@ export class AssignmentComponent implements OnInit {
 
 
   // updates pagination when assignments are being added
-  private updatePaginationOnAddition() {
+  private updatePagination() {
 
     const pageSize = this.paginator.pageSize;
 
@@ -128,9 +128,7 @@ export class AssignmentComponent implements OnInit {
 
   }
 
-
-
-
+  
 
   // method that gets called on page index change
   onPageChange(event: PageEvent): void {
@@ -200,13 +198,14 @@ export class AssignmentComponent implements OnInit {
         complete: () => {
 
           // process if the admin has registered institutions
-          if (this.institutions?.length || this.isSuperAdmin) {
+          if (this.institutions?.length) {
 
+         
             this.assignmentForm?.get('admin')?.setValue(adminId);
 
           } else {
 
-            this.router.navigate(['/register', 'acion_needed'])
+            this.router.navigate(['/register', 'action_needed'])
           }
         }
 
@@ -315,7 +314,11 @@ export class AssignmentComponent implements OnInit {
   // delete assignment question at the given index
   deleteQuestion(index: number) {
 
+    console.log(`deleting at index : ${index}`)
+
     this.assignment.removeAt(index);
+
+    this.updatePagination();
 
 
   }
@@ -379,7 +382,7 @@ export class AssignmentComponent implements OnInit {
         break;
     }
 
-    this.updatePaginationOnAddition();
+    this.updatePagination();
 
 
   }
@@ -552,11 +555,7 @@ export class AssignmentComponent implements OnInit {
   }
 
 
-  private get isSuperAdmin() {
-
-    return this.authService.isSuperAdmin();
-
-  }
+  
 
 
   private get _adminId() {

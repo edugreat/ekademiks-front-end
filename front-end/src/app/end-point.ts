@@ -343,6 +343,7 @@ export class Endpoints {
 
     return this._assignment;
    }
+
 }
 
 

@@ -131,7 +131,7 @@
               <input matInput formControlName="answer" required />
             </mat-form-field>
 
-            <button (click)="deleteQuestion(i)" matTooltip="delete" class="bin" mat-icon-button>
+            <button (click)="deleteQuestion((pageIndex * paginator.pageSize) + i)" matTooltip="delete" class="bin" mat-icon-button>
               <mat-icon>delete</mat-icon>
             </button>
           </div>
@@ -157,7 +157,7 @@
               <textarea matInput formControlName="answer" required></textarea>
             </mat-form-field>
 
-            <button (click)="deleteQuestion(i)" matTooltip="delete" class="bin" mat-icon-button>
+            <button (click)="deleteQuestion((pageIndex * paginator.pageSize) + i)" matTooltip="delete" class="bin" mat-icon-button>
               <mat-icon>delete</mat-icon>
             </button>
           </div>
