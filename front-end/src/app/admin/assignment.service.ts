@@ -6,7 +6,7 @@ import { Observable, take } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
-export class AssignmentService {
+export class  AssignmentService {
 
  
 
@@ -20,13 +20,20 @@ export class AssignmentService {
     } )
   }
 
+  public postPDFAssignment(formData:FormData):Observable<number>{
+
+   
+   
+    return this.http.post<number>(this.endpoints.pdfAssignmentUrl, formData)
+  }
+
 
 }
 
 
 export interface AssignmentDetails{
-
-  id?:number,
+ 
+  id?:number|null,
   name:string,
   type:string,
   admin:number,
@@ -37,7 +44,8 @@ export interface AssignmentDetails{
   totalQuestions:number
   creationDate:Date,
   submissionEnds:Date
-  assignmentDTO:Array<AssignmentDTO>
+  assignmentDTO?:Array<AssignmentDTO>,
+  pdfFiles?:File[]
 
 }
 

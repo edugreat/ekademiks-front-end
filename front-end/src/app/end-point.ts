@@ -337,11 +337,18 @@ export class Endpoints {
    }
  
    // ASSIGNMENT ENDPOINTS
-   private _assignment = `${this.baseUrl}/assignments`;
+   private _assignmentUrl = `${this.baseUrl}/assignments`;
 
    public get assignment(){
 
-    return this._assignment;
+    return this._assignmentUrl;
+   }
+
+   private _pdfAssignmentUrl = `${this._assignmentUrl}/file`;
+
+   public get pdfAssignmentUrl(){
+
+    return this._pdfAssignmentUrl;
    }
 
 }

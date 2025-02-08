@@ -52,11 +52,11 @@
           <!-- Number of questions asked -->
           <mat-form-field appearance="outline">
             <mat-label>No of questions</mat-label>
-            <input [readOnly]="hideIcon" #input matInput formControlName="totalQuestion" required>
-            <mat-icon class="hiding-icon" matTooltip="proceed" *ngIf="!hideIcon" matSuffix
+            <input  [readOnly]="_readonly" #input matInput formControlName="totalQuestion" required>
+            <mat-icon class="hiding-icon" matTooltip="proceed" *ngIf="showSendBtn" matSuffix
               (click)="processTotalQuestionChanges(input)">send</mat-icon>
-            <mat-icon class="hiding-icon" matTooltip="edit" matSuffix *ngIf="hideIcon"
-              (click)="toggleHide()">edit</mat-icon>
+            <mat-icon class="hiding-icon" matTooltip="edit" matSuffix *ngIf="showEditBtn"
+              (click)="editTotalQuestion()">edit</mat-icon>
           </mat-form-field>
   
   
@@ -166,7 +166,12 @@
         <!-- PDF-based assignment -->
         <div *ngIf="type.value === 'pdf'">
           <h2>PDF Upload</h2>
-          <input #fileInput type="file" accept=".pdf" (change)="onFileSelected(fileInput)" />
+          <input #fileInput multiple type="file" accept=".pdf" (change)="onFileSelected(fileInput)" />
+
+          <mat-radio-group  [disabled]="!isPdfSelected" [(ngModel)]="selectedPdfType" [ngModelOptions]="{standalone:true}" >
+            <mat-radio-button color="primary" *ngFor="let type of typeOfPDF" [value]="type" >{{type}}</mat-radio-button>
+          </mat-radio-group>
+          
         </div>
       </div>
 
