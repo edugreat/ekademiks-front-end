@@ -44,12 +44,12 @@ export interface AssignmentDetails{
   totalQuestions:number
   creationDate:Date,
   submissionEnds:Date
-  assignmentDTO?:Array<AssignmentDTO>,
+  assignmentResourceDTO?:Array<assignmentResourceDTO>,
   pdfFiles?:File[]
 
 }
 
-interface AssignmentDTO{
+interface assignmentResourceDTO{
 
   id?:number,
   _index:number,

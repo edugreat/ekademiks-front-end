@@ -161,7 +161,7 @@ export class AssignmentComponent implements OnInit {
       isValid = this.isPdfSelected && this.selectedPdfType.length > 0;
     }
 
-    console.log(`${this.invalidForm()} ${isValid}`)
+    
 
     return this.invalidForm() || !isValid
 
@@ -169,9 +169,7 @@ export class AssignmentComponent implements OnInit {
 
   onFileSelected(fileInput: HTMLInputElement) {
 
-    // console.log(JSON.stringify(fileInput.files![0]as File, null, 1))
-
-    console.log(JSON.stringify(fileInput.files![0], null, 1))
+   
 
     if (fileInput.files?.length) {
 
@@ -250,9 +248,6 @@ export class AssignmentComponent implements OnInit {
     } else validity = false;
 
 
-   // console.log(`len ${this.assignment.length} total ${this.totalQuestion.value} val ${validity}`)
-
-   console.log(`${this.assignment.length === Number(this.totalQuestion.value)}`)
 
 
     return this.assignment.length > 0 && this.assignment.length === Number(this.totalQuestion.value) && validity;
@@ -286,8 +281,7 @@ export class AssignmentComponent implements OnInit {
 
   private assignmentTypeChange() {
     this.type.valueChanges.subscribe(change => {
-      console.log('called')
-
+     
       this.assignment.clear();
 
 
@@ -308,9 +302,7 @@ export class AssignmentComponent implements OnInit {
 
   private createObjQuestion(): FormGroup {
 
-    // check if countStore.length < highest _index control for assignment form array
-
-
+   
     return this.fb.group({
 
       _index: new FormControl<number | undefined>(this.countStore.shift(), [Validators.required]),
@@ -325,8 +317,7 @@ export class AssignmentComponent implements OnInit {
   // delete assignment question at the given index
   deleteQuestion(index: number) {
 
-    console.log(`deleting at index : ${index}`)
-
+   
     this.assignment.removeAt(index);
 
     this.updatePagination();
@@ -335,7 +326,7 @@ export class AssignmentComponent implements OnInit {
   }
 
   // dynamically create question options for the objective questions
-  private get options(): FormGroup {
+  public get options(): FormGroup {
 
     return this.fb.group({
       A: new FormControl<string | undefined>(undefined, [Validators.required]),
@@ -532,9 +523,6 @@ export class AssignmentComponent implements OnInit {
       
        this.showSendBtn = true;
       
-       console.log(`read only: ${this._readonly}`)
-
-        console.log(`value: ${val}`)
         isProcessing = false;
       }
 
@@ -595,7 +583,7 @@ export class AssignmentComponent implements OnInit {
     let assignmentDetails: AssignmentDetails = {
       id:null,
       name: this.name.value,
-      type: this.selectedPdfType,
+      type: this.selectedPdfType ? this.selectedPdfType : this.type.value,
       admin: this._adminId,
       subject: this.subject.value,
       category: this.category.value,
@@ -627,6 +615,14 @@ export class AssignmentComponent implements OnInit {
         break;
 
       default:
+
+     
+     
+
+      assignmentDetails.assignmentResourceDTO = [];
+
+      assignmentDetails.assignmentResourceDTO.push(...this.assignment.value)
+
 
         this.assignmentService.postAssignment(assignmentDetails).pipe(take(1)).subscribe({
           next:(val) => console.log(val),
