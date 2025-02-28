@@ -201,6 +201,12 @@ export class Endpoints {
         return this._addStudent_Records;
     }
 
+    private _cachedUserUrl = `${this.baseUrl}/auth/cached/user`;
+
+    public get cachedUserUrl(){
+
+        return this._cachedUserUrl;
+    }
 
     // CHAT ENDPOINTS
     private chatUrl = 'http://localhost:8080/chats';

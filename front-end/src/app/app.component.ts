@@ -1,11 +1,10 @@
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
-import { AuthService } from './auth/auth.service';
-import { Subscription, take } from 'rxjs';
+import { AuthService, User } from './auth/auth.service';
+import { fromEvent, map, Observable, of, Subscription, take } from 'rxjs';
 import { Router } from '@angular/router';
 import { ConfirmationDialogService } from './confirmation-dialog.service';
 import { ActivityService } from './activity.service';
 import { NotificationsService } from './admin/upload/notifications/notifications.service';
-import { ChatService } from './chat/chat.service';
 
 
 
@@ -22,22 +21,26 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // The number of unread notifications
   unreadNotifications = 0;
+
+ currentUser?:User;
+
+ currentUserSub?:Subscription;
   
   constructor(
     private authService: AuthService,
     private router: Router,
     private confirmationService: ConfirmationDialogService,
     private activityService:ActivityService,
-    private notificationService:NotificationsService,
-    private chatService:ChatService
- 
+    private notificationService:NotificationsService 
   
     
-  ) {}
+  ) { }
   
 
   ngOnInit(): void {
     this.updateUserName();
+
+    this._currentUser();
    this.authService.studentLoginObs$.subscribe(isLoggedIn =>{
 
     if(isLoggedIn){
@@ -66,7 +69,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
   //checks if the user is already logged in so as to hide the login button
   loggedIn(): boolean {
-    return this.authService.isLoggedIn();
+    return this.currentUser ? true : false;
   }
 
   //log out the user by clearing the session storage
@@ -92,23 +95,58 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   // returns true if the current user is a guest
-  isGuestUser() {
+  isGuestUser():boolean {
     
-    return !this.authService.isLoggedIn();
+    return this.currentUser ? false : true;
+
     }
 
   // Checks if the user is a looged in student
-  isLoggedInStudent(){
+  public isLoggedInStudent(): boolean{
+  
+    if(this.currentUser) return this.currentUser.roles.some(role => role.toLowerCase() === 'student');
 
-   return this.authService.isLoggedInStudent();
+    return false;
 
+    
   }
 
   //checks if the current user is an admin
-  isAdmin(){
+  public isAdmin():boolean{
 
-    return this.authService.isAdmin();
+    if(this.currentUser) return this.currentUser.roles.some(role => role.toLowerCase() === 'admin');
+
+    return false;
+
   }
+
+
+
+  // get the object of logged in user
+  private _currentUser(){
+
+    if(this.authService.loggedInUser) {
+
+      this.currentUser = this.authService.loggedInUser;
+
+
+      return;
+    }else{
+
+
+      if(!this.authService.loggedInUser){
+
+
+        this.currentUserSub = this.authService.cachedUser().subscribe(user => this.currentUser = user);
+
+
+      }
+    }
+
+
+  }
+
+ 
 
   // get the number of unread notifications for logged in students
   private countUnreadNotifications(){
@@ -123,16 +161,14 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     // checks if the current user belongs in any group chat. This is for conditional display of chat functionalities
-    isGroupMemeber(): boolean {
-     
-     
+    get isGroupMemeber(): boolean {
      
       return this.authService.isAgroupMember();
 
       }
       
       // returns current loggedin student's id
-     public get studentId():number{
+     private get studentId():number{
 
         return Number(sessionStorage.getItem('studentId'));
       }

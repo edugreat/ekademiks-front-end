@@ -10,6 +10,9 @@ import { ChatCacheService } from '../chat/chat-cache.service';
 export class AuthService {
   
 
+  // an instance of logged in user
+  private _loggedInUser?:User;
+
 
   // This flag is used to stop anyother requests from proceeding while refresh token process is ongoing, until it completes
   private _refreshTokenInProcess = false;
@@ -36,11 +39,27 @@ export class AuthService {
    }
   
 
+  //  set the current logged in user
+   public set loggedInUser(loggedInUser:User){
+
+    this._loggedInUser = loggedInUser;
+   }
+
+  //  get the current logged in user
+   public get loggedInUser():User|undefined{
+
+    return this._loggedInUser;
+
+
+   }
+
    login(email:string, password:string, role:string):Observable<User>{
 
     
     return this.http.post<User>(`${this.endpoints.baseSignInUrl}?role=${role}`, {email:`${email}`, password:`${password}`}).pipe(
       tap(user =>{
+
+        this.loggedInUser = user;
 
          this.saveToSession(user)
 
@@ -49,6 +68,16 @@ export class AuthService {
 
 
   }
+
+
+  // returned redis cached object of loggedin user from the server
+  cachedUser():Observable<User> {
+
+    return this.http.get<User>(this.endpoints.cachedUserUrl).pipe(tap((user) => this.loggedInUser = user));
+
+  
+  }
+  
 
   // requests for new token when the existing token has expired
   requestNewToken():Observable<User>{
@@ -89,8 +118,8 @@ export class AuthService {
   //saves the just logged in user's token to the session storage
   private saveToSession(user:User){
 
-   
-    sessionStorage.setItem("accessToken", user.accessToken);
+  //  save indication that the user is a not guest
+    sessionStorage.setItem("logged", "yes");
    
     // sets the refresh token once as it serves only for requesting new tokens
     if(!sessionStorage.getItem('refreshToken')){
@@ -119,7 +148,7 @@ export class AuthService {
 
 
       // indicates that the current user belong in a group chat. This is used to provide some chat functionalities
-    const studentId = Number(sessionStorage.getItem('studentId'));
+    const studentId = user.id;
     this.isGroupMember(studentId).pipe(take(1)).subscribe((member:boolean) =>{
 
       if(member){
@@ -129,7 +158,7 @@ export class AuthService {
         // fetch the date they joined each of the groups. This is used to control the spinner as previous chats are being fetched.
         // If a group has previous chats but the logged in user joined the group later than those previous messages, the spinner would not
         // be displayed to indicate network activity trying to fetch previous chat
-        const studentId:number = Number(sessionStorage.getItem('studentId')!);
+        const studentId:number =user.id;
         this.updateGroupJoinedDates(studentId);
 
       }
@@ -178,7 +207,7 @@ export class AuthService {
   //checks if the current user is a logged in user user
   isLoggedIn():boolean{
 
-    return sessionStorage.getItem("accessToken") !== null;
+    return sessionStorage.getItem("logged") !== null;
   }
 
   //logs the current user out by simply clearing their token from the session storage
