@@ -1,16 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Institution, InstitutionService } from '../institution.service';
-import { take } from 'rxjs';
+import { Subscription, take } from 'rxjs';
 import { HttpStatusCode } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService, User } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-institution-registration',
   templateUrl: './institution-registration.component.html',
   styleUrl: './institution-registration.component.css'
 })
-export class InstitutionRegistrationComponent implements OnInit {
+export class InstitutionRegistrationComponent implements OnInit, OnDestroy {
 
 
 
@@ -28,9 +29,14 @@ export class InstitutionRegistrationComponent implements OnInit {
   // LGA for the currently selected state
   localGovts:string[] = [];
 
+  // an instance of currently logged in user
+  private currentUser?:User;
+
+  private currentUserSub?:Subscription;
+
 
   constructor(private fb:FormBuilder, private institionService:InstitutionService,
-    private router:Router, private activatedRoute:ActivatedRoute
+    private router:Router, private activatedRoute:ActivatedRoute, private authService:AuthService
   ){}
  
   ngOnInit(): void {
@@ -48,6 +54,38 @@ export class InstitutionRegistrationComponent implements OnInit {
     
   }
 
+  ngOnDestroy(): void {
+    
+    this.currentUserSub?.unsubscribe()
+  }
+
+
+  // get the object of logged in user
+  private _currentUser(){
+
+    if(this.authService.loggedInUser) {
+
+      this.currentUser = this.authService.loggedInUser;
+
+
+      return;
+    }else{
+
+
+      if(!this.authService.loggedInUser){
+
+
+        const cacheKey = Number(sessionStorage.getItem('cache'));
+        this.currentUserSub = this.authService.cachedUser(cacheKey).subscribe(user => this.currentUser = user);
+
+
+      }
+    }
+
+
+  }
+
+ 
   
 
     onSubmit() {
@@ -126,18 +164,14 @@ export class InstitutionRegistrationComponent implements OnInit {
         validators:[Validators.required]
       }),
   
-      createdBy: new FormControl<number>(this.adminId)
+      createdBy: new FormControl<number>(this.currentUser!.id)
     })
 
     this.getStates();
 
   }
 
-   get adminId(){
-
-    return Number(sessionStorage.getItem('adminId')!)
-  }
-
+  
   private get state():FormControl{
 
     return this.registrationForm!.get('state') as FormControl;
@@ -211,9 +245,15 @@ export class InstitutionRegistrationComponent implements OnInit {
   // method that routes to the 'AddStudentComponent' to associate students to an institution
   addStudent() {
 
-    this.router.navigate(['/add_student',this.adminId])
+    this.router.navigate(['/add_student', this.currentUser!.id])
    
 
+    }
+
+    get adminId(){
+
+
+      return this.currentUser!.id;
     }
     
 }

@@ -76,13 +76,14 @@
     <button routerLink="/notifications" *ngIf="isLoggedInStudent() && unreadNotifications === 0 "  id="notifications" ><mat-icon   >notifications</mat-icon></button>
     <button  routerLink="/notifications" *ngIf="isLoggedInStudent() &&  unreadNotifications > 0"  id="notifications"  ><mat-icon aria-hidden="false" [matBadge]="unreadNotifications" matBadgePosition="above after" matBadgeSize="small" matBadgeColor="warn" >notifications_active</mat-icon></button>
     <span id="topMenuLoginLogout" >
-        <a *ngIf="!loggedIn()" mat-button [routerLink]="['/login']" class="top-menu-item" ><mat-icon>login</mat-icon>Login</a>
-        <a (click)="logout()" *ngIf="loggedIn()"  mat-button class="top-menu-item"  ><mat-icon>logout</mat-icon>Logout</a>
+        <a *ngIf="!isLoggedIn" mat-button [routerLink]="['/login']" class="top-menu-item" ><mat-icon>login</mat-icon>Login</a>
+        <a (click)="logout()" *ngIf="isLoggedIn"  mat-button class="top-menu-item"  ><mat-icon>logout</mat-icon>Logout</a>
         
     </span>
    
   </mat-toolbar>
  
+
   <!-- SIDE NAVIGATION BAR -->
   
   <mat-sidenav-container>
@@ -107,7 +108,7 @@
         
       
         <div >
-            <a  *ngIf="!loggedIn()"  (click)="sidenav.close()" mat-button routerLink="/login" class="side-menu-item"> <mat-icon>login</mat-icon> Login</a>
+            <a  *ngIf="!isLoggedIn"  (click)="sidenav.close()" mat-button routerLink="/login" class="side-menu-item"> <mat-icon>login</mat-icon> Login</a>
         </div>
 
         <div *ngIf="isLoggedInStudent()">
@@ -147,7 +148,7 @@
 
 
         <div >
-            <a (click)="logout()" *ngIf="loggedIn()" (click)="sidenav.close()" mat-button class="side-menu-item"> <mat-icon>logout</mat-icon> Logout</a>
+            <a (click)="logout()" *ngIf="isLoggedIn" (click)="sidenav.close()" mat-button class="side-menu-item"> <mat-icon>logout</mat-icon> Logout</a>
         </div>
     </div>
         </mat-sidenav>

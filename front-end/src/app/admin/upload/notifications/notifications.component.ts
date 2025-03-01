@@ -1,14 +1,14 @@
-import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AdminService } from '../../admin.service';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatCheckbox, MatCheckboxChange } from '@angular/material/checkbox';
 import { HttpResponse, HttpStatusCode } from '@angular/common/http';
 import { Institution, InstitutionService } from '../../institution.service';
-import { pipe, take } from 'rxjs';
+import { pipe, Subscription, take, tap } from 'rxjs';
 import { MatOptionSelectionChange } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
-import { AuthService } from '../../../auth/auth.service';
+import { AuthService, User } from '../../../auth/auth.service';
 
 @Component({
   selector: 'app-notifications',
@@ -17,7 +17,7 @@ import { AuthService } from '../../../auth/auth.service';
 })
 // Component used to draft notifications forwarded to the students for certain reasons (e.g assessment upload, result releases etc)
 
-export class NotificationsComponent implements OnInit, AfterViewInit{
+export class NotificationsComponent implements OnInit, OnDestroy, AfterViewInit{
 
 
 
@@ -51,6 +51,13 @@ export class NotificationsComponent implements OnInit, AfterViewInit{
   @ViewChild('institutionSelect') institutionSelect!:MatSelect;
 
 
+  // instance of currently logged in user
+
+  private currentUser?:User;
+
+  private currentUserSub?:Subscription;
+
+
   
 
 // Used to disable the input fields during form submission to avoid re-submission 
@@ -64,11 +71,9 @@ selectedInstitution?: number;
 
   ngOnInit(): void {
    
+    this._currentUser();
+
    this.getDetailsAboutNotification();
-
-  //  fetch admin's registered insitutions if any exists
-  this.getInstitutions();
-
 
   }
 
@@ -77,6 +82,11 @@ ngAfterViewInit(): void {
   
 this.audienceInputChange();
  
+}
+
+ngOnDestroy(): void {
+  
+  this.currentUserSub?.unsubscribe();
 }
   // Method that processes the activated route to get information that would help draft the notification
   private getDetailsAboutNotification(){
@@ -103,7 +113,32 @@ this.audienceInputChange();
   
   }
 
- 
+ // get the object of logged in user
+ private _currentUser(){
+
+  if(this.authService.loggedInUser) {
+
+    this.currentUser = this.authService.loggedInUser;
+
+
+    this.getInstitutions(this.currentUser.id)
+    return;
+  }else{
+
+
+    if(!this.authService.loggedInUser){
+
+      const cacheKey = Number(sessionStorage.getItem('cache'));
+      this.currentUserSub = this.authService.cachedUser(cacheKey).pipe(tap((user) => this.getInstitutions(user.id))).subscribe(user => this.currentUser = user);
+
+
+    }
+  }
+
+
+}
+
+
     
     processCheckedBtn($event: MatCheckboxChange) {
 
@@ -271,15 +306,11 @@ this.audienceInputChange();
 
     }
 
-    private get adminId(){
-
-      return Number(sessionStorage.getItem('adminId'));
-    }
 
     // get a list of institutions registered by this admin
-    private getInstitutions(){
+    private getInstitutions(adminId:number){
 
-      this.institutionService.getRegisteredInstitutions(this.adminId).pipe(take(1)).subscribe({
+      this.institutionService.getRegisteredInstitutions(adminId).pipe(take(1)).subscribe({
         next:(data:Institution[]) => {
 
           this.myInstitutions = data;

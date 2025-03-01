@@ -80,7 +80,7 @@ export class AssessmentComponent implements OnInit, OnDestroy{
 
     const level = this.activatedRoute.snapshot.params['level'] ? this.activatedRoute.snapshot.params['level'] : this.DEFAULT_LEVEL ;
 
-    console.log(`the level ${level}`)
+   
 
     return sessionStorage.getItem('status') ? sessionStorage.getItem('status')! : level;;
   }
@@ -104,9 +104,7 @@ export class AssessmentComponent implements OnInit, OnDestroy{
          
         ).subscribe( subjectNames =>{
 
-          console.log(`selected level : ${this.selectedLevel}`)
-
-          console.log(subjectNames === null)
+         
      
           this.subjectNames = subjectNames;
      
@@ -120,7 +118,7 @@ export class AssessmentComponent implements OnInit, OnDestroy{
          }
          else {
 
-          console.log(`else block`)
+          
         
            this.subjectNames = this.assessmentService.getSubjects(this.selectedLevel)!
            this.networkBusy = !this.networkBusy;

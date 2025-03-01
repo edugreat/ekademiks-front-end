@@ -1,9 +1,10 @@
-import { AfterViewInit, Component, computed, OnInit, Signal, signal } from '@angular/core';
+import { AfterViewInit, Component, computed, OnDestroy, OnInit, Signal, signal } from '@angular/core';
 import { AdminService, CategoryObject, SubjectObject } from '../admin.service';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Institution, InstitutionService } from '../institution.service';
-import { AuthService } from '../../auth/auth.service';
+import { AuthService, User } from '../../auth/auth.service';
 import { MatSelectChange } from '@angular/material/select';
+import { Subscribable, Subscription, tap } from 'rxjs';
 
 //Declares an object type Option
 export type Option = { text: string | undefined; letter: string | undefined };
@@ -24,8 +25,8 @@ export type TestDTO = {
   testName: string | undefined;
   duration: number | undefined;
   questions: Question[];
-  institutionId?:number
-  
+  institutionId?: number
+
 };
 
 @Component({
@@ -33,7 +34,7 @@ export type TestDTO = {
   templateUrl: './upload-test.component.html',
   styleUrl: './upload-test.component.css',
 })
-export class UploadTestComponent implements OnInit{
+export class UploadTestComponent implements OnInit, OnDestroy {
 
   //an array of test categories received from the server
   // This is used to prepopulate the subject selection input so admin can make a choice that subsequently instantiate the necessary form control
@@ -59,10 +60,10 @@ export class UploadTestComponent implements OnInit{
   nonEditable = true;
 
   // declare an object of TestDTO and initialize to undefined
- testDTO?: TestDTO;
+  testDTO?: TestDTO;
 
-//  an array of institutions registered by or identifiable with the given admin
- myInstitutions:Institution[] = [];
+  //  an array of institutions registered by or identifiable with the given admin
+  myInstitutions: Institution[] = [];
 
   // signal that signals the number of options already provided for a particular question number
   // Once the number of options have reached five ie [A-E], that current question number is removed from view
@@ -79,8 +80,12 @@ export class UploadTestComponent implements OnInit{
   // boolean flag for previewing the test
   previewTest = false;
 
-  // remove later
-  //savedInStored = localStorage.getItem('prev') != null;
+  // instance of current user
+  private currentUser?: User;
+
+  private currentUserSub?: Subscription;
+
+
 
   // Signals that the form should be reset(basicaaly deactivated) after all questions have been set. Now we can set the instructions without updating the form
   disableOnCompletion: Signal<boolean> = computed(() => {
@@ -95,12 +100,12 @@ export class UploadTestComponent implements OnInit{
   });
 
   // declares an instruction form group to hold all instructional guides to the test
-    selectedInstitution?:Institution;
-    studentPopulation?:number = Number.MAX_SAFE_INTEGER; //the population of students for the selected institution
+  selectedInstitution?: Institution;
+  studentPopulation?: number = Number.MAX_SAFE_INTEGER; //the population of students for the selected institution
 
-  constructor(private adminService: AdminService, private fb:FormBuilder, 
-    private institutionService:InstitutionService, private authService:AuthService
-  ) {}
+  constructor(private adminService: AdminService, private fb: FormBuilder,
+    private institutionService: InstitutionService, private authService: AuthService
+  ) { }
 
   //Test form for collecting basic information about the test from the admin
   testUploadForm = this.fb.group({
@@ -190,52 +195,86 @@ export class UploadTestComponent implements OnInit{
   });
 
   ngOnInit(): void {
-    
-    this._myInstitutions();
+
+    this._currentUser();
+
 
   }
+
+  ngOnDestroy(): void {
+
+    this.currentUserSub?.unsubscribe();
+  }
+
+  // get the object of logged in user
+  private _currentUser() {
+
+    if (this.authService.loggedInUser) {
+
+      this.currentUser = this.authService.loggedInUser;
+      this._myInstitutions(this.currentUser.id)
+
+
+      return;
+    } else {
+
+
+      if (!this.authService.loggedInUser) {
+
+
+        const cacheKey = Number(sessionStorage.getItem('cache'));
+        this.currentUserSub = this.authService.cachedUser(cacheKey).pipe(tap((user) => this._myInstitutions(user.id))).subscribe(user => this.currentUser = user);
+
+
+      }
+    }
+
+
+  }
+
+
 
 
   processInstitutionChange($event: MatSelectChange) {
 
-    if(!this.isSuperAdmin){
+    if (!this.isSuperAdmin) {
 
       // dynamically set the target institution based on user's interaction with the input selection
       this.testDTO!.institutionId = $event.value ? ($event.value as Institution).id : 0
 
-      if(!$event.value) this.studentPopulation = undefined;
+      if (!$event.value) this.studentPopulation = undefined;
 
-      else if($event.value) {
+      else if ($event.value) {
 
-        this.studentPopulation = this.selectedInstitution?.studentPopulation 
-                                ? 
-                this.selectedInstitution.studentPopulation
-                                :
-                             undefined;
+        this.studentPopulation = this.selectedInstitution?.studentPopulation
+          ?
+          this.selectedInstitution.studentPopulation
+          :
+          undefined;
       }
     }
-   
+
   }
-    
+
 
 
   //get the data required for test upload. Such data include the test category and the subject for which the Test is intended
   private fetchTestUploadInfo() {
-    this.adminService.fetchCategories().subscribe(  {
-     next:(data: CategoryObject)=>{
+    this.adminService.fetchCategories().subscribe({
+      next: (data: CategoryObject) => {
 
-      //assign the array of levels returnd from this server call to the 'category' property
-      this.categories = data._embedded.levels.map((level) => level.category);
+        //assign the array of levels returnd from this server call to the 'category' property
+        this.categories = data._embedded.levels.map((level) => level.category);
 
-      // get link to the subject for the given category(level)
-      const urls: string[] = data._embedded.levels.map(
-        (level) => level._links.subjects.href
-      );
+        // get link to the subject for the given category(level)
+        const urls: string[] = data._embedded.levels.map(
+          (level) => level._links.subjects.href
+        );
 
-      urls.forEach((url) => this.fetchSubject(url));
-     },
-     error:(err) => console.log(err),
-     complete:() =>{}
+        urls.forEach((url) => this.fetchSubject(url));
+      },
+      error: (err) => console.log(err),
+      complete: () => { }
     });
   }
 
@@ -244,90 +283,87 @@ export class UploadTestComponent implements OnInit{
       .fetchSubjects(url)
 
       .subscribe({
-        next:(data:SubjectObject)=>{
+        next: (data: SubjectObject) => {
 
-           //assign to the subject array property, the returned subject name array of this server
-        const subject: string[] = data._embedded.subjects.map(
-          (subjectName) => subjectName.subjectName
-        );
-        this.subjectNames.push(...subject);
+          //assign to the subject array property, the returned subject name array of this server
+          const subject: string[] = data._embedded.subjects.map(
+            (subjectName) => subjectName.subjectName
+          );
+          this.subjectNames.push(...subject);
         },
 
-        error:(err) => console.log(err),
+        error: (err) => console.log(err),
 
-        complete:() => this.removeDuplicateSubjectNames(this.subjectNames.sort(this.sortSubjectList))
+        complete: () => this.removeDuplicateSubjectNames(this.subjectNames.sort(this.sortSubjectList))
       })
-     
 
-     
+
+
   }
 
-   get isSuperAdmin(){
+  get isSuperAdmin() {
 
     return this.authService.isSuperAdmin();
   }
-  
+
   // Since we're storing subjects for both senior & junior into a single array, there's need to remove duplicates if any exists.
-   removeDuplicateSubjectNames(subjectNames: string[]) {
-    
-   
+  removeDuplicateSubjectNames(subjectNames: string[]) {
+
+
     let size = subjectNames.length;
-    for (let index = 0; (index + 1 ) < size; index++) {
-     
-     
-      if(subjectNames[index  + 1].toLowerCase() === subjectNames[index].toLowerCase()){
+    for (let index = 0; (index + 1) < size; index++) {
+
+
+      if (subjectNames[index + 1].toLowerCase() === subjectNames[index].toLowerCase()) {
         subjectNames.splice(index, 1);
         --size;
       }
 
 
-      
+
     }
   }
 
-  get adminId(){
+  
 
-    return Number(sessionStorage.getItem('adminId'));
-  }
+  private _myInstitutions(adminId: number) {
 
-  private _myInstitutions(){
+    this.institutionService.getRegisteredInstitutions(adminId).subscribe({
+      next: (value: Institution[]) => {
 
-    this.institutionService.getRegisteredInstitutions(this.adminId).subscribe({
-      next:(value:Institution[]) => {
 
-        
-        
-        if(value.length === 1){
-         this.selectedInstitution = value[0];
-         
-        //  super admins are given the privilege to set assessments for students which might not necessarily be of their institutions
-         if(!this.isSuperAdmin){
 
-          this.studentPopulation = this.selectedInstitution.studentPopulation;
-         }
+        if (value.length === 1) {
+          this.selectedInstitution = value[0];
+
+          //  super admins are given the privilege to set assessments for students which might not necessarily be of their institutions
+          if (!this.isSuperAdmin) {
+
+            this.studentPopulation = this.selectedInstitution.studentPopulation;
+          }
         }
 
         this.myInstitutions = value
 
         this.fetchTestUploadInfo();
       },
-      complete:() => {
+      complete: () => {
         this.adjustFormStatus();
-          // Set current task description to 'upload'
-      // This event is received by the AdminComponet to trigger mat-stepper progress for the 'upload' task
-      this.adminService.taskDescription('upload-test');
+        // Set current task description to 'upload'
+        // This event is received by the AdminComponet to trigger mat-stepper progress for the 'upload' task
+        this.adminService.taskDescription('upload-test');
       }
     })
   }
 
   // Sorts subject list in asceding alphabetical order
 
-  private sortSubjectList(x:string, y:string):number{
-  const x1 = x.toLowerCase();
-  const x2 = y.toLowerCase();
+  private sortSubjectList(x: string, y: string): number {
+    const x1 = x.toLowerCase();
+    const x2 = y.toLowerCase();
 
-    if(x1 < x2) return -1;
-    else if(x1 > x2) return 1;
+    if (x1 < x2) return -1;
+    else if (x1 > x2) return 1;
     else return 0;
   }
 
@@ -348,12 +384,12 @@ export class UploadTestComponent implements OnInit{
   // dynamically enable or disable some part of the forms depending on the current state of other part of the for.
   //For instance, when category is yet to get selected, other parts of the form should be disabled
   private adjustFormStatus() {
-  
 
-    if(!this.selectedInstitution && !this.isSuperAdmin){
+
+    if (!this.selectedInstitution && !this.isSuperAdmin) {
 
       this.categoryInput.disable();
-    }else {
+    } else {
 
       this.categoryInput.enable()
     }
@@ -437,56 +473,56 @@ export class UploadTestComponent implements OnInit{
     });
   }
 
-  private get idInput(){
+  private get idInput() {
 
     return this.testUploadForm.get('id')!;
   }
-  private get categoryInput(){
+  private get categoryInput() {
 
     return this.testUploadForm.get('category')!;
   }
 
-  private get subjectInput(){
+  private get subjectInput() {
 
     return this.testUploadForm.get('subject')!;
   }
 
-  private get titleInput(){
+  private get titleInput() {
 
     return this.testUploadForm.get('title')!;
   }
 
-  private get durationInput(){
+  private get durationInput() {
 
     return this.testUploadForm.get('duration')!;
   }
 
-  private get totalInput(){
+  private get totalInput() {
 
     return this.questionForm.get('total')!;
   }
 
-  private get indexInput(){
+  private get indexInput() {
 
     return this.questionForm.get('index')!;
   }
 
-  private get questionInput(){
+  private get questionInput() {
 
     return this.questionForm.get('question')!;
   }
 
-  private get answerInput(){
+  private get answerInput() {
 
     return this.questionForm.get('answer')!;
   }
 
-  private get optionInput(){
+  private get optionInput() {
 
     return this.optionForm.get('letter')!;
   }
 
-  private get optionTextInput(){
+  private get optionTextInput() {
 
     return this.optionForm.get('text')!;
   }
@@ -601,8 +637,8 @@ export class UploadTestComponent implements OnInit{
 
       // Reset both the value of the current question number
       this.indexInput.reset();
-     
-     
+
+
     }
   }
 
@@ -620,7 +656,7 @@ export class UploadTestComponent implements OnInit{
 
   //returns the current option
   private currentOption(): Option {
-   
+
 
     const currentOption: Option = {
       letter: this.optionInput.value,
@@ -630,18 +666,21 @@ export class UploadTestComponent implements OnInit{
     return currentOption;
   }
 
-  
 
- 
-  preview() {
+  get adminId() {
 
-    //localStorage.setItem('prev', JSON.stringify(this.testDTO, null, 2));
-  this.previewTest = true;
-  //this.savedInStored = true;
-  
+    return this.currentUser!.id;
   }
 
-  
+
+  preview() {
+
+
+    this.previewTest = true;
+
+  }
+
+
 }
 
 

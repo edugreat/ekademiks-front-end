@@ -1,18 +1,63 @@
 import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpStatusCode } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { inject, Injectable, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, Observable, switchMap, throwError } from 'rxjs';
-import { AuthService } from './auth.service';
+import { catchError, Observable, Subscription, switchMap, throwError } from 'rxjs';
+import { AuthService, User } from './auth.service';
 //Intercepts all outgoing http calls and injects the authorization tokens if it exists
-export class AuthInterceptor implements HttpInterceptor{
+@Injectable()
+export class AuthInterceptor implements HttpInterceptor, OnInit, OnDestroy{
 
- 
+
+  private currentUser?:User;
+
+  private currentUserSub?:Subscription;
+   
+  constructor(private authService:AuthService){}
+
+  ngOnInit(): void {
+
+    const cacheKey = Number(sessionStorage.getItem('cacheKey'));
+    this._currentUser(cacheKey);
+    
+  }
+
+  ngOnDestroy(): void {
+
+    this.currentUserSub?.unsubscribe();
+    
+  }
+
+
+  // get the object of logged in user
+  private _currentUser(cacheKey:number){
+
+    if(this.authService.loggedInUser) {
+
+      this.currentUser = this.authService.loggedInUser;
+
+
+      return;
+    }else{
+
+
+      if(!this.authService.loggedInUser){
+
+
+        this.currentUserSub = this.authService.cachedUser(cacheKey).subscribe(user => this.currentUser = user);
+
+
+      }
+    }
+
+
+  }
+
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const router = inject(Router);
     const authService = inject(AuthService);
-    //gets the authorization token from the local storage
-    const accessToken  = sessionStorage.getItem('accessToken');
+    //gets the authorization token
+    const accessToken  = this.currentUser?.accessToken;
    
     if(accessToken){
      
@@ -39,7 +84,7 @@ export class AuthInterceptor implements HttpInterceptor{
                 authService.refreshTokenInProcess = false;
 
                 // gets the newly generated access token
-                const accessToken = sessionStorage.getItem('accessToken');
+                const accessToken = this.currentUser?.accessToken;
 
                 // creates new authorizatuin header
                 const Authorization = `Bearer ${accessToken}`;

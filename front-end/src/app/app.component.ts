@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthService, User } from './auth/auth.service';
-import { fromEvent, map, Observable, of, Subscription, take } from 'rxjs';
+import { Subscription, take } from 'rxjs';
 import { Router } from '@angular/router';
 import { ConfirmationDialogService } from './confirmation-dialog.service';
 import { ActivityService } from './activity.service';
@@ -24,6 +24,8 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
  currentUser?:User;
 
+ 
+
  currentUserSub?:Subscription;
   
   constructor(
@@ -31,13 +33,14 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     private router: Router,
     private confirmationService: ConfirmationDialogService,
     private activityService:ActivityService,
-    private notificationService:NotificationsService 
-  
+    private notificationService:NotificationsService  
     
   ) { }
   
 
   ngOnInit(): void {
+
+    console.log('on init is called')
     this.updateUserName();
 
     this._currentUser();
@@ -67,11 +70,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  //checks if the user is already logged in so as to hide the login button
-  loggedIn(): boolean {
-    return this.currentUser ? true : false;
-  }
-
+ 
   //log out the user by clearing the session storage
   logout() {
     this.confirmationService.confirmAction('Do you want to logout?');
@@ -82,6 +81,10 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
        
 
         this.authService.logout();
+
+        this.currentUser = undefined;
+
+       
         
        
        
@@ -125,28 +128,70 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   // get the object of logged in user
   private _currentUser(){
 
-    if(this.authService.loggedInUser) {
+    // retrieve the logged in user object if the user has logged in
 
-      this.currentUser = this.authService.loggedInUser;
+    if(this.isLoggedIn){
 
+      if(this.authService.loggedInUser) {
 
-      return;
-    }else{
-
-
-      if(!this.authService.loggedInUser){
-
-
-        this.currentUserSub = this.authService.cachedUser().subscribe(user => this.currentUser = user);
-
-
+        this.currentUser = this.authService.loggedInUser;
+       
+  
+        // verify the user is a student and belongs in a group chat
+        this.isGroupMember();
+  
+  
+       
+      }else{
+  
+  
+        if(!this.authService.loggedInUser){
+  
+  
+          const cacheKey = Number(sessionStorage.getItem('cacheKey'));
+          this.currentUserSub = this.authService.cachedUser(cacheKey).subscribe(user => {
+  
+            this.currentUser = user;
+           
+  
+            this.isGroupMember()
+  
+  
+          });
+  
+         
+  
+        }
       }
+      
     }
+    
 
+
+   
 
   }
 
  
+
+  private isGroupMember() {
+    if (this.isLoggedInStudent()) {
+
+      this.authService.isGroupMember(this.currentUser!.id).pipe(take(1)).subscribe((member: boolean) => {
+
+        if (member) {
+
+          sessionStorage.setItem('groupMember', 'true');
+
+
+          // fetch the date they joined each of the groups. This is used to control the spinner as previous chats are being fetched.
+          // If a group has previous chats but the logged in user joined the group later than those previous messages, the spinner would not
+          // be displayed to indicate network activity trying to fetch previous chat
+          this.authService.updateGroupJoinedDates(this.currentUser!.id);
+        }
+      });
+    }
+  }
 
   // get the number of unread notifications for logged in students
   private countUnreadNotifications(){
@@ -167,12 +212,12 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
       }
       
-      // returns current loggedin student's id
-     private get studentId():number{
 
-        return Number(sessionStorage.getItem('studentId'));
+     get isLoggedIn():boolean{
+
+        return sessionStorage.getItem('logged') ? true : false;
       }
-
+     
    
   }
 

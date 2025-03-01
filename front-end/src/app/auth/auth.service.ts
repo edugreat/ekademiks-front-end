@@ -40,7 +40,7 @@ export class AuthService {
   
 
   //  set the current logged in user
-   public set loggedInUser(loggedInUser:User){
+   public set loggedInUser(loggedInUser:User | undefined){
 
     this._loggedInUser = loggedInUser;
    }
@@ -61,6 +61,10 @@ export class AuthService {
 
         this.loggedInUser = user;
 
+        console.log(`
+            ${JSON.stringify(user, null,1)}
+            `)
+
          this.saveToSession(user)
 
       })
@@ -71,9 +75,10 @@ export class AuthService {
 
 
   // returned redis cached object of loggedin user from the server
-  cachedUser():Observable<User> {
+  cachedUser(cacheKey:number):Observable<User> {
 
-    return this.http.get<User>(this.endpoints.cachedUserUrl).pipe(tap((user) => this.loggedInUser = user));
+    return this.http.get<User>(`
+      ${this.endpoints.cachedUserUrl}?cache=${cacheKey}`).pipe(tap((user) => this.loggedInUser = user));
 
   
   }
@@ -120,6 +125,8 @@ export class AuthService {
 
   //  save indication that the user is a not guest
     sessionStorage.setItem("logged", "yes");
+
+    sessionStorage.setItem('cachingKey', user.cachingKey!);
    
     // sets the refresh token once as it serves only for requesting new tokens
     if(!sessionStorage.getItem('refreshToken')){
@@ -144,26 +151,7 @@ export class AuthService {
       sessionStorage.setItem("studentId", `${user.id}`)
     }
 
-    if(this.isLoggedInStudent()){
-
-
-      // indicates that the current user belong in a group chat. This is used to provide some chat functionalities
-    const studentId = user.id;
-    this.isGroupMember(studentId).pipe(take(1)).subscribe((member:boolean) =>{
-
-      if(member){
-
-        sessionStorage.setItem('groupMember', 'true');
-
-        // fetch the date they joined each of the groups. This is used to control the spinner as previous chats are being fetched.
-        // If a group has previous chats but the logged in user joined the group later than those previous messages, the spinner would not
-        // be displayed to indicate network activity trying to fetch previous chat
-        const studentId:number =user.id;
-        this.updateGroupJoinedDates(studentId);
-
-      }
-    })
-    }
+  
   }
 
   // special method that tests if the logged in user is a super admin
@@ -215,6 +203,7 @@ export class AuthService {
     //clears the user roles stored in memory once the user logs out
    sessionStorage.clear();
 
+   this.loggedInUser = undefined
     this.chatCachedService.clearAllChats();
     this.currentUserName.next('Student');
     this.studentLoginSubject.next(false);
@@ -263,6 +252,7 @@ export interface User{
   mobileNumber: string,
   email:string,
   statusCode:number,
+  cachingKey?:string, // used to look up redis cached object
   status:string //SENIOR or JUNIOR
   accessToken:string,
   refreshToken:string,
