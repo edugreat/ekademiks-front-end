@@ -10,18 +10,29 @@ import { ChatCacheService } from '../chat/chat-cache.service';
 export class AuthService {
   
 
-  // an instance of logged in user
-  private _loggedInUser?:User;
+  // an observable that emits an object of logged in users to subscribers
+  private _loggedInUserSubject = new BehaviorSubject<User|undefined>(undefined);
+
+  loggedInUserObs$ = this._loggedInUserSubject.asObservable();
 
 
   // This flag is used to stop anyother requests from proceeding while refresh token process is ongoing, until it completes
   private _refreshTokenInProcess = false;
+
+
   
 
   // Login event that is used at the app.compoent to trigger connection to the server's notification channel upon student's login ;
-  private studentLoginSubject = new BehaviorSubject<boolean>(this.isLoggedInStudent());
+  private studentLoginSubject = new BehaviorSubject<boolean>(this.isLoggedInStudent);
 
   studentLoginObs$ = this.studentLoginSubject.asObservable();
+
+  // an object of the currently logged in user
+  private _currentUser?:User;
+
+  // key-value pair of group ID and the date the user joined the group
+  private _groupJoinDates = new Map<number, Date>;
+
 
   
 
@@ -33,7 +44,7 @@ export class AuthService {
   public userName$: Observable<string> ;
   constructor(private http: HttpClient, private endpoints:Endpoints, private chatCachedService:ChatCacheService) {
 
-    this.currentUserName = new BehaviorSubject<string>(sessionStorage.getItem('username')! || 'Student');
+    this.currentUserName = new BehaviorSubject<string>(this.currentUser?.firstName || 'Student');
     this.userName$= this.currentUserName.asObservable();
     
    }
@@ -42,16 +53,20 @@ export class AuthService {
   //  set the current logged in user
    public set loggedInUser(loggedInUser:User | undefined){
 
-    this._loggedInUser = loggedInUser;
-   }
-
-  //  get the current logged in user
-   public get loggedInUser():User|undefined{
-
-    return this._loggedInUser;
-
+    this._loggedInUserSubject.next(loggedInUser);
 
    }
+
+   private set currentUser(user:User|undefined){
+
+    this._currentUser = user;
+   }
+
+   public get currentUser(){
+
+    return this._currentUser;
+   }
+  
 
    login(email:string, password:string, role:string):Observable<User>{
 
@@ -61,9 +76,9 @@ export class AuthService {
 
         this.loggedInUser = user;
 
-        console.log(`
-            ${JSON.stringify(user, null,1)}
-            `)
+        this.currentUser = user;
+
+       
 
          this.saveToSession(user)
 
@@ -78,11 +93,41 @@ export class AuthService {
   cachedUser(cacheKey:number):Observable<User> {
 
     return this.http.get<User>(`
-      ${this.endpoints.cachedUserUrl}?cache=${cacheKey}`).pipe(tap((user) => this.loggedInUser = user));
+      ${this.endpoints.cachedUserUrl}?cache=${cacheKey}`).pipe(tap((user) => {
+
+        this.loggedInUser = user;
+        this.currentUser = user;
+        this.currentUserName.next(user.firstName)
+        //this.saveToSession(user)
+      
+      }));
 
   
   }
   
+
+  private set groupJoinDates(joinedDate:Map<number, Date>){
+
+    this._groupJoinDates = new Map(Object.entries(joinedDate).map(([key, val])  => [Number(key), new Date(val)]));
+
+    
+
+    
+  }
+
+  public get groupJoinDates():Map<number, Date>{
+
+    if(this._groupJoinDates.size) return this._groupJoinDates;
+
+    else if(sessionStorage.getItem('joined')) {
+
+      const date:Map<number, Date> = JSON.parse(sessionStorage.getItem('joined')!)
+
+      this._groupJoinDates = new Map(Object.entries(date).map(([key, val])  => [Number(key), new Date(val)]));
+    }
+
+    return this._groupJoinDates;
+  }
 
   // requests for new token when the existing token has expired
   requestNewToken():Observable<User>{
@@ -102,31 +147,22 @@ export class AuthService {
   }
 
   
-  // checks of the current user is belongs to any group chat. This is used for displaying certain chat functionalities
-  isAgroupMember():boolean{
-
-    const aGroupMember = sessionStorage.getItem('groupMember');
-
-    if(aGroupMember === 'true') return true;
-
-    return false;
-
-  }
-
+ 
   // observable of boolean value that checks if the current user belongs in any group chat
   public isGroupMember(studentId:number):Observable<boolean>{
 
-  
     return this.http.get<boolean>(`${this.endpoints.isGroupMemberUrl}?id=${studentId}`);
 
   }
   //saves the just logged in user's token to the session storage
   private saveToSession(user:User){
 
-  //  save indication that the user is a not guest
+  //  save indication that the user is not guest
     sessionStorage.setItem("logged", "yes");
 
     sessionStorage.setItem('cachingKey', user.cachingKey!);
+
+    sessionStorage.setItem('accessToken', user.accessToken);
    
     // sets the refresh token once as it serves only for requesting new tokens
     if(!sessionStorage.getItem('refreshToken')){
@@ -134,21 +170,36 @@ export class AuthService {
       sessionStorage.setItem('refreshToken', user.refreshToken);
     }
 
+    if(this.isLoggedInStudent){
+
+      // confirm the student belongs in a chat group
+      this.isGroupMember(user.id).pipe(take(1)).subscribe(member => {
+        if(member === true){
+          sessionStorage.setItem('inGroup','yes');
+
+          // retrieve information about when they join the group chats
+          this.updateGroupJoinedDates(user.id)
+        }
+      })
+    }
+
     
-    sessionStorage.setItem('username', user.firstName);
-   sessionStorage.setItem('roles', JSON.stringify(user.roles));
-    this.currentUserName.next(sessionStorage.getItem('username')!);
+  //   sessionStorage.setItem('username', user.firstName);
+  //  sessionStorage.setItem('roles', JSON.stringify(user.roles));
+    this.currentUserName.next(user.firstName);
     sessionStorage.setItem('status', user.status);
-    if(this.isLoggedInStudent()){
+    if(this.isLoggedInStudent){
       this.studentLoginSubject.next(true);//send browser reload notification once a user successfully logs
 
     }
 
-    if(this.isAdmin()){
+    if(this.isLoggedInStudent){
 
-      sessionStorage.setItem('adminId',`${user.id}`)
-    }else {
-      sessionStorage.setItem("studentId", `${user.id}`)
+      sessionStorage.setItem('studentId', user.id+'');
+    }else if(this.isAdmin()){
+
+      sessionStorage.setItem('adminId',user.id+'')
+
     }
 
   
@@ -163,10 +214,10 @@ export class AuthService {
   }
 
   
-  private groupJoinedDates(studentId:number):Observable<{[groupId:number]:Date}>{
+  private groupJoinedDates(studentId:number):Observable<Map<number, Date>>{
 
     
-    return this.http.get<{[groupId:number]:Date}>(`${this.endpoints.grp_joined_at}?id=${studentId}`)
+    return this.http.get<Map<number, Date>>(`${this.endpoints.grp_joined_at}?id=${studentId}`)
 
     
   }
@@ -180,11 +231,11 @@ export class AuthService {
 
 
     this.groupJoinedDates(studentId).pipe(take(1)).subscribe({
-      next:(val:{[id:number]:Date}) => {
-        if(val){
+      next:(joinedDate) => {
 
-          sessionStorage.setItem('joinedAt',JSON.stringify(val));
-        }
+       this.groupJoinDates = joinedDate;
+
+       sessionStorage.setItem('joined',JSON.stringify(joinedDate));
       }
     })
 
@@ -193,7 +244,7 @@ export class AuthService {
    
 
   //checks if the current user is a logged in user user
-  isLoggedIn():boolean{
+  get isLoggedIn():boolean{
 
     return sessionStorage.getItem("logged") !== null;
   }
@@ -222,11 +273,12 @@ export class AuthService {
   }
 
   // Checks if the current user is a logged in student
-   isLoggedInStudent():boolean{
+   get isLoggedInStudent():boolean{
 
-    const roles:string[] = (sessionStorage.getItem('roles') ? JSON.parse(sessionStorage.getItem('roles')!)  : [])
-   
-    return roles.some(role => role.toLowerCase() === 'student');
+    if(this.currentUser) return this.currentUser.roles.some(role => role.toLowerCase() === 'student');
+    
+
+    return false;
   }
  
   get studentId():number{

@@ -160,6 +160,6 @@ export class AuthComponent implements OnDestroy {
     // calls the authentication service isLoggeIn method 
     private isLoggedIn(){
 
-      return this.authService.isLoggedIn();
+      return this.authService.isLoggedIn;
     }
 }

@@ -107,9 +107,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   // Checks if the user is a looged in student
   public isLoggedInStudent(): boolean{
   
-    if(this.currentUser) return this.currentUser.roles.some(role => role.toLowerCase() === 'student');
-
-    return false;
+    return this.currentUser ? this.currentUser.roles.some(role => role.toLowerCase() === 'student') : false;
 
     
   }
@@ -128,6 +126,26 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   // get the object of logged in user
   private _currentUser(){
 
+
+    // subscribe to get get realtime information of the currently logged in user
+    this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user => {
+
+     
+        this.currentUser = user;
+               
+       // if a user has already logged in but the object is undefined due to browser refresh, retrieve user object from the server cache
+       if(this.isLoggedIn && !user){
+
+        this.authService.cachedUser(Number(sessionStorage.getItem('cachingKey'))).pipe(take(1)).subscribe(user => this.currentUser = user)
+      }
+
+    })
+
+
+
+
+
+
     // retrieve the logged in user object if the user has logged in
 
     if(this.isLoggedIn){
@@ -135,33 +153,30 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
       if(this.authService.loggedInUser) {
 
         this.currentUser = this.authService.loggedInUser;
+
+        console.log(`current user: ${JSON.stringify(this.currentUser, null, 1)}`)
        
-  
-        // verify the user is a student and belongs in a group chat
-        this.isGroupMember();
   
   
        
       }else{
   
   
-        if(!this.authService.loggedInUser){
   
   
-          const cacheKey = Number(sessionStorage.getItem('cacheKey'));
+          const cacheKey = Number(sessionStorage.getItem('cachingKey'));
           this.currentUserSub = this.authService.cachedUser(cacheKey).subscribe(user => {
   
             this.currentUser = user;
-           
+            
   
-            this.isGroupMember()
-  
+            
   
           });
   
          
   
-        }
+        
       }
       
     }
@@ -174,24 +189,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
  
 
-  private isGroupMember() {
-    if (this.isLoggedInStudent()) {
-
-      this.authService.isGroupMember(this.currentUser!.id).pipe(take(1)).subscribe((member: boolean) => {
-
-        if (member) {
-
-          sessionStorage.setItem('groupMember', 'true');
-
-
-          // fetch the date they joined each of the groups. This is used to control the spinner as previous chats are being fetched.
-          // If a group has previous chats but the logged in user joined the group later than those previous messages, the spinner would not
-          // be displayed to indicate network activity trying to fetch previous chat
-          this.authService.updateGroupJoinedDates(this.currentUser!.id);
-        }
-      });
-    }
-  }
+ 
 
   // get the number of unread notifications for logged in students
   private countUnreadNotifications(){
@@ -208,7 +206,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     // checks if the current user belongs in any group chat. This is for conditional display of chat functionalities
     get isGroupMemeber(): boolean {
      
-      return this.authService.isAgroupMember();
+      return sessionStorage.getItem('inGroup') !== null;
 
       }
       

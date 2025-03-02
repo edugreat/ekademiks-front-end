@@ -1,63 +1,21 @@
 import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpStatusCode } from '@angular/common/http';
 import { inject, Injectable, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, Observable, Subscription, switchMap, throwError } from 'rxjs';
+import { catchError, Observable, Subscription, switchMap, take, throwError } from 'rxjs';
 import { AuthService, User } from './auth.service';
 //Intercepts all outgoing http calls and injects the authorization tokens if it exists
 @Injectable()
-export class AuthInterceptor implements HttpInterceptor, OnInit, OnDestroy{
+export class AuthInterceptor implements HttpInterceptor{
 
 
-  private currentUser?:User;
 
-  private currentUserSub?:Subscription;
-   
-  constructor(private authService:AuthService){}
-
-  ngOnInit(): void {
-
-    const cacheKey = Number(sessionStorage.getItem('cacheKey'));
-    this._currentUser(cacheKey);
-    
-  }
-
-  ngOnDestroy(): void {
-
-    this.currentUserSub?.unsubscribe();
-    
-  }
-
-
-  // get the object of logged in user
-  private _currentUser(cacheKey:number){
-
-    if(this.authService.loggedInUser) {
-
-      this.currentUser = this.authService.loggedInUser;
-
-
-      return;
-    }else{
-
-
-      if(!this.authService.loggedInUser){
-
-
-        this.currentUserSub = this.authService.cachedUser(cacheKey).subscribe(user => this.currentUser = user);
-
-
-      }
-    }
-
-
-  }
 
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const router = inject(Router);
     const authService = inject(AuthService);
     //gets the authorization token
-    const accessToken  = this.currentUser?.accessToken;
+    const accessToken  = sessionStorage.getItem('accessToken');
    
     if(accessToken){
      
@@ -70,6 +28,7 @@ export class AuthInterceptor implements HttpInterceptor, OnInit, OnDestroy{
         catchError((error: HttpErrorResponse) =>{
 
           //check if the error is access denied error
+
           if(error.status === HttpStatusCode.Unauthorized && !authService.refreshTokenInProcess){
 
             
@@ -84,7 +43,7 @@ export class AuthInterceptor implements HttpInterceptor, OnInit, OnDestroy{
                 authService.refreshTokenInProcess = false;
 
                 // gets the newly generated access token
-                const accessToken = this.currentUser?.accessToken;
+                const accessToken =  sessionStorage.getItem('accessToken');;
 
                 // creates new authorizatuin header
                 const Authorization = `Bearer ${accessToken}`;

@@ -139,12 +139,12 @@ private authService:AuthService
 
     isLoggedIn():boolean{
 
-      return this.authService.isLoggedIn()
+      return this.authService.isLoggedIn
     }
 
     isGuestUser():boolean{
 
-      return !this.authService.isLoggedIn();
+      return !this.authService.isLoggedIn;
     }
 }
 

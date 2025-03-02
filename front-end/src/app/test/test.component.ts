@@ -269,10 +269,9 @@ submit() {
           //persist to the session storage for later use
           sessionStorage.setItem("testTip", JSON.stringify(data));
       
-         //check if the student is a logged in user or guest
-         const isLoggedInUser = this.authService.isLoggedIn();
+         
       
-        if(isLoggedInUser){
+        if(this.authService.isLoggedIn){
           
            //submit the student's performance to the back-end
         this.submissionSub$ =  this.testService.submitTest(attempt).subscribe({
@@ -345,10 +344,8 @@ submit() {
       //persist to the session storage for later use
       sessionStorage.setItem("testTip", JSON.stringify(data));
   
-     //check if the student is a logged in user or guest
-     const isLoggedInUser = this.authService.isLoggedIn();
-  
-    if(isLoggedInUser){
+     
+    if(this.authService.isLoggedIn){
       
        //submit the student's performance to the back-end
     this.submissionSub$ =  this.testService.submitTest(attempt).subscribe({

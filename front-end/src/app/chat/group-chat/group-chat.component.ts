@@ -7,6 +7,7 @@ import { _Notification as _Notification } from '../../admin/upload/notifications
 import { MAT_SNACK_BAR_DATA, MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { ChatCacheService } from '../chat-cache.service';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-group-chat',
@@ -87,7 +88,8 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
 
 
-  constructor(private chatService: ChatService, private activatedRoute: ActivatedRoute, private chatCachedService:ChatCacheService) { }
+  constructor(private chatService: ChatService, private activatedRoute: ActivatedRoute, 
+    private chatCachedService:ChatCacheService, private authService:AuthService) { }
 
 
 
@@ -528,8 +530,9 @@ export class GroupChatComponent implements OnInit, OnDestroy {
     const _joinedAt = JSON.parse(sessionStorage.getItem('joinedAt')!);
 
 
+    return this.authService.groupJoinDates.get(this.groupId!)!
 
-    return new Date(_joinedAt[this.groupId!]);
+    // return new Date(_joinedAt[this.groupId!]);
 
 
   }

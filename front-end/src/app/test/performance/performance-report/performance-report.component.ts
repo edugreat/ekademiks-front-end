@@ -246,7 +246,7 @@ goToDetails(_index:number) {
 
     isLoggedIn(): boolean {
       
-      return this.authService.isLoggedIn();
+      return this.authService.isLoggedIn;
       }
 }
 
