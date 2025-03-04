@@ -53,7 +53,7 @@ export const testGuard: CanActivateFn | CanMatchFn = () => {
 const authService = inject(AuthService);
 const router = inject(Router);
 
-if(! authService.isAdmin()){
+if(! authService.isAdmin){
 
   return true;
 }else{

@@ -116,9 +116,9 @@ ngOnDestroy(): void {
  // get the object of logged in user
  private _currentUser(){
 
-  if(this.authService.loggedInUser) {
+  if(this.authService.currentUser) {
 
-    this.currentUser = this.authService.loggedInUser;
+    this.currentUser = this.authService.currentUser;
 
 
     this.getInstitutions(this.currentUser.id)
@@ -126,9 +126,9 @@ ngOnDestroy(): void {
   }else{
 
 
-    if(!this.authService.loggedInUser){
+    if(!this.authService.currentUser && sessionStorage.getItem('cachingKey')){
 
-      const cacheKey = Number(sessionStorage.getItem('cache'));
+      const cacheKey = Number(sessionStorage.getItem('cachingKey'));
       this.currentUserSub = this.authService.cachedUser(cacheKey).pipe(tap((user) => this.getInstitutions(user.id))).subscribe(user => this.currentUser = user);
 
 
@@ -163,7 +163,7 @@ ngOnDestroy(): void {
 
     isSuperAdmin(){
      
-      return this.authService.isSuperAdmin()
+      return this.authService.isSuperAdmin
       }
 
     

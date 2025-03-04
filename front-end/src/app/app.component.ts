@@ -134,7 +134,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
         this.currentUser = user;
                
        // if a user has already logged in but the object is undefined due to browser refresh, retrieve user object from the server cache
-       if(this.isLoggedIn && !user){
+       if(this.isLoggedIn && !this.currentUser){
 
         this.authService.cachedUser(Number(sessionStorage.getItem('cachingKey'))).pipe(take(1)).subscribe(user => this.currentUser = user)
       }
@@ -150,16 +150,16 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
     if(this.isLoggedIn){
 
-      if(this.authService.loggedInUser) {
+      if(this.authService.currentUser) {
 
-        this.currentUser = this.authService.loggedInUser;
+        this.currentUser = this.authService.currentUser;
 
         console.log(`current user: ${JSON.stringify(this.currentUser, null, 1)}`)
        
-  
+       
   
        
-      }else{
+      }else if(!this.authService.currentUser && sessionStorage.getItem('cachingKey')){
   
   
   

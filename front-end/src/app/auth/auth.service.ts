@@ -193,24 +193,15 @@ export class AuthService {
 
     }
 
-    if(this.isLoggedInStudent){
-
-      sessionStorage.setItem('studentId', user.id+'');
-    }else if(this.isAdmin()){
-
-      sessionStorage.setItem('adminId',user.id+'')
-
-    }
-
   
   }
 
   // special method that tests if the logged in user is a super admin
-  isSuperAdmin(){
+  get isSuperAdmin(){
 
-    const roles:string[] = (sessionStorage.getItem('roles') ? JSON.parse(sessionStorage.getItem('roles')!)  : []);
+    return this.currentUser ? this.currentUser.roles.some(role  => role.toLowerCase() === 'superadmin') : false;
 
-    return roles.some(role => role.toLowerCase() === 'superadmin');
+   
   }
 
   
@@ -264,10 +255,10 @@ export class AuthService {
   
 
   //checks if the current user is an admin
-  isAdmin():boolean{
-    const roles:string[] = (sessionStorage.getItem('roles') ? JSON.parse(sessionStorage.getItem('roles')!)  : [])
-   
-    return roles.some(role => role.toLowerCase() === 'admin' ||  roles.toLocaleString() === 'superadmin');
+  get isAdmin():boolean{
+
+    return this.currentUser ?  this.currentUser.roles.some(role => role.toLowerCase() === 'admin') : false;
+
 
    
   }
@@ -277,6 +268,7 @@ export class AuthService {
 
     if(this.currentUser) return this.currentUser.roles.some(role => role.toLowerCase() === 'student');
     
+    else if(sessionStorage.getItem('cachingKey'))this.cachedUser(Number(sessionStorage.getItem('cachingKey'))).pipe(take(1)).subscribe(user =>{return user ? true : false})
 
     return false;
   }

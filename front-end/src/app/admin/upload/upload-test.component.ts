@@ -1,10 +1,10 @@
-import { AfterViewInit, Component, computed, OnDestroy, OnInit, Signal, signal } from '@angular/core';
+import { Component, computed, OnDestroy, OnInit, Signal, signal } from '@angular/core';
 import { AdminService, CategoryObject, SubjectObject } from '../admin.service';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Institution, InstitutionService } from '../institution.service';
 import { AuthService, User } from '../../auth/auth.service';
 import { MatSelectChange } from '@angular/material/select';
-import { Subscribable, Subscription, tap } from 'rxjs';
+import { Subscription, tap } from 'rxjs';
 
 //Declares an object type Option
 export type Option = { text: string | undefined; letter: string | undefined };
@@ -209,9 +209,9 @@ export class UploadTestComponent implements OnInit, OnDestroy {
   // get the object of logged in user
   private _currentUser() {
 
-    if (this.authService.loggedInUser) {
+    if (this.authService.currentUser) {
 
-      this.currentUser = this.authService.loggedInUser;
+      this.currentUser = this.authService.currentUser;
       this._myInstitutions(this.currentUser.id)
 
 
@@ -219,10 +219,10 @@ export class UploadTestComponent implements OnInit, OnDestroy {
     } else {
 
 
-      if (!this.authService.loggedInUser) {
+      if (!this.authService.currentUser && sessionStorage.getItem('cachingKey')) {
 
 
-        const cacheKey = Number(sessionStorage.getItem('cache'));
+        const cacheKey = Number(sessionStorage.getItem('cachingKey'));
         this.currentUserSub = this.authService.cachedUser(cacheKey).pipe(tap((user) => this._myInstitutions(user.id))).subscribe(user => this.currentUser = user);
 
 
@@ -303,7 +303,7 @@ export class UploadTestComponent implements OnInit, OnDestroy {
 
   get isSuperAdmin() {
 
-    return this.authService.isSuperAdmin();
+    return this.authService.isSuperAdmin;
   }
 
   // Since we're storing subjects for both senior & junior into a single array, there's need to remove duplicates if any exists.

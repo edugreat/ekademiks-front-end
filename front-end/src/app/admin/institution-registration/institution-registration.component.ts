@@ -63,19 +63,19 @@ export class InstitutionRegistrationComponent implements OnInit, OnDestroy {
   // get the object of logged in user
   private _currentUser(){
 
-    if(this.authService.loggedInUser) {
+    if(this.authService.currentUser) {
 
-      this.currentUser = this.authService.loggedInUser;
+      this.currentUser = this.authService.currentUser;
 
 
       return;
     }else{
 
 
-      if(!this.authService.loggedInUser){
+      if(!this.authService.currentUser && sessionStorage.getItem('cachingKey')){
 
 
-        const cacheKey = Number(sessionStorage.getItem('cache'));
+        const cacheKey = Number(sessionStorage.getItem('cachingKey'));
         this.currentUserSub = this.authService.cachedUser(cacheKey).subscribe(user => this.currentUser = user);
 
 

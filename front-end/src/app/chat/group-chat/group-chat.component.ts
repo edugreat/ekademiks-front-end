@@ -7,7 +7,7 @@ import { _Notification as _Notification } from '../../admin/upload/notifications
 import { MAT_SNACK_BAR_DATA, MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { ChatCacheService } from '../chat-cache.service';
-import { AuthService } from '../../auth/auth.service';
+import { AuthService, User } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-group-chat',
@@ -66,6 +66,12 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
   groupAdminId?: number;
 
+   //loggedInStudentId:number|undefined = 0;
+
+   currentUser?:User;
+
+ 
+
   // an array of both previous and current chat messages belonging to this group chat
   chatMessages: ChatMessage[] = [];
 
@@ -102,7 +108,12 @@ export class GroupChatComponent implements OnInit, OnDestroy {
       const _groupId = params.get('group_id');
       const groupDescription = params.get('description');
 
-      const _grpAdminId = params.get('group_admin_id')
+      const _grpAdminId = params.get('group_admin_id');
+
+      
+
+    //  get the object of the current user
+    this._currentUser();
 
 
       if (_groupId && groupDescription && _grpAdminId) {
@@ -150,9 +161,10 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
     this.chatMessages = await this.chatCachedService.getCachedChat(_groupId);
 
-    if(this.chatMessages.length === 0){
+    // if messages where received and user is logged in(cachingKey stored in the session storage helps to verify a user was logged in)
+    if(this.chatMessages.length === 0 && sessionStorage.getItem('cachingKey') ){
 
-      this.chatService.connectToChatMessages(Number(_groupId), this.loggedInStudentId());
+      this.chatService.connectToChatMessages(Number(_groupId),this.currentUser!.id);
 
      
     }
@@ -196,6 +208,23 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
       }
     })
+  }
+
+  get isLoggedIn(){
+
+    return sessionStorage.getItem('logged') !== null;
+  }
+
+ private _currentUser(){
+
+  this.currentUser = this.authService.currentUser;
+
+  if(!this.currentUser && this.isLoggedIn){
+
+    this.authService.cachedUser(Number(sessionStorage.getItem('cachingKey'))).pipe(take(1)).subscribe(user => this.currentUser = user);
+  }
+
+
   }
 
 
@@ -335,9 +364,9 @@ export class GroupChatComponent implements OnInit, OnDestroy {
   deleteChat() {
 
     // only the chat author or the group admin is permitted to delete the chat
-    if (this.currentlyClickedChat?.senderId === this.loggedInStudentId() || this.isGroupAdmin()) {
+    if (this.currentlyClickedChat?.senderId === this.currentUser?.id || this.isGroupAdmin()) {
 
-      this.chatService.deleteChatMessage({ [this.currentlyClickedChat!.groupId]: this.currentlyClickedChat!.id! }, this.loggedInStudentId())
+      this.chatService.deleteChatMessage({ [this.currentlyClickedChat!.groupId]: this.currentlyClickedChat!.id! }, this.currentUser!.id)
         .pipe(take(1)).subscribe({
 
           next: (response: HttpResponse<number>) => {
@@ -365,7 +394,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
                     let replier = repliers[index];
 
                     // update the deleteBy property
-                    replier.deleterId = this.loggedInStudentId();
+                    replier.deleterId = this.currentUser?.id;
 
                     // set deleter's name
                     (replier.deleter === this.username) ? this.username : undefined;
@@ -408,7 +437,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
     if (this.currentlyClickedChat) {
 
-      return this.loggedInStudentId() === this.currentlyClickedChat.senderId;
+      return this.currentUser?.id === this.currentlyClickedChat.senderId;
     }
 
     return false;
@@ -542,19 +571,19 @@ export class GroupChatComponent implements OnInit, OnDestroy {
     return (sessionStorage.getItem('recentPosts') ? true : false)
   }
 
-  loggedInStudentId(): number {
+  // loggedInStudentId(): number {
 
-    const id = Number(sessionStorage.getItem('studentId'));
+  //   const id = Number(sessionStorage.getItem('studentId'));
 
-    return id;
-  }
+  //   return id;
+  // }
 
   // triggers sending new chat messages to the group
   sendChat() {
 
 
-    const senderId = sessionStorage.getItem('studentId');
-    if (this.groupId && senderId && this.newChatContent.trim().length) {
+   
+    if (this.groupId && this.currentUser?.id && this.newChatContent.trim().length) {
 
 
 
@@ -618,7 +647,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
         const newChatMessage: ChatMessage = {
           id: 0,//not actually a required field, but to prevent server reporting error 
           groupId: Number(this.groupId),
-          senderId: Number(senderId),
+          senderId: Number(this.currentUser.id),
           senderName: '',//not actually a required field, but to prevent server reporting error 
           content: this.newChatContent,
           isEditedChat: false,
@@ -651,7 +680,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
         const newChatMessage: ChatMessage = {
           id: 0,//not actually a required field, but to prevent server reporting error 
           groupId: Number(this.groupId),
-          senderId: Number(senderId),
+          senderId: Number(this.currentUser.id),
           senderName: '',//not actually a required field, but to prevent server reporting error 
           content: this.newChatContent,
           isEditedChat:false,
@@ -698,7 +727,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
   // returns the name of a user who deleted a given chat
   public chatDeleter(chat: ChatMessage): string {
 
-    if (chat.deleterId === this.loggedInStudentId()) return `deleted by you`;
+    if (chat.deleterId === this.currentUser?.id) return `deleted by you`;
     else if (chat.deleterId === this.groupAdminId) return `deleted by admin`;
 
     return `deleted by ${chat.deleter!}`;
@@ -741,7 +770,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
 
 
-    return this.groupAdminId === this.loggedInStudentId();
+    return this.groupAdminId === this.currentUser?.id;
   }
 
   // validates chat message to enable or disable the sent button
@@ -862,18 +891,20 @@ export class GroupChatComponent implements OnInit, OnDestroy {
   //  this method deletes all notifications(for the currently logged in student) about new members joining the group
   private deleteNewMemberJoinedGroupNotification(notificationIds: number[]) {
 
-    this.chatService.deleteChatNotifications(this.loggedInStudentId(), notificationIds).subscribe({
+    if(this.currentUser){
+      this.chatService.deleteChatNotifications(this.currentUser.id, notificationIds).subscribe({
 
-      complete: () => {
-
-        for (let index = 0; index < notificationIds.length; index++) {
-
-          this.newMemberNotifications.splice(index, 1);
-
+        complete: () => {
+  
+          for (let index = 0; index < notificationIds.length; index++) {
+  
+            this.newMemberNotifications.splice(index, 1);
+  
+          }
         }
-      }
-
-    })
+  
+      })
+    }
   }
 
   // checks if the user is forbidden from posting to the group chat referenced by the ID.

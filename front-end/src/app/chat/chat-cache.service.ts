@@ -9,7 +9,7 @@ import { ChatMessage } from './chat.service';
 })
 export class ChatCacheService extends Dexie{
 
-  chatCache: Dexie.Table<ChatEntry,string>; //Table definition
+  chatCache: Dexie.Table<ChatEntry,string>; //IndexDB Table definition where chats are cached for easy retrieval without incessant server queries
 
   constructor() {
     super('ChatDB'); //database name

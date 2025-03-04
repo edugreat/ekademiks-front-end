@@ -28,9 +28,9 @@
 
         <div class="sender-name">
             
-          <span *ngIf="!(chat.senderId === loggedInStudentId())" style="color: rgb(58, 25, 2);" >{{tilde}}</span>
+          <span *ngIf="!(chat.senderId === currentUser?.id)" style="color: rgb(58, 25, 2);" >{{tilde}}</span>
             <span style="margin-top: -5px; color: #777 ">
-                {{ chat.senderId === loggedInStudentId() ? 'You' :chat.senderName }}
+                {{ chat.senderId === currentUser?.id ? 'You' :chat.senderName }}
             </span>
         </div>  
 
@@ -40,7 +40,7 @@
         </button>
         <div class="chat-message-container" >
          <div style="display: flex; flex-direction: column;">
-          <span [ngStyle]="{'background-color':chat.senderId === loggedInStudentId() ? '#d2f0c4':'#f5f7f4'}" class="message-content" > {{ chat.content }}</span>
+          <span [ngStyle]="{'background-color':chat.senderId === currentUser?.id ? '#d2f0c4':'#f5f7f4'}" class="message-content" > {{ chat.content }}</span>
           <span *ngIf="chat.isEditedChat" style="font-size: 0.5rem; margin-left: 3px; color: rgb(58, 25, 2); " >Edited </span>
          </div>
           <span class="reply-icon" *ngIf="chat.repliedTo"> <mat-icon>reply</mat-icon> </span>
@@ -80,7 +80,7 @@
       <mat-icon color="warn">delete</mat-icon>delete chat
     </button>  
 
-    <button *ngIf="!(currentlyClickedChat?.senderId === loggedInStudentId())" mat-menu-item >
+    <button *ngIf="!(currentlyClickedChat?.senderId === currentUser?.id)" mat-menu-item >
       <mat-icon color="warn">report</mat-icon>
       <span>Report {{currentlyClickedChat?.senderName}}</span>
     </button>

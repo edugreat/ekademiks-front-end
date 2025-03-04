@@ -134,7 +134,7 @@ private authService:AuthService
   
 
   isAdmin(): boolean {
-    return this.authService.isAdmin();
+    return this.authService.isAdmin;
     }
 
     isLoggedIn():boolean{

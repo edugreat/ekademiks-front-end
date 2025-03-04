@@ -659,9 +659,9 @@ export class AssignmentComponent implements OnInit, OnDestroy {
    // get the object of logged in user
    private _currentUser(){
 
-    if(this.authService.loggedInUser) {
+    if(this.authService.currentUser) {
 
-      this.currentUser = this.authService.loggedInUser;
+      this.currentUser = this.authService.currentUser;
 
      
       // get admin's registered institutions
@@ -675,7 +675,7 @@ export class AssignmentComponent implements OnInit, OnDestroy {
     }else{
 
 
-      if(!this.authService.loggedInUser){
+      if(!this.authService.currentUser){
 
         const cacheKey = Number(sessionStorage.getItem('cache'));
         this.currentUserSub = this.authService.cachedUser(cacheKey).pipe(tap((user) => this.getRegisteredInstitutions(user.id))).subscribe(user => this.currentUser = user);
