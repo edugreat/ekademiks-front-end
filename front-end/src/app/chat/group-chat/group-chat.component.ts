@@ -89,6 +89,8 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
 
   @ViewChild('chatContainer') chatContainer!: ElementRef;
+
+  currentUserSub?: Subscription;
   
 
 
@@ -162,7 +164,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
     this.chatMessages = await this.chatCachedService.getCachedChat(_groupId);
 
     // if messages where received and user is logged in(cachingKey stored in the session storage helps to verify a user was logged in)
-    if(this.chatMessages.length === 0 && sessionStorage.getItem('cachingKey') ){
+    if(this.chatMessages.length === 0 && this.currentUser){
 
       this.chatService.connectToChatMessages(Number(_groupId),this.currentUser!.id);
 
@@ -187,6 +189,8 @@ export class GroupChatComponent implements OnInit, OnDestroy {
     clearInterval(this.snackBarTimer);
 
     this.chatNotificationSub?.unsubscribe();
+
+    this.currentUserSub?.unsubscribe()
 
     // disconnect from the receiving chat messages
     //this.chatService.disconnectFromSSE();
@@ -217,13 +221,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
  private _currentUser(){
 
-  this.currentUser = this.authService.currentUser;
-
-  if(!this.currentUser && this.isLoggedIn){
-
-    this.authService.cachedUser(Number(sessionStorage.getItem('cachingKey'))).pipe(take(1)).subscribe(user => this.currentUser = user);
-  }
-
+  this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user => this.currentUser = user);
 
   }
 
@@ -397,7 +395,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
                     replier.deleterId = this.currentUser?.id;
 
                     // set deleter's name
-                    (replier.deleter === this.username) ? this.username : undefined;
+                    (replier.deleter === this.currentUser?.firstName) ? this.currentUser?.firstName : undefined;
 
 
                     // replace the old chat with the updated chat
@@ -420,11 +418,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
   }
 
-  // returns logged in username
-  private get username() {
-
-    return sessionStorage.getItem('username');
-  }
+  
 
   // get the IDs of chat that replied to a given chat
   private getRepliers(id: number): ChatMessage[] {
@@ -538,11 +532,11 @@ export class GroupChatComponent implements OnInit, OnDestroy {
   //This is used to control the display of spinner while waiting for the retrieval of previous chats
   private hadRecentPosts() {
 
-    const studentId = sessionStorage.getItem('studentId');
+   
 
-    if (studentId && this.groupId) {
+    if (this.currentUser?.id && this.groupId) {
 
-      this.chatService.hadPreviousPosts(Number(studentId), this.groupId).pipe(take(1)).subscribe({
+      this.chatService.hadPreviousPosts(this.currentUser.id, this.groupId).pipe(take(1)).subscribe({
         next: (result) => {
           if (result) {
             sessionStorage.setItem('recentPosts', 'true');
@@ -561,7 +555,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
     return this.authService.groupJoinDates.get(this.groupId!)!
 
-    // return new Date(_joinedAt[this.groupId!]);
+    
 
 
   }
@@ -571,12 +565,6 @@ export class GroupChatComponent implements OnInit, OnDestroy {
     return (sessionStorage.getItem('recentPosts') ? true : false)
   }
 
-  // loggedInStudentId(): number {
-
-  //   const id = Number(sessionStorage.getItem('studentId'));
-
-  //   return id;
-  // }
 
   // triggers sending new chat messages to the group
   sendChat() {

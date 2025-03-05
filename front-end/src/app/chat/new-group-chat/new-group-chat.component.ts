@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ConfirmationDialogService } from '../../confirmation-dialog.service';
 import { Router } from '@angular/router';
-import { take } from 'rxjs';
+import { Subscription, take } from 'rxjs';
 import { ChatService } from '../chat.service';
 import { HttpResponse, HttpStatusCode } from '@angular/common/http';
-import { AuthService } from '../../auth/auth.service';
+import { AuthService, User } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-new-group-chat',
@@ -19,6 +19,9 @@ export class NewGroupChatComponent implements OnInit {
 
   // flag used to display the progress-spinner once the chat group form is being submitted
   submittingGroupChatForm = false;
+
+  private currentUser?:User;
+  currentUserSub?:Subscription;
 
   constructor(private fb:FormBuilder, private confirmationService:ConfirmationDialogService,
     private router:Router, private chatService:ChatService, private authService:AuthService
@@ -53,6 +56,8 @@ export class NewGroupChatComponent implements OnInit {
   ngOnInit(): void {
     
     this.loadIcons();
+
+    this._currentUser();
   }
 // loads icons from the assets folder in the classpath
   private loadIcons() :void{
@@ -68,6 +73,11 @@ export class NewGroupChatComponent implements OnInit {
         };
       });
 
+  }
+
+  private _currentUser(){
+
+  this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user => this.currentUser = user);
   }
 
   private groupName() : FormControl{
@@ -99,10 +109,7 @@ export class NewGroupChatComponent implements OnInit {
 
   private getGroupAdminId():number | undefined{
 
-    if(sessionStorage.getItem('studentId'))
-      return Number(sessionStorage.getItem('studentId'));
-
-    return undefined;
+    return this.currentUser ? this.currentUser.id : undefined;
 
   }
 
@@ -130,9 +137,9 @@ export class NewGroupChatComponent implements OnInit {
 
         if(response.status === HttpStatusCode.Ok){
 
-         this.authService.updateGroupJoinedDates(this.studentId)
+         this.authService.updateGroupJoinedDates(id)
 
-         this.router.navigate(['/my-groups', Number(sessionStorage.getItem('studentId'))]);
+         this.router.navigate(['/my-groups', id]);
 
         //  the user is now a group member
          sessionStorage.setItem('groupMember', 'true');
@@ -145,11 +152,7 @@ export class NewGroupChatComponent implements OnInit {
    
     }
 
-    private get studentId():number{
-
-      return Number(sessionStorage.getItem('studentId'));
-    }
-
+   
 onCancel() {
   
   this.confirmationService.confirmAction("Cancel group creation?");

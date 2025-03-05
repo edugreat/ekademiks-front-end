@@ -43,28 +43,15 @@ export class AssessmentExpansionPanelComponent implements OnInit, OnDestroy {
   // get the object of logged in user
   private _currentUser() {
 
-    if (this.authService.currentUser) {
+    this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user => {
+      
+      if(user){
 
-      this.currentUser = this.authService.currentUser;
-
-      this.getTopicAndDuration(this.currentUser.id)
-
-
-      return;
-    } else {
-
-
-      if (!this.authService.currentUser && sessionStorage.getItem('cachingKey')) {
-
-
-        const cacheKey = Number(sessionStorage.getItem('cachingKey'));
-        this.currentUserSub = this.authService.cachedUser(cacheKey).pipe(tap((user) => this.getTopicAndDuration(user.id))).subscribe(user => this.currentUser = user);
-
+        this.currentUser = user;
+        this.getTopicAndDuration(this.currentUser.id)
 
       }
-    }
-
-
+    })
   }
 
 

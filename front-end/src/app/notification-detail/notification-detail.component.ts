@@ -5,6 +5,7 @@ import { HttpResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AssessmentsService } from '../assessment/assessments.service';
+import { AuthService, User } from '../auth/auth.service';
 
 
 @Component({
@@ -19,12 +20,16 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
   // unread notifications initialized to an empty array
   unreadNotifications?:_Notification[];
 
+  private currentUser?:User;
+
+  private currentUserSub?:Subscription;
+
 
   // this is used to unsubscribe from the event that retrieves the assessment topic and duration
   private topicAndDurationSub$?:Subscription;
 
   constructor(private notificationService:NotificationsService, private testService:TestService,
-    private router:Router, private assessmentService:AssessmentsService
+    private router:Router, private assessmentService:AssessmentsService, private authService:AuthService
 
   ){
 
@@ -34,11 +39,15 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
   ngOnInit(): void {
 
     this.getNotifications();
+
+    this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user => this.currentUser = user);
     
   }
   ngOnDestroy(): void {
     
     this.topicAndDurationSub$?.unsubscribe();
+
+    this.currentUserSub?.unsubscribe();
   }
 
 
@@ -87,12 +96,11 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
     // update unread notification count so that subscribers can be notification about the update
     this.notificationService.updateNotificationsCounts(this.unreadNotifications!.length);
 
-    // get the student's id
-    const studentId = Number(sessionStorage.getItem('studentId')!);
+   
     
     // make a server call to notifying that the notification has been read
     // This enables the server keep track of read notification so as not to serve stale notification subsequently
-    this.notificationService.notificationIsRead(notificationId, studentId).subscribe({
+    this.notificationService.notificationIsRead(notificationId, this.currentUser!.id).subscribe({
 
      
 

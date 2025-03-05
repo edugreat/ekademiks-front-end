@@ -127,62 +127,12 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   private _currentUser(){
 
 
-    // subscribe to get get realtime information of the currently logged in user
-    this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user => {
+    if(sessionStorage.getItem('cachingKey') && !this.authService.currentUser){
 
-     
-        this.currentUser = user;
-               
-       // if a user has already logged in but the object is undefined due to browser refresh, retrieve user object from the server cache
-       if(this.isLoggedIn && !this.currentUser){
-
-        this.authService.cachedUser(Number(sessionStorage.getItem('cachingKey'))).pipe(take(1)).subscribe(user => this.currentUser = user)
-      }
-
-    })
-
-
-
-
-
-
-    // retrieve the logged in user object if the user has logged in
-
-    if(this.isLoggedIn){
-
-      if(this.authService.currentUser) {
-
-        this.currentUser = this.authService.currentUser;
-
-        console.log(`current user: ${JSON.stringify(this.currentUser, null, 1)}`)
-       
-       
-  
-       
-      }else if(!this.authService.currentUser && sessionStorage.getItem('cachingKey')){
-  
-  
-  
-  
-          const cacheKey = Number(sessionStorage.getItem('cachingKey'));
-          this.currentUserSub = this.authService.cachedUser(cacheKey).subscribe(user => {
-  
-            this.currentUser = user;
-            
-  
-            
-  
-          });
-  
-         
-  
-        
-      }
-      
+      this.currentUserSub = this.authService.cachedUser(Number(sessionStorage.getItem('cachingKey'))).pipe(take(1)).subscribe(user => this.currentUser = user);
     }
-    
 
-
+   
    
 
   }

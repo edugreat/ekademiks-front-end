@@ -33,9 +33,7 @@ export class AuthService {
   // key-value pair of group ID and the date the user joined the group
   private _groupJoinDates = new Map<number, Date>;
 
-
-  
-
+ 
   //A subject to emit the name of the currently logged in user (initially emits the generic placeholder 'Student'). Subscribers receive up to date information
   private currentUserName:BehaviorSubject<string> 
 
@@ -44,9 +42,11 @@ export class AuthService {
   public userName$: Observable<string> ;
   constructor(private http: HttpClient, private endpoints:Endpoints, private chatCachedService:ChatCacheService) {
 
+    
     this.currentUserName = new BehaviorSubject<string>(this.currentUser?.firstName || 'Student');
     this.userName$= this.currentUserName.asObservable();
-    
+
+  
    }
   
 
@@ -95,10 +95,11 @@ export class AuthService {
     return this.http.get<User>(`
       ${this.endpoints.cachedUserUrl}?cache=${cacheKey}`).pipe(tap((user) => {
 
+      
         this.loggedInUser = user;
         this.currentUser = user;
         this.currentUserName.next(user.firstName)
-        //this.saveToSession(user)
+        this.saveToSession(user)
       
       }));
 
@@ -266,17 +267,12 @@ export class AuthService {
   // Checks if the current user is a logged in student
    get isLoggedInStudent():boolean{
 
-    if(this.currentUser) return this.currentUser.roles.some(role => role.toLowerCase() === 'student');
+     return this.currentUser ?  this.currentUser.roles.some(role => role.toLowerCase() === 'student') : false
     
-    else if(sessionStorage.getItem('cachingKey'))this.cachedUser(Number(sessionStorage.getItem('cachingKey'))).pipe(take(1)).subscribe(user =>{return user ? true : false})
-
-    return false;
+   
   }
  
-  get studentId():number{
-
-    return Number(sessionStorage.getItem('studentId')!);
-  }
+  
 
 
   public get refreshTokenInProcess() {

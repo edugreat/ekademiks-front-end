@@ -1,8 +1,8 @@
 import { Injectable, NgZone, OnDestroy } from '@angular/core';
 import { Endpoints } from '../end-point';
-import { defer, Observable, of, Subject, Subscription } from 'rxjs';
+import { defer, Observable, of, Subject, Subscription, take } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpResponse, HttpStatusCode } from '@angular/common/http';
-import { AuthService } from '../auth/auth.service';
+import { AuthService, User } from '../auth/auth.service';
 import { _Notification as _Notification } from '../admin/upload/notifications/notifications.service';
 import { ChatCacheService } from './chat-cache.service';
 import { EventSourcePolyfill } from 'ng-event-source';
@@ -31,7 +31,7 @@ export class ChatService implements OnDestroy {
   // limit SSE connections to just 5 concurrently
   private maxConnections = 5;
 
-  private _activeGroups:number[] = [];
+  private _activeGroups: number[] = [];
 
   // keeps try of the number of reconnection counts when server sent event connection is lost
   private retryCount = 0;
@@ -65,14 +65,18 @@ export class ChatService implements OnDestroy {
   backgroundUpdate$ = this._backgroundChatUpdate.asObservable();
 
   // chat background update subscription
- private backgroundSubscriptions = new Map<number, Subscription>();
+  private backgroundSubscriptions = new Map<number, Subscription>();
 
- _backgroundSubscriptions?:Subscription;
- 
+  _backgroundSubscriptions?: Subscription;
+
+  private currentUser?: User;
+
+  private currentUserSub?: Subscription;
+
 
 
   constructor(private endpoints: Endpoints,
-    private http: HttpClient, private zone: NgZone, private authService: AuthService, private chatCachedService:ChatCacheService) {
+    private http: HttpClient, private zone: NgZone, private authService: AuthService, private chatCachedService: ChatCacheService) {
 
     // disconnect from receiving chat messages once the user logs out
     this.loginSub = this.authService.studentLoginObs$.subscribe(isLoggedIn => {
@@ -82,11 +86,15 @@ export class ChatService implements OnDestroy {
       else this.performBackgroundChatUpdate();
     });
 
+    // subscribe to receive realtime update of the currently logged in user
+    this.currentUserSub = authService.loggedInUserObs$.subscribe(user => this.currentUser = user);
+
 
   }
 
   ngOnDestroy(): void {
     this.loginSub?.unsubscribe();
+    this.currentUserSub?.unsubscribe();
   }
 
   createGroupChat(dto: any): Observable<HttpResponse<number>> {
@@ -100,6 +108,8 @@ export class ChatService implements OnDestroy {
     return this.http.get<number[]>(`${this.endpoints.myGroupIdsUrl}?studentId=${studentId}`)
 
   }
+
+
   // communicates to the server endpoint to fetch to fetch unread chats count for the given student
   // Unread chats count is a map object having the group's id as the key, and count of unread messages(greater than or zero) as the values
   groupInfo(studentId: number): Observable<any> {
@@ -189,15 +199,15 @@ export class ChatService implements OnDestroy {
 
     const jwtToken = sessionStorage.getItem('accessToken');
 
-       //  create new event source for the group if there was non
+    //  create new event source for the group if there was non
     if (this.eventSources.has(groupId)) {
 
       // close the least recently used connection
-      if(this._activeGroups.length >= this.maxConnections){
+      if (this._activeGroups.length >= this.maxConnections) {
 
         const oldConnection = this._activeGroups.shift();
 
-        if(oldConnection){
+        if (oldConnection) {
 
           this.disconnectFromGroup(groupId);
 
@@ -206,29 +216,29 @@ export class ChatService implements OnDestroy {
 
       }
 
-    }else{
+    } else {
 
 
-      if(!this.chatNotificationSubjects.has(groupId)){
+      if (!this.chatNotificationSubjects.has(groupId)) {
         // create new notification subject
         this.chatNotificationSubjects.set(groupId, new Subject<_Notification>());
       }
-              // create a new Subject
-              if(!this.chatMessageSubjects.has(groupId)){
-               
-              
+      // create a new Subject
+      if (!this.chatMessageSubjects.has(groupId)) {
 
-                this.chatMessageSubjects.set(groupId, new Subject<ChatMessage>());
 
-              }
+
+        this.chatMessageSubjects.set(groupId, new Subject<ChatMessage>());
+
+      }
       // create new event source for the group
-      const eventSource = new EventSourcePolyfill(`${this.endpoints.chatMessagesUrl}?group=${groupId}&student=${studentId}`,{
+      const eventSource = new EventSourcePolyfill(`${this.endpoints.chatMessagesUrl}?group=${groupId}&student=${studentId}`, {
 
         headers: {
           'authorization': `Bearer ${jwtToken}`
-        }, 
-        heartbeatTimeout:this.retryDelay,
-        connectionTimeout:5000
+        },
+        heartbeatTimeout: this.retryDelay,
+        connectionTimeout: 5000
       });
 
       // add the event source to the map of event sources
@@ -236,10 +246,10 @@ export class ChatService implements OnDestroy {
 
 
       // sets up hearbeat event listener
-      eventSource.addEventListener('heartbeat',(evt:Event) => {
+      eventSource.addEventListener('heartbeat', (evt: Event) => {
 
         // resets all thresholds
-        if(evt){
+        if (evt) {
 
 
           console.log('received hearbeat ')
@@ -257,17 +267,17 @@ export class ChatService implements OnDestroy {
           // check if any message has been received
           if (messageEvent) {
 
-            
+
             const data = JSON.parse(messageEvent.data);
- 
+
 
             // process for the case where the message a request to join the group chat
             if (this.isJoinGroupRequest(data)) {
 
-                      
+
 
               console.log(`emitting chat notification: ${data}`)
-             
+
 
               // emit current chat notification to subscribers
               this.chatNotificationSubjects.get(groupId)!.next(data);
@@ -276,68 +286,62 @@ export class ChatService implements OnDestroy {
             }  //process for the case of chat message
             else if (this.isChatMessages(data)) {
 
-              
+
               //  emits new chat message to suscribers
               this.chatMessageSubjects.get(groupId)!.next(data);
 
             }
-           
+
           }
         });
 
-             });
+      });
 
-              //  disconnect group from notifications on account of error
-        eventSource.onerror = () => {
+      //  disconnect group from notifications on account of error
+      eventSource.onerror = () => {
 
-          console.log(`event source error `)
+        console.log(`event source error `)
 
-          // disconnect the erring group
-          this.disconnectFromGroup(groupId);
+        // disconnect the erring group
+        this.disconnectFromGroup(groupId);
 
-          // retry network connection
+        // retry network connection
 
-         this.retryDelay = Math.min(1000 * Math.pow(2, this.retryCount), 60000);
+        this.retryDelay = Math.min(1000 * Math.pow(2, this.retryCount), 60000);
 
-          this.retryCount++;
+        this.retryCount++;
 
-          ++this.reconnectionAttempt;
+        ++this.reconnectionAttempt;
 
-          console.log(`reconnection attempt: ${this.reconnectionAttempt}`)
+        console.log(`reconnection attempt: ${this.reconnectionAttempt}`)
 
-          // stop further reconnection attempts once reconnection limit is reached or exceeded
-          if(this.reconnectionAttempt >= this.MAX_RECONNECTION_ATTEMPT) eventSource.close()
+        // stop further reconnection attempts once reconnection limit is reached or exceeded
+        if (this.reconnectionAttempt >= this.MAX_RECONNECTION_ATTEMPT) eventSource.close()
 
-          // this.reconnectionTiming = setTimeout(() => {
 
-          //   console.log('reconnecting to chat')
+      };
 
-          //   this.connectToChatMessages(groupId, studentId);
-          // }, retryDelay);
+      //  reset retry count once connected
+      eventSource.onmessage = () => {
+        console.log('connected to chats');
+        this.retryCount = 0;
 
-        };
+        this.retryDelay = 35000
+      }
 
-        //  reset retry count once connected
-        eventSource.onmessage = () => {
-          console.log('connected to chats');
-          this.retryCount = 0;
 
-          this.retryDelay = 35000
-        }
 
-        
 
-        
 
 
 
     }
 
-   
+
   }
 
   // streams chat messages for the given group referenced by its ID
-  public streamChatMessagesFor(groupId:number):Observable<ChatMessage | undefined>{
+  public streamChatMessagesFor(groupId: number): Observable<ChatMessage | undefined> {
 
 
     return defer(() => {
@@ -347,42 +351,42 @@ export class ChatService implements OnDestroy {
       return message ? this.chatMessageSubjects.get(groupId)!.asObservable() : of(undefined);
     })
 
-   
 
-  //  return this.chatMessageSubjects.get(groupId) ? this.chatMessageSubjects.get(groupId)!.asObservable() : of(undefined)
+
+    //  return this.chatMessageSubjects.get(groupId) ? this.chatMessageSubjects.get(groupId)!.asObservable() : of(undefined)
   }
 
   // special method that get notified when message for a given group are recieved. The group must have been unssubscribed from the component
   // due to the user visiting another group they belong to. In order to still keep getting realtime messages, this method only performs background
   //chat updates for the group which has been unsubscribed from observable when chats arrive.
-  private performBackgroundChatUpdate(){
+  private performBackgroundChatUpdate() {
 
-  this._backgroundSubscriptions =   this.backgroundUpdate$.subscribe((groupId:number) => {
+    this._backgroundSubscriptions = this.backgroundUpdate$.subscribe((groupId: number) => {
 
       // subscribe to get chat messages since the user has clicked to different group at the component level
-      if(groupId){
-
-       
-          // unsubscribe from previous subscription if there's any to avoid memory leak
-          this.backgroundSubscriptions.get(groupId)?.unsubscribe();
-
-          // replace the subscription with the new one.
-            this.backgroundSubscriptions.set(groupId, this.streamChatMessagesFor(groupId).subscribe({
-
-              next:(data:ChatMessage | undefined) => {
-    
-                if(data){
-                  
-                  this.addToChats(data);
-    
-    
-                }
-    
-              }
-            }));
+      if (groupId) {
 
 
-      }else if(groupId < 0) {
+        // unsubscribe from previous subscription if there's any to avoid memory leak
+        this.backgroundSubscriptions.get(groupId)?.unsubscribe();
+
+        // replace the subscription with the new one.
+        this.backgroundSubscriptions.set(groupId, this.streamChatMessagesFor(groupId).subscribe({
+
+          next: (data: ChatMessage | undefined) => {
+
+            if (data) {
+
+              this.addToChats(data);
+
+
+            }
+
+          }
+        }));
+
+
+      } else if (groupId < 0) {
 
         console.log(`unsubscribing ${groupId}`)
 
@@ -400,70 +404,70 @@ export class ChatService implements OnDestroy {
     switch (incomingChat.content) {
       case this.DELETEDCHATCONTENT:
 
-      // delete the message from savedChats
-      savedChats.splice(savedChats.findIndex(c => c.id === incomingChat.id), 1);
+        // delete the message from savedChats
+        savedChats.splice(savedChats.findIndex(c => c.id === incomingChat.id), 1);
 
-      // get replied chats for the deleted chat
-      let repliedChats = this.repliers(incomingChat.id!, savedChats);
+        // get replied chats for the deleted chat
+        let repliedChats = this.repliers(incomingChat.id!, savedChats);
 
-      if(repliedChats.length){
+        if (repliedChats.length) {
 
-        for (let index = 0; index < repliedChats.length; index++) {
+          for (let index = 0; index < repliedChats.length; index++) {
 
-          //set the name and id of the user that deleted the chat
+            //set the name and id of the user that deleted the chat
 
-          repliedChats[index].deleterId = incomingChat.deleterId;
-          repliedChats[index].deleter = incomingChat.deleter;
-         
+            repliedChats[index].deleterId = incomingChat.deleterId;
+            repliedChats[index].deleter = incomingChat.deleter;
+
+          }
+
+          // update the content of saveChats
+          repliedChats.forEach(r => {
+
+            savedChats.splice(savedChats.findIndex(c => c.id === r.id), 1, r);
+          })
         }
 
-        // update the content of saveChats
-        repliedChats.forEach(r => {
-
-          savedChats.splice(savedChats.findIndex(c => c.id === r.id), 1, r);
-        })
-      }
-        
         break;
-    
+
       default:
 
-       // search for the chat in the array of savedChats
-       const index = savedChats.findIndex(c => c.id === incomingChat.id);
+        // search for the chat in the array of savedChats
+        const index = savedChats.findIndex(c => c.id === incomingChat.id);
 
-      //  check of the incoming chat is an edited version of a previous chat
-      if(index !== -1 && incomingChat.content !== savedChats[index].content){
+        //  check of the incoming chat is an edited version of a previous chat
+        if (index !== -1 && incomingChat.content !== savedChats[index].content) {
 
-        savedChats[index].content = incomingChat.content;
-        savedChats[index].isEditedChat = true;
-      } else if(index === -1){
+          savedChats[index].content = incomingChat.content;
+          savedChats[index].isEditedChat = true;
+        } else if (index === -1) {
 
-        // this is the case of a new chat message
-        savedChats.push(incomingChat);
-      }
-    
+          // this is the case of a new chat message
+          savedChats.push(incomingChat);
+        }
+
 
         break;
     }
 
-   
+
     // update the session storage
-  
+
     this.cachedMessage(incomingChat.groupId, savedChats);
 
-   
 
-    
+
+
   }
 
   // return an array of chat replies for the chat referenced by id
-  repliers(id: number , savedChats: ChatMessage[]):ChatMessage[] {
-    
+  repliers(id: number, savedChats: ChatMessage[]): ChatMessage[] {
+
 
     return savedChats.filter(c => c.repliedTo === id);
   }
 
-  public streamChatNotificationsFor(groupId: number):Observable<_Notification | undefined> {
+  public streamChatNotificationsFor(groupId: number): Observable<_Notification | undefined> {
 
     console.log(`received notification: `)
 
@@ -476,11 +480,11 @@ export class ChatService implements OnDestroy {
 
 
   }
- 
-  public get backgroundChatUpdate(){
+
+  public get backgroundChatUpdate() {
 
     return this._backgroundChatUpdate;
-    
+
   }
 
   disconnectFromGroup(groupId: number): any {
@@ -500,15 +504,15 @@ export class ChatService implements OnDestroy {
 
   }
 
-  private get activeUsers(){
+  private get activeUsers() {
 
     return this._activeGroups
   }
 
   //save messages to session storage
-  async cachedMessage(groupId: number, messages: ChatMessage[]){
+  async cachedMessage(groupId: number, messages: ChatMessage[]) {
 
-   await this.chatCachedService.saveChat(`${groupId}`, messages)
+    await this.chatCachedService.saveChat(`${groupId}`, messages)
 
   }
 
@@ -521,10 +525,10 @@ export class ChatService implements OnDestroy {
   // provides mechanism for sorting chat messages by date
   private byDate(): ((a: ChatMessage, b: ChatMessage) => number) | undefined {
 
-   
+
     return (a, b) => {
 
-      
+
 
 
       if ((a.sentAt as Date).getTime() > (b.sentAt as Date).getTime()) return 1;
@@ -552,7 +556,7 @@ export class ChatService implements OnDestroy {
 
     if (this.eventSources) {
 
-    
+
 
       this.eventSources.forEach((_, groupId) => this.disconnectFromGroup(groupId!))
 
@@ -568,36 +572,28 @@ export class ChatService implements OnDestroy {
 
   }
 
-  public disconnectFromServer(groupId?:number, studentId?:number, activeGroups?:number[]):Observable<HttpResponse<number>>{
+  public disconnectFromServer(groupId?: number, studentId?: number): Observable<HttpResponse<number>> {
 
     const map = new Map<number, number>();
 
 
-    if(groupId && studentId){
+    if (groupId && studentId) {
 
       map.set(groupId, studentId);
-    }else {
+    } else {
 
       const _activeGroups = this.activeUsers;
 
       console.log(`logging out all groups ${this.activeUsers}`)
 
-      _activeGroups.forEach(group => map.set(group, this.loggedInStudentId));
+      _activeGroups.forEach(group => map.set(group, this.currentUser!.id));
     }
 
-    return this.http.post<HttpStatusCode>(this.endpoints.disconnectUrl, map,{observe:'response'});
+    return this.http.post<HttpStatusCode>(this.endpoints.disconnectUrl, map, { observe: 'response' });
 
 
   }
 
-  private get loggedInStudentId(){
-
-    return Number(sessionStorage.getItem('studentId'));
-  }
-
-
-
- 
 
   // checks if the new notification received is a request to join group chat or about new member that has just joined the group chat
   private isJoinGroupRequest(data: any): data is _Notification {
@@ -665,7 +661,7 @@ export type ChatMessage = {
   senderId: number,
   senderName?: string,
   content: string,
-  isEditedChat:boolean,
+  isEditedChat: boolean,
   repliedTo?: number,//ID of the chat that was replied to assuming this was a replied chat
   repliedToChat?: string,//The actual chat message that was replied to if this was a replied chat
   deleterId?: number,//points to the user who deleted a given chat that some replies
@@ -688,7 +684,7 @@ export type GroupChatInfo = {
     groupDescription: string, // the group description which every group chat must have. It portrays their ideology 
     groupAdminId: string, // information pointing the group admin
     hasPreviousPosts: boolean //determines if the group chat previous posts
-    isGroupLocked:boolean
+    isGroupLocked: boolean
   }
 }
 

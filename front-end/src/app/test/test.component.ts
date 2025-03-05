@@ -9,7 +9,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { InstructionDialogComponent } from './instruction-dialog.component';
 import { ProgressBarMode } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AuthService } from '../auth/auth.service';
+import { AuthService, User } from '../auth/auth.service';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
 import { ActivityService } from '../activity.service';
 
@@ -95,6 +95,10 @@ testStarted: boolean = false; // boolean flag indicating whether the student has
 
  submissionSub$:Subscription | undefined;
 
+ private currentUser?:User;
+
+ private currentUserSub?:Subscription;
+
   constructor(private testService:TestService,
     private activatedRoute:ActivatedRoute,
     private mediaService:MediaService,
@@ -108,7 +112,7 @@ testStarted: boolean = false; // boolean flag indicating whether the student has
 
   ngOnInit(): void {
 
-   
+   this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user => this.currentUser = user);
    this.getQuestions();
    this.mediaAlias();
    
@@ -119,6 +123,7 @@ testStarted: boolean = false; // boolean flag indicating whether the student has
     
     this.questionSub?.unsubscribe();
     this.submissionSub$?.unsubscribe();
+    this.currentUserSub?.unsubscribe();
     
   }
 
@@ -254,7 +259,7 @@ submit() {
          let attempt:Attempt = {
       
           testId:  Number(sessionStorage.getItem('testId')),
-          studentId: Number(sessionStorage.getItem('studentId')),
+          studentId: this.currentUser!.id,
           selectedOptions: this.selectedOptions
          }
           
@@ -329,7 +334,7 @@ submit() {
      let attempt:Attempt = {
   
       testId:  Number(sessionStorage.getItem('testId')),
-      studentId: Number(sessionStorage.getItem('studentId')),
+      studentId: this.currentUser!.id,
       selectedOptions: this.selectedOptions
      }
       

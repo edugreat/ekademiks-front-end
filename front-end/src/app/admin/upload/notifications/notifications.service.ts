@@ -1,6 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { AuthService } from '../../../auth/auth.service';
+import { AuthService, User } from '../../../auth/auth.service';
 import { HttpBackend, HttpClient } from '@angular/common/http';
 
 @Injectable({
@@ -30,6 +30,10 @@ export class NotificationsService {
   // An array that stores all received notifications
   private _notifications: _Notification[] = [];
 
+  currentUser?:User;
+
+  
+
 
 
 
@@ -43,9 +47,11 @@ export class NotificationsService {
   constructor(private zone: NgZone, private authService: AuthService, private http:HttpClient) {
 
     // subscribe to get notified on student's log in . If a student has logged in, connect to server's notification
-    authService.studentLoginObs$.subscribe(isLoggedIn => {
+    authService.loggedInUserObs$.subscribe(user => {
 
-      if (isLoggedIn) {
+      if (user) {
+
+        this.currentUser = user;
 
         this.connectToNotifications();
       } else {
@@ -79,7 +85,7 @@ export class NotificationsService {
     if (this.eventSource) this.eventSource.close();
 
     // create a new event source passing the sse notification api
-    this.eventSource = new EventSource(`${this.notificationUrl}?studentId=${this.authService.studentId}`);
+    this.eventSource = new EventSource(`${this.notificationUrl}?studentId=${this.currentUser!.id}`);
 
     this.eventSource.addEventListener('notifications', (event: MessageEvent<any>) => {
 

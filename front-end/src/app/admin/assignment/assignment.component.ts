@@ -659,29 +659,14 @@ export class AssignmentComponent implements OnInit, OnDestroy {
    // get the object of logged in user
    private _currentUser(){
 
-    if(this.authService.currentUser) {
+    this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user =>{
 
-      this.currentUser = this.authService.currentUser;
+      if(user){
 
-     
-      // get admin's registered institutions
-      this.getRegisteredInstitutions(this.currentUser.id);
-
-    
-
-
-
-      return;
-    }else{
-
-
-      if(!this.authService.currentUser){
-
-        const cacheKey = Number(sessionStorage.getItem('cache'));
-        this.currentUserSub = this.authService.cachedUser(cacheKey).pipe(tap((user) => this.getRegisteredInstitutions(user.id))).subscribe(user => this.currentUser = user);
-
-
+        this.currentUser = user;
+        this.getRegisteredInstitutions(user.id)
       }
+    })
     }
 
 
@@ -692,4 +677,3 @@ export class AssignmentComponent implements OnInit, OnDestroy {
 
 
   
-}

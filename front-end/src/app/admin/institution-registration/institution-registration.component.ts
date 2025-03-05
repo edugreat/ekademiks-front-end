@@ -45,7 +45,9 @@ export class InstitutionRegistrationComponent implements OnInit, OnDestroy {
    this.activatedRoute.paramMap.subscribe(val =>{
    
     this.msg = val.get('msg') ? val.get('msg') : null;
-   })
+   });
+
+   this._currentUser();
     
     this.createRegistrationForm();
 
@@ -65,21 +67,7 @@ export class InstitutionRegistrationComponent implements OnInit, OnDestroy {
 
     if(this.authService.currentUser) {
 
-      this.currentUser = this.authService.currentUser;
-
-
-      return;
-    }else{
-
-
-      if(!this.authService.currentUser && sessionStorage.getItem('cachingKey')){
-
-
-        const cacheKey = Number(sessionStorage.getItem('cachingKey'));
-        this.currentUserSub = this.authService.cachedUser(cacheKey).subscribe(user => this.currentUser = user);
-
-
-      }
+     this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user => this.currentUser = user);
     }
 
 
