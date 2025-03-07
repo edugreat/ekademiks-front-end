@@ -43,9 +43,7 @@ export class AssessmentComponent implements OnInit, OnDestroy{
 
   constructor(private activatedRoute: ActivatedRoute,
               private assessmentService:AssessmentsService,
-              private mediaService: MediaService, 
-              private authService:AuthService
-  ){}
+              private mediaService: MediaService  ){}
 
   ngOnInit(): void {
     
@@ -95,8 +93,9 @@ export class AssessmentComponent implements OnInit, OnDestroy{
 
    
 
-    
-      if(!this.assessmentService.getSubjects(this.selectedLevel)){//when activated router is a result of user's selection of a particular assessment
+
+    // try fetching from the cache if data is available, else make a sever call
+      if(!this.assessmentService.getSubjects(this.selectedLevel)){
 
    
         this.subjectNamesSub =  this.assessmentService.fetchSubjectNames(this.selectedLevel).pipe(

@@ -115,10 +115,9 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   //checks if the current user is an admin
   public isAdmin():boolean{
 
-    if(this.currentUser) return this.currentUser.roles.some(role => role.toLowerCase() === 'admin');
+    return this.currentUser ? this.currentUser.roles.some(role => role.toLowerCase() === 'admin') : false;
 
-    return false;
-
+    
   }
 
 
@@ -126,10 +125,21 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   // get the object of logged in user
   private _currentUser(){
 
+    this.authService.loggedInUserObs$.subscribe(user => this.currentUser = user);
 
     if(sessionStorage.getItem('cachingKey') && !this.authService.currentUser){
 
-      this.currentUserSub = this.authService.cachedUser(Number(sessionStorage.getItem('cachingKey'))).pipe(take(1)).subscribe(user => this.currentUser = user);
+      this.currentUserSub = this.authService.cachedUser(Number(sessionStorage.getItem('cachingKey'))).pipe(take(1)).subscribe(user => {
+
+        // log them out and demand they login again
+        if(!user){
+
+          this.authService.logout();
+
+          this.router.navigate(['/login'])
+
+        }
+      });
     }
 
    

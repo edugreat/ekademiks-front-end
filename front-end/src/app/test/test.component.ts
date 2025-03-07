@@ -259,12 +259,12 @@ submit() {
          let attempt:Attempt = {
       
           testId:  Number(sessionStorage.getItem('testId')),
-          studentId: this.currentUser!.id,
+          studentId: this.currentUser ? this.currentUser.id : -1,
           selectedOptions: this.selectedOptions
          }
           
       
-          //extracts this part of the test content for use later in the student performance feedback to give a tip to the student for the questions they answers and their correct options
+          //extracts this part of the test content for use later in the student performance feedback to give a tip to the student for the questions they answerred and their correct options
           const data:{problem:string, response:string, answer:string}[] = this.testContent!.questions.map((question, index) =>({
             problem:question.problem,
             response:question.options.filter((option) => this.selectedOptions[index] === option.letter).map(option => option.text)[0],
@@ -276,6 +276,7 @@ submit() {
       
          
       
+          // if the user attempting to submit is a logged in user
         if(this.authService.isLoggedIn){
           
            //submit the student's performance to the back-end
@@ -289,9 +290,12 @@ submit() {
             complete:() => {
               this.activityService.currentAction('submission')//notifies the 'canDeactivate' that navigation is intended after assessment submission has been performed 
               
+              
+
               setTimeout(() => {
                 
-                this.router.navigate(['/performance'])
+               // persist student's performance to server's cache
+               this.saveRecentPerformance() ;
               }, 5000);
              
             },
@@ -307,8 +311,12 @@ submit() {
           this.testSubmitted = true;
           //notifies the 'canDeactivate' that navigation is intended after assessment submission has been performed 
           this.activityService.currentAction('submission');
+
+         
+
           setTimeout(() => {
-            this.router.navigate(['/performance'])
+             // persist student's performance to server's cache
+           this.saveRecentPerformance();
           }, 5000);
           
         }
@@ -334,7 +342,7 @@ submit() {
      let attempt:Attempt = {
   
       testId:  Number(sessionStorage.getItem('testId')),
-      studentId: this.currentUser!.id,
+      studentId: this.currentUser ? this.currentUser.id : -1,
       selectedOptions: this.selectedOptions
      }
       
@@ -366,11 +374,14 @@ submit() {
 
           //notifies the 'canDeactivate' that navigation is intended after assessment submission has been performed 
          this.activityService.currentAction('submission');
+
+         
          
           setTimeout(() => {
-            this.router.navigate(['/performance'])
+             // persist student's performance to server's cache
+           this.saveRecentPerformance() ;
           }, 5000);
-          this.router.navigate(['/performance']);
+         
         },
        
         error:(err) =>{
@@ -385,8 +396,10 @@ submit() {
       //notifies the 'canDeactivate' that navigation is intended after assessment submission has been performed 
       this.activityService.currentAction('submission');
       
+
       setTimeout(() => {
-        this.router.navigate(['/performance'])
+       // persist student's performance to server's cache
+       this.saveRecentPerformance() ;
       }, 5001);
       
     }
@@ -396,8 +409,7 @@ submit() {
 
   }
 
-  // persist student's performance to temporary storage for display purpose
-  this.saveRecentPerformance();
+  
   
   }
 
@@ -500,7 +512,7 @@ private openSnackBar(message:string){
  //displays users's recent performance if the 'showMyPerformance' evaluates to true due to user's input selection
 private saveRecentPerformance(){
 
-  if(!sessionStorage.getItem('recent-performance')){
+ 
 //extract the correct options for the particular test
 const correctOptions = this.testContent!.questions.map(question => question.answer);
 //get the student's recent performance
@@ -511,10 +523,25 @@ const recentPerformance: PerformanceObject = {
  correctOptions:correctOptions
 }
 
-sessionStorage.setItem('recent-performance', JSON.stringify(recentPerformance));
+// retrieve key to be used in performance redis retrieval of cached value
+  const cachingKey = Number(sessionStorage.getItem);
+
+  // persist recent performance to server's cache
+  this.testService.saveRecentPerformanceToCache(recentPerformance, cachingKey).pipe(take(1)).subscribe({
+
+    complete:() => {
 
 
-  }
+      // route to the 'performance page' so they can see their recent performance
+      this.router.navigate(['/performance']);
+
+
+    }
+
+  })
+
+
+  
 
 }
 }

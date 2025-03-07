@@ -2,6 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TestService } from '../test.service';
 import { PerformanceObject } from '../test.component';
 import { Router } from '@angular/router';
+import { take, tap } from 'rxjs';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-performance',
@@ -32,7 +34,7 @@ export class PerformanceComponent implements OnInit, OnDestroy {
   //flag that detects if the student's performance is ready to be displayed
   performanceAvailable = false;
 
-  constructor(private testService: TestService, private router:Router){}
+  constructor(private testService: TestService, private authService:AuthService, private router:Router){}
 
 
   ngOnInit(): void {
@@ -70,7 +72,49 @@ showMyRecentAccessPerformance(){
   const recentPeformance = JSON.parse(sessionStorage.getItem('recent-performance')!);
 
 
-  this.recentPerformance = recentPeformance;
-  this.performanceAvailable = true;
+  // first try accessing recent performance from the in-app service cache
+  if(this.testService.recentPerformance){
+
+    this.recentPerformance = this.testService.recentPerformance;
+  }else{
+
+    // extract caching key from browser storage
+    const cachingKey = Number(sessionStorage.getItem('cachingKey'));
+
+    // make api get call to the server cache center for users' recent performance
+    this.testService.getCachedRecentPerformance(cachingKey).pipe(tap(performance => {
+
+      // make in-app cache of just retrieved user's recent performance to the service.
+      this.testService.recentPerformance = performance;
+    }),
+    // automatic unsubscription after first emission
+   take(1)).subscribe(performance => {
+
+       
+    if(cachingKey && ! performance){
+
+      // log the user out if performance could not be retrieved despite having caching key in browser.
+
+      // This mostly shows their session expired and needs re-authenticate
+      this.authService.logout();
+
+      this.router.navigate(['/login']);
+
+     
+    }else{
+
+      this.recentPerformance = performance;
+
+      // flag that initiate view rendering
+      this.performanceAvailable = true;
+    }
+
+  
+   })
+  }
+
+
+  
+ 
 }
 }

@@ -43,14 +43,19 @@ export class AssessmentExpansionPanelComponent implements OnInit, OnDestroy {
   // get the object of logged in user
   private _currentUser() {
 
+    // we set guest user's ID to by default
+    let userId = -1;
+
     this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user => {
       
       if(user){
 
         this.currentUser = user;
-        this.getTopicAndDuration(this.currentUser.id)
+        userId = user.id;
+     }
 
-      }
+     this.getTopicAndDuration(userId);
+
     })
   }
 
@@ -67,6 +72,7 @@ export class AssessmentExpansionPanelComponent implements OnInit, OnDestroy {
 
     if (this.subject && this.category) {
 
+      // try fetching from in-app cache before rescusing to the server
       if (!this.assessmentService.getSelectedTopicAndDuration(`${this.subject}_${this.category}`)) {
 
 

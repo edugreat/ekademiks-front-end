@@ -9,7 +9,7 @@ import { Endpoints } from '../end-point';
   providedIn: 'root'
 })
 export class TestService {
-
+  
  
 
  //the submitting subject emits true or either student's or system initiated assessment submission
@@ -18,6 +18,9 @@ export class TestService {
 
  //boolean flag that shows when user's route navigation is due to assessment submission. This is basically to prevent the 'canDeactivate from blocking navigation
  forSubmission = false;
+
+  // provides in-app cache for student's recent performance just to minimize api call to the server's cache center
+  private _recentPerformance?:PerformanceObject;
  
   constructor(private http:HttpClient, private endpoints:Endpoints) {
     this.submissionSubject.asObservable().subscribe(value => this.forSubmission = value)
@@ -67,6 +70,29 @@ submission(value:boolean){
   this.submissionSubject.next(value)
 }
 
+saveRecentPerformanceToCache(recentPerformance: PerformanceObject, cachingKey:number):Observable<void> {
+ 
+  return this.http.post<void>(`${this.endpoints.recentPerformanceUrl}?key=${cachingKey}`, recentPerformance);
+}
+
+
+public getCachedRecentPerformance(cachingKey:number):Observable<PerformanceObject>{
+
+  return this.http.get<PerformanceObject>(`${this.endpoints.recentPerformanceUrl}?key=${cachingKey}`)
+
+
+}
+
+
+public set recentPerformance(performance:PerformanceObject){
+
+  this._recentPerformance = performance;
+}
+
+public get recentPerformance():PerformanceObject | undefined{
+
+  return this._recentPerformance;
+}
 // Method that retrieves an object whose key is the subject name and value is the category using the given test id
 subjectAndCategory(testId:number):Observable<HttpResponse<{[key:string]:string}>>{
 
