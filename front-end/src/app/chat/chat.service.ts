@@ -252,7 +252,6 @@ export class ChatService implements OnDestroy {
         if (evt) {
 
 
-          console.log('received hearbeat ')
           this.retryDelay = 35000
         }
       })
@@ -276,9 +275,6 @@ export class ChatService implements OnDestroy {
 
 
 
-              console.log(`emitting chat notification: ${data}`)
-
-
               // emit current chat notification to subscribers
               this.chatNotificationSubjects.get(groupId)!.next(data);
 
@@ -300,7 +296,6 @@ export class ChatService implements OnDestroy {
       //  disconnect group from notifications on account of error
       eventSource.onerror = () => {
 
-        console.log(`event source error `)
 
         // disconnect the erring group
         this.disconnectFromGroup(groupId);
@@ -313,7 +308,6 @@ export class ChatService implements OnDestroy {
 
         ++this.reconnectionAttempt;
 
-        console.log(`reconnection attempt: ${this.reconnectionAttempt}`)
 
         // stop further reconnection attempts once reconnection limit is reached or exceeded
         if (this.reconnectionAttempt >= this.MAX_RECONNECTION_ATTEMPT) eventSource.close()
@@ -323,7 +317,7 @@ export class ChatService implements OnDestroy {
 
       //  reset retry count once connected
       eventSource.onmessage = () => {
-        console.log('connected to chats');
+       
         this.retryCount = 0;
 
         this.retryDelay = 35000
@@ -388,7 +382,7 @@ export class ChatService implements OnDestroy {
 
       } else if (groupId < 0) {
 
-        console.log(`unsubscribing ${groupId}`)
+      
 
         // unsubscribe unsubscribe this group from background chat updates since the group actively routed to in the component
         this.backgroundSubscriptions.get((-1 * groupId))?.unsubscribe();
@@ -469,7 +463,7 @@ export class ChatService implements OnDestroy {
 
   public streamChatNotificationsFor(groupId: number): Observable<_Notification | undefined> {
 
-    console.log(`received notification: `)
+  
 
     return defer(() => {
 
@@ -552,7 +546,6 @@ export class ChatService implements OnDestroy {
   // disconnect the user from all the group when they log out
   disconnectAllChatGroups() {
 
-    console.log(`logging out active users ${this.activeUsers}`)
 
     if (this.eventSources) {
 
@@ -584,7 +577,6 @@ export class ChatService implements OnDestroy {
 
       const _activeGroups = this.activeUsers;
 
-      console.log(`logging out all groups ${this.activeUsers}`)
 
       _activeGroups.forEach(group => map.set(group, this.currentUser!.id));
     }

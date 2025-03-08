@@ -86,7 +86,6 @@ export class AssessmentsService {
   //fetches from the server test topics and durations for the given subject and category
   getTopicsAndDurations(subjectName:string, category:string, studentId:number):Observable<TopicAndDuration[]>{
 
-    console.log(`fetching for user ID ${studentId}`)
 
     return this.http.get<Array<{testName:string, duration:number}>>(`${this.testUrl}?subject=${subjectName}&category=${category}`, {
       headers:{

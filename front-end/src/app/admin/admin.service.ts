@@ -234,7 +234,6 @@ deleteCategory(category: number):Observable<HttpResponse<number>> {
 // sends notifications to the students
 sendNotifications(notification: NotificationDTO, institutionId?: number):Observable<HttpResponse<void>>{
 
-  console.log(`institution id: ${institutionId}`)
   return this.http.post<void>(this.endpoints.notificationUrl, notification,
     
     {

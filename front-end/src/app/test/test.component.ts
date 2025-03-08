@@ -301,7 +301,7 @@ submit() {
             },
            
             error:(error) =>{
-              console.log(error)
+             
             }
          })
         }else{//for guest students, do not submit to the backend, instead route to the performance page for them to see their recent performance or take more assessment
@@ -523,15 +523,30 @@ const recentPerformance: PerformanceObject = {
  correctOptions:correctOptions
 }
 
-// retrieve key to be used in performance redis retrieval of cached value
-  const cachingKey = Number(sessionStorage.getItem);
+// retrieve key to be used in performance redis retrieval of cached value, empty string value for guest users
+  const cachingKey = sessionStorage.getItem('cachingKey') ? sessionStorage.getItem('cachingKey') : '';
 
   // persist recent performance to server's cache
-  this.testService.saveRecentPerformanceToCache(recentPerformance, cachingKey).pipe(take(1)).subscribe({
+  this.testService.saveRecentPerformanceToCache(recentPerformance, cachingKey!).pipe(take(1)).subscribe({
+
+    // persist the returned caching key to the browser storage. This is used to retrieved student's recent performance
+    next:(key) =>{
+      
+    
+      sessionStorage.setItem('cachingKey', key)
+
+
+    },
+
+    error:(err) => {
+     
+      console.log(err.error)
+    },
 
     complete:() => {
+     
 
-
+     
       // route to the 'performance page' so they can see their recent performance
       this.router.navigate(['/performance']);
 

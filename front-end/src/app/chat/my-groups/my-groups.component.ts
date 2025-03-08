@@ -265,8 +265,8 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
                   // checks if the student still belongs to some other groups after exiting the current group chat
                   if(response.status === HttpStatusCode.Ok){
 
-                    // set a flag that forbids them from sending messages to the group while they're yet logged in. 
-                    // This flag would not be needed if the page were refreshed.
+                    // set a flag that forbids them from sending messages to the group immediately they leave the group chat. 
+                    // This flag would not be needed if the page were refreshed as the system will update user legibility to post.
                     sessionStorage.setItem('forbidden', (this.editableChat.key as string));
 
                     this.authService.isGroupMember(Number(this.studentId())).pipe(take(1)).subscribe(member => {

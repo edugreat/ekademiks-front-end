@@ -33,15 +33,15 @@
 
         <!-- Click to view most recently posted assigments -->
         <div *ngIf="!isAdmin()" >
-          <mat-icon *ngIf="isGuestUser()" >schedule</mat-icon>
+         
           <a disabled style="font-size: 0.8rem;" mat-button >Recent Assignments</a>
         </div>
        
         <mat-divider *ngIf="!isAdmin() && !isGuestUser()"  vertical="true" style="height: 0.9rem; width: 0.1rem; background-color: #4E342E; " ></mat-divider>
 
         <!-- Click to review your recent your recent assessment performance, for non guest users -->
-        <div *ngIf="!isAdmin() && !isGuestUser()" >
-          <a disabled style="font-size: 0.8rem;" mat-button >Recent Performance</a>
+        <div *ngIf="!isAdmin()" >
+          <a [routerLink]="['/performance']" style="font-size: 0.8rem;" mat-button >Recent Performance</a>
         </div>
 
           <!--Admin can send notifications -->

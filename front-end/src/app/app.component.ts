@@ -40,7 +40,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
 
-    console.log('on init is called')
+   
     this.updateUserName();
 
     this._currentUser();
@@ -127,12 +127,15 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.authService.loggedInUserObs$.subscribe(user => this.currentUser = user);
 
-    if(sessionStorage.getItem('cachingKey') && !this.authService.currentUser){
+    if(this.authService.isLoggedIn && !this.authService.currentUser){
 
-      this.currentUserSub = this.authService.cachedUser(Number(sessionStorage.getItem('cachingKey'))).pipe(take(1)).subscribe(user => {
+      const cachingKey = sessionStorage.getItem('cachingKey');
+
+      this.currentUserSub = this.authService.cachedUser(cachingKey!).pipe(take(1)).subscribe(user => {
 
         // log them out and demand they login again
         if(!user){
+
 
           this.authService.logout();
 

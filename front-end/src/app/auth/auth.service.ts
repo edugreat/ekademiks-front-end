@@ -90,7 +90,7 @@ export class AuthService {
 
 
   // returned redis cached object of loggedin user from the server
-  cachedUser(cacheKey:number):Observable<User> {
+  cachedUser(cacheKey:string):Observable<User> {
 
     return this.http.get<User>(`
       ${this.endpoints.cachedUserUrl}?cache=${cacheKey}`).pipe(tap((user) => {
@@ -184,11 +184,9 @@ export class AuthService {
       })
     }
 
-    
-  //   sessionStorage.setItem('username', user.firstName);
-  //  sessionStorage.setItem('roles', JSON.stringify(user.roles));
+   
     this.currentUserName.next(user.firstName);
-    sessionStorage.setItem('status', user.status);
+    
     if(this.isLoggedInStudent){
       this.studentLoginSubject.next(true);//send browser reload notification once a user successfully logs
 

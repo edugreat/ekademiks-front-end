@@ -66,6 +66,7 @@ export class AuthInterceptor implements HttpInterceptor{
 
                 // The user would be notified about the error, then be taken to the login page
                 // router.navigate(['/no-access', error.status]);
+               authService.logout();
                 router.navigate(['/login']);
 
                 return throwError(() => err);
@@ -85,13 +86,11 @@ export class AuthInterceptor implements HttpInterceptor{
           authService.logout();
 
             router.navigate(['/disabled'])
-          }else{
-            console.log(`generic error: ${error.error}`)
           }
           return throwError(() => error)
         })
       )
-    }else{console.log('no access token found')}
+    }
 
   return next.handle(req)
 

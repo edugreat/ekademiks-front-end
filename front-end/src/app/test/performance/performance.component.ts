@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TestService } from '../test.service';
 import { PerformanceObject } from '../test.component';
 import { Router } from '@angular/router';
-import { take, tap } from 'rxjs';
+import { Subscription, take, tap } from 'rxjs';
 import { AuthService } from '../../auth/auth.service';
 
 @Component({
@@ -19,7 +19,7 @@ It subscribes to the method of the TestService to be notified of the availabilit
 It also declares a method and calls the Testservice method to emit 'true' or 'false'. When 'true' is emitted, the student wants to see their performance, else,they want to take more assessment.
 The emission of 'true' or 'false' is due to the student's interraction with the radio button of the view component.
 */
-export class PerformanceComponent implements OnInit, OnDestroy {
+export class PerformanceComponent implements OnInit{
 
 
  
@@ -29,6 +29,7 @@ export class PerformanceComponent implements OnInit, OnDestroy {
   //student's recent performance placeholder, instantiated once the observable emits values
   recentPerformance?:PerformanceObject;
 
+ 
 
 
   //flag that detects if the student's performance is ready to be displayed
@@ -39,13 +40,12 @@ export class PerformanceComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 
+   
     this.testService.submission(false)//notifies 'canDeactivate'that submission is complete. Further navigation out of the TestComponent should be checked
   
   }
 
-  ngOnDestroy(): void {
-   
-  }
+ 
 
 
 
@@ -69,17 +69,21 @@ export class PerformanceComponent implements OnInit, OnDestroy {
 //Method that subscribes to observable and listens to know when student wants to see their recent assessment.
 showMyRecentAccessPerformance(){
 
-  const recentPeformance = JSON.parse(sessionStorage.getItem('recent-performance')!);
+  // const recentPeformance = JSON.parse(sessionStorage.getItem('recent-performance')!);
 
 
   // first try accessing recent performance from the in-app service cache
   if(this.testService.recentPerformance){
 
     this.recentPerformance = this.testService.recentPerformance;
-  }else{
+
+    // enables view display
+    this.performanceAvailable = true;
+
+  }else if(sessionStorage.getItem('cachingKey')){
 
     // extract caching key from browser storage
-    const cachingKey = Number(sessionStorage.getItem('cachingKey'));
+    const cachingKey:string = sessionStorage.getItem('cachingKey')!;
 
     // make api get call to the server cache center for users' recent performance
     this.testService.getCachedRecentPerformance(cachingKey).pipe(tap(performance => {
@@ -87,11 +91,12 @@ showMyRecentAccessPerformance(){
       // make in-app cache of just retrieved user's recent performance to the service.
       this.testService.recentPerformance = performance;
     }),
-    // automatic unsubscription after first emission
-   take(1)).subscribe(performance => {
+   take(1)
+   ).subscribe(performance => {
+
 
        
-    if(cachingKey && ! performance){
+    if(!performance){
 
       // log the user out if performance could not be retrieved despite having caching key in browser.
 
@@ -102,6 +107,7 @@ showMyRecentAccessPerformance(){
 
      
     }else{
+
 
       this.recentPerformance = performance;
 

@@ -70,13 +70,19 @@ submission(value:boolean){
   this.submissionSubject.next(value)
 }
 
-saveRecentPerformanceToCache(recentPerformance: PerformanceObject, cachingKey:number):Observable<void> {
+saveRecentPerformanceToCache(recentPerformance: PerformanceObject, cachingKey:string):Observable<string> {
  
-  return this.http.post<void>(`${this.endpoints.recentPerformanceUrl}?key=${cachingKey}`, recentPerformance);
+  return this.http.post(`${this.endpoints.recentPerformanceUrl}?key=${cachingKey}`, recentPerformance, {
+    responseType:'text'
+  }).pipe(tap(key => {
+
+  }));
 }
 
 
-public getCachedRecentPerformance(cachingKey:number):Observable<PerformanceObject>{
+public getCachedRecentPerformance(cachingKey:string):Observable<PerformanceObject>{
+
+  cachingKey = encodeURIComponent(cachingKey);
 
   return this.http.get<PerformanceObject>(`${this.endpoints.recentPerformanceUrl}?key=${cachingKey}`)
 

@@ -8,11 +8,13 @@ export const authGuard: CanActivateFn = () => {
   const router = inject(Router);
   const authService = inject(AuthService);
 
-  if(authService.isLoggedIn){
+  // this shows they really took some assessment(indicated by the server delivered cachingKey)
+  if(sessionStorage.getItem('cachingKey')){
 
     return true;
   }else{
 
+    authService.logout();
     router.navigate(['/login']);
 
     return false;
