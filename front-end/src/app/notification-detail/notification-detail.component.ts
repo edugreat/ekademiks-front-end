@@ -115,7 +115,27 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
     // gets the assessment topic and its duration
     private getTopicAndDuration(testId:number, topic:string, duration:number, subjectName:string, category:string){
     
-      // Make a a get request to the server to retrieve both the 'tpic' and 'duration' for the assessment referenced by the given 'testId'
+      // try fetching from the in-app cache 
+      if(this.assessmentService.getTopicAndDuration.length){
+
+        this.topicAndDurationSub$ = this.assessmentService.getSelectedTopicAndDuration(testId).subscribe({
+   
+          next:(result) =>{
+  
+            
+            topic = result.topic;
+            duration = result.duration;
+           
+           
+          },
+  
+          // routes to assessment commencement page
+          complete:() => this.router.navigate(['/start', topic, duration, subjectName, category])
+        
+        })
+      }else{
+
+         // Make a a get request to the server to retrieve both the 'topic' and 'duration' for the assessment referenced by the given 'testId'
       this.topicAndDurationSub$ = this.assessmentService.getTopicAndDuration(testId).subscribe({
    
         next:(result) =>{
@@ -132,6 +152,9 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
       
       })
 
+      }
+
+     
     }
 
     goBack() {

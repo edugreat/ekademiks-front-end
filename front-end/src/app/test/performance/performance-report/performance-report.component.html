@@ -107,7 +107,7 @@
         
         <td mat-cell *matCellDef="let element; let i=index">
         
-          <button matTooltip="click to view details" matIconSuffix (click)="goToDetails((pageIndex * pageSize)+i)" >
+          <button matTooltip="click & scroll down to view details" matIconSuffix (click)="goToDetails((pageIndex * pageSize)+i)" >
             <mat-icon *ngIf="!display![(pageIndex * pageSize)+i]" >visibility</mat-icon>
             <mat-icon *ngIf="display![(pageIndex * pageSize)+i]" >visibility_off</mat-icon>
           </button>
@@ -162,7 +162,7 @@
   <!-- the student has no recent assessment -->
    <ng-template  #noRecord >
     <div id="noRecord" >
-      <h3 >Please take an assessment</h3>
+      <h3 >Please take an assessment to begin with.</h3>
     </div>
   
    </ng-template>

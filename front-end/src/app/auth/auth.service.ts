@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, take, tap } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, take, tap } from 'rxjs';
 import { Endpoints } from '../end-point';
 import { ChatCacheService } from '../chat/chat-cache.service';
 
@@ -33,6 +33,10 @@ export class AuthService {
   // key-value pair of group ID and the date the user joined the group
   private _groupJoinDates = new Map<number, Date>;
 
+  // Subject that emits to subscribers a map object of key(group chat id) and value(dates the user joined the group)
+  private groupJoinedDateSubject = new BehaviorSubject<Date>(new Date());
+
+  public groupJoinDateOb$ = this.groupJoinedDateSubject.asObservable();
  
   //A subject to emit the name of the currently logged in user (initially emits the generic placeholder 'Student'). Subscribers receive up to date information
   private currentUserName:BehaviorSubject<string> 
@@ -116,18 +120,12 @@ export class AuthService {
     
   }
 
-  public get groupJoinDates():Map<number, Date>{
+  // returns into the Observale, the value for the given key(i.e the date the user joined the given group chat)
+  public  getJoinDates(groupId:number){
 
-    if(this._groupJoinDates.size) return this._groupJoinDates;
+    this.groupJoinedDateSubject.next(this._groupJoinDates.get(groupId) || new Date());
 
-    else if(sessionStorage.getItem('joined')) {
-
-      const date:Map<number, Date> = JSON.parse(sessionStorage.getItem('joined')!)
-
-      this._groupJoinDates = new Map(Object.entries(date).map(([key, val])  => [Number(key), new Date(val)]));
-    }
-
-    return this._groupJoinDates;
+  
   }
 
   // requests for new token when the existing token has expired
@@ -179,7 +177,7 @@ export class AuthService {
           sessionStorage.setItem('inGroup','yes');
 
           // retrieve information about when they join the group chats
-          this.updateGroupJoinedDates(user.id)
+          this.groupJoinedDates(user.id).pipe(take(1)).subscribe();
         }
       })
     }
@@ -204,33 +202,21 @@ export class AuthService {
   }
 
   
-  private groupJoinedDates(studentId:number):Observable<Map<number, Date>>{
+  public groupJoinedDates(studentId:number):Observable<Map<number, Date>>{
 
     
-    return this.http.get<Map<number, Date>>(`${this.endpoints.grp_joined_at}?id=${studentId}`)
+    return this.http.get<Map<number, Date>>(`${this.endpoints.grp_joined_at}?id=${studentId}`).pipe(tap(joinedDates =>{
+
+      this.groupJoinDates = joinedDates;
+
+    }))
 
     
   }
 
-  public get status(){
+ 
 
-    return sessionStorage.getItem('status');
-  }
-
-  updateGroupJoinedDates(studentId:number){
-
-
-    this.groupJoinedDates(studentId).pipe(take(1)).subscribe({
-      next:(joinedDate) => {
-
-       this.groupJoinDates = joinedDate;
-
-       sessionStorage.setItem('joined',JSON.stringify(joinedDate));
-      }
-    })
-
-  }
-
+ 
    
 
   //checks if the current user is a logged in user user

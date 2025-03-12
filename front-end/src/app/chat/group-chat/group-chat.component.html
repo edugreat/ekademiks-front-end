@@ -17,12 +17,12 @@
 
   
   <div #chatContainer class="chat">  
-    <div *ngIf="! isGroupAdmin()" style="font-size: 0.75em; color: #777; margin-bottom: 2px; display: flex; justify-content: center; ">
-     You joined on {{joinedAt() | date:'medium'}}
+    <div *ngIf="!isGroupAdmin()" style="font-size: 0.75em; color: #777; margin-bottom: 2px; display: flex; justify-content: center; ">
+     You joined on {{groupJoinDate | date:'fullDate'}}
     </div>
 
     <div *ngIf="isGroupAdmin()" style="font-size: 0.75em; color: #777; margin-bottom: 2px; display: flex; justify-content: center; ">
-        Group you created on {{joinedAt() | date:'medium'}}
+        Group you created on {{groupJoinDate | date:'fullDate'}}
        </div>
     <div  *ngFor="let chat of chatMessages" class="chat-message" #chatMessageRef > 
 

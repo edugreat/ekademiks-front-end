@@ -37,13 +37,15 @@ export class AssessmentExpansionPanelComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
 
+    this.currentUserSub?.unsubscribe();
+
   }
 
 
   // get the object of logged in user
   private _currentUser() {
 
-    // we set guest user's ID to by default
+    // we set guest user's ID to -1 by default
     let userId = -1;
 
     this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user => {
@@ -54,7 +56,7 @@ export class AssessmentExpansionPanelComponent implements OnInit, OnDestroy {
         userId = user.id;
      }
 
-     this.getTopicAndDuration(userId);
+     this.getTopicsAndDurations(userId);
 
     })
   }
@@ -63,8 +65,8 @@ export class AssessmentExpansionPanelComponent implements OnInit, OnDestroy {
 
 
 
-  // get the assessment topic and its duration
-  private getTopicAndDuration(studentId: number) {
+  // get the assessment topics and its durations
+  private getTopicsAndDurations(studentId: number) {
 
     this.subject = this.activatedRoute.snapshot.params['subject'];
     this.category = this.activatedRoute.snapshot.params['category'];
@@ -72,21 +74,20 @@ export class AssessmentExpansionPanelComponent implements OnInit, OnDestroy {
 
     if (this.subject && this.category) {
 
-      // try fetching from in-app cache before rescusing to the server
-      if (!this.assessmentService.getSelectedTopicAndDuration(`${this.subject}_${this.category}`)) {
+      // try fetching from in-app cache before recusing to the server
+      if (!this.assessmentService.getSelectedTopicsAndDurations(`${this.subject}_${this.category}`)) {
 
-
-
+       
         this.topicsAndDurations$ = this.assessmentService.getTopicsAndDurations(this.subject, this.category, studentId);
 
-        this.assessmentService.setTopicAndDuration(`${this.subject}_${this.category}`, this.topicsAndDurations$);
+        this.assessmentService.setTopicsAndDurations(`${this.subject}_${this.category}`, this.topicsAndDurations$);
         // converts to lowercase case except the initial letter
         this.level = this.category.substring(0, 1) + '' + (this.category.substring(1)).toLowerCase()
 
       } else {
 
 
-        this.topicsAndDurations$ = this.assessmentService.getSelectedTopicAndDuration(`${this.subject}_${this.category}`);
+        this.topicsAndDurations$ = this.assessmentService.getSelectedTopicsAndDurations(`${this.subject}_${this.category}`);
         this.level = this.category.substring(0, 1) + '' + (this.category.substring(1)).toLowerCase()
       }
 

@@ -21,6 +21,9 @@ export class TestService {
 
   // provides in-app cache for student's recent performance just to minimize api call to the server's cache center
   private _recentPerformance?:PerformanceObject;
+
+  // in-app cache for the assessment test(an object of TestContentDTO)
+  private _testMap = new Map<string, TestContent>();
  
   constructor(private http:HttpClient, private endpoints:Endpoints) {
     this.submissionSubject.asObservable().subscribe(value => this.forSubmission = value)
@@ -32,8 +35,23 @@ getTest(topic:string, category:string):Observable<TestContent>{
 
   return this.http.get<TestContentDTO>(`${this.endpoints.baseTestUrl}?topic=${topic}&category=${category}`).pipe(
     tap(dto => sessionStorage.setItem("testId", dto.testId+"")), 
-    map(dto => this.convertToTestContent(dto)),
+    map(dto => {
+
+      const data = this.convertToTestContent(dto);
+
+      this._testMap.set(topic.concat(category), data);  
+
+      return data;
+    }
+  
+  
   )
+  )
+}
+
+public getTestFor(key:string):TestContent | undefined{
+
+  return this._testMap.get(key)
 }
 
 //helper method to transform the Question dto object fetched from the server side to the question object to display on th front end

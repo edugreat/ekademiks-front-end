@@ -103,7 +103,7 @@ private authService:AuthService
     this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user => {
 
       this.currentUser = user
-      console.log(`user received: ${JSON.stringify(user, null,1)}`)
+    
     });
 
 

@@ -40,10 +40,12 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
 
+    console.log('app component init')
    
     this.updateUserName();
 
     this._currentUser();
+    
    this.authService.studentLoginObs$.subscribe(isLoggedIn =>{
 
     if(isLoggedIn){

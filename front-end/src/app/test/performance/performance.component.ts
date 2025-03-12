@@ -96,24 +96,10 @@ showMyRecentAccessPerformance(){
 
 
        
-    if(!performance){
+    this.recentPerformance = performance;
 
-      // log the user out if performance could not be retrieved despite having caching key in browser.
-
-      // This mostly shows their session expired and needs re-authenticate
-      this.authService.logout();
-
-      this.router.navigate(['/login']);
-
-     
-    }else{
-
-
-      this.recentPerformance = performance;
-
-      // flag that initiate view rendering
-      this.performanceAvailable = true;
-    }
+    // flag that initiate view rendering
+    this.performanceAvailable = true;
 
   
    })

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, asyncScheduler, map, of, scheduled } from 'rxjs';
+import { Observable, asyncScheduler, map, of, scheduled, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +17,10 @@ export class AssessmentsService {
   private _assessmentLevels?:Observable<Levels[]>;
 
   // caches the assessment topic and its duration, for the assessment the user selected
-  private _topicAndDurationMap = new Map<string, Observable<TopicAndDuration[]>>();
+  private _topicsAndDurationsMap = new Map<string, Observable<TopicAndDuration[]>>();
+
+  // in-app cache for a particular assessment's topic and duration
+  private _topicAndDurationMap = new Map<number, Observable<TopicAndDuration>>();
 
   constructor(private http:HttpClient) { }
 
@@ -73,14 +76,14 @@ export class AssessmentsService {
     return this._subjectMap.get(category)
   }
 
-  public setTopicAndDuration(category:string, data:Observable<TopicAndDuration[]>){
+  public setTopicsAndDurations(category:string, data:Observable<TopicAndDuration[]>){
 
-    this._topicAndDurationMap.set(category,data);
+    this._topicsAndDurationsMap.set(category,data);
   }
 
-  public getSelectedTopicAndDuration(category:string){
+  public getSelectedTopicsAndDurations(category:string){
 
-    return this._topicAndDurationMap.get(category)!
+    return this._topicsAndDurationsMap.get(category)!
   }
 
   //fetches from the server test topics and durations for the given subject and category
@@ -102,12 +105,24 @@ export class AssessmentsService {
   // fetches from the server test topic and category for a given test id
   getTopicAndDuration(testId:number):Observable<TopicAndDuration>{
 
-    return this.http.get<{testName:string, duration:number}>(`${this.testUrl}/info?testId=${testId}`).pipe(
-      map((result) =>{
-        return {topic:result.testName, duration: result.duration}
-      })
+    return this.http.get<TopicAndDuration>(`${this.testUrl}/info?testId=${testId}`).pipe(
+      tap((data) => this.setTopicAndDuration(testId, of(data)))
     )
   }
+
+  // make in-app cache of assessment's topic and duration
+  private setTopicAndDuration(testId:number, data:Observable<TopicAndDuration>){
+
+    this._topicAndDurationMap.set(testId, data);
+  }
+
+
+  public getSelectedTopicAndDuration(testId:number):Observable<TopicAndDuration>{
+
+    return this._topicAndDurationMap.get(testId)!;
+  }
+
+
 }
 
 

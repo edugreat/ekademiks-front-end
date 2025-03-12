@@ -87,6 +87,11 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
   snackBarTimer: any;
 
+  // Date representing instance a user joins a group chat
+  groupJoinDate?:Date;
+
+  groupJoinDateSub?:Subscription;
+
 
   @ViewChild('chatContainer') chatContainer!: ElementRef;
 
@@ -106,7 +111,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
     this.activatedRoute.paramMap.subscribe(params => {
 
-    
+   
       const _groupId = params.get('group_id');
       const groupDescription = params.get('description');
 
@@ -119,6 +124,10 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
 
       if (_groupId && groupDescription && _grpAdminId) {
+
+        this.subscribeToJoinedDate(_groupId);
+
+       
 
         // unsubscribe from the receiving background message for the this group, then subscribe to receiving background message for the previous group
       this.chatMessageSub?.unsubscribe();
@@ -157,6 +166,27 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
 
   }
+
+  // subscribes to service method to get date the user joined the group chat
+  private subscribeToJoinedDate(groupId:string){
+    
+
+    setTimeout(() => {
+      
+    
+       // forces the service to emit the date the user joined this group chat
+     this.getJoinedDate(groupId);
+        // subscribes to receive the date the user joined the group chat
+        this.groupJoinDateSub = this.authService.groupJoinDateOb$.subscribe(date => this.groupJoinDate = date);
+
+    }, 2000);
+
+  }
+
+  getJoinedDate(_groupId: string) {
+    
+   this.authService.getJoinDates(Number(_groupId));
+  }
   async loadChats(_groupId: string) {
    
     // try loading cached chats first
@@ -190,7 +220,9 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
     this.chatNotificationSub?.unsubscribe();
 
-    this.currentUserSub?.unsubscribe()
+    this.currentUserSub?.unsubscribe();
+
+    this.groupJoinDateSub?.unsubscribe();
 
     // disconnect from the receiving chat messages
     //this.chatService.disconnectFromSSE();
@@ -221,10 +253,16 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
  private _currentUser(){
 
-  this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user => this.currentUser = user);
+  this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user => {
+    this.currentUser = user;
+
+   
+  
+  });
 
   }
 
+  
 
   private streamChats() {
 
@@ -548,17 +586,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
   }
 
-  joinedAt(): Date {
-
-    const _joinedAt = JSON.parse(sessionStorage.getItem('joinedAt')!);
-
-
-    return this.authService.groupJoinDates.get(this.groupId!)!
-
-    
-
-
-  }
+ 
 
   recentPosts(): boolean {
 

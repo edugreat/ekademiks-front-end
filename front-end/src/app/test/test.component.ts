@@ -137,12 +137,40 @@ testStarted: boolean = false; // boolean flag indicating whether the student has
 
   if(this.topic && category){
 
-   this.questionSub =  this.testService.getTest(this.topic, category).subscribe(testContent => {
+    // try accessing the ina-app cache for resource availability
+    if(this.testService.getTestFor(this.topic.concat(category))){
+
+     
+
+      let testContent = this.testService.getTestFor(this.topic.concat(category));
+
+      this.processAssessmentData(testContent!);
+
+    } 
+    // get resource from the server
+    else{
+
+     
+      this.questionSub =  this.testService.getTest(this.topic, category).subscribe(testContent => {
 
 
-    this.testContent = testContent;//set the returned test content to the testContent property
+        this.processAssessmentData(testContent);
+    
+    
+    
+       });
+    }
 
-   
+  
+  }
+  
+}
+
+  private processAssessmentData(testContent: TestContent) {
+    this.testContent = testContent; //set the returned test content to the testContent property
+
+
+
 
     //get the instructions for the test
     this.testInstructions = testContent.instructions;
@@ -152,22 +180,16 @@ testStarted: boolean = false; // boolean flag indicating whether the student has
     this.selectedOptions = new Array(this.testContent.questions.length).fill(null);
 
     //sets the number of questions askd
-     this.totalQuestions = this.testContent.questions.length;
+    this.totalQuestions = this.testContent.questions.length;
 
-     this.remaining = this.totalQuestions;
+    this.remaining = this.totalQuestions;
 
-     //set the initial pagination information
-     this.updatePaginationInfo(this.currentPage);
+    //set the initial pagination information
+    this.updatePaginationInfo(this.currentPage);
 
     //opens the dialog box once the question gets loaded
     this.openDialog(this.enterAnimationDuration, this.exitAnimationDuration);
-
-
-
-   });
   }
-  
-}
 
 //set pagination information
 private updatePaginationInfo(start:number){
