@@ -7,6 +7,7 @@ import { _Notification as _Notification } from '../../admin/upload/notifications
 import { MAT_SNACK_BAR_DATA, MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { ChatCacheService } from '../chat-cache.service';
+import { AuthService, User } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-group-chat',
@@ -65,6 +66,12 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
   groupAdminId?: number;
 
+   //loggedInStudentId:number|undefined = 0;
+
+   currentUser?:User;
+
+ 
+
   // an array of both previous and current chat messages belonging to this group chat
   chatMessages: ChatMessage[] = [];
 
@@ -80,14 +87,22 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
   snackBarTimer: any;
 
+  // Date representing instance a user joins a group chat
+  groupJoinDate?:Date;
+
+  groupJoinDateSub?:Subscription;
+
 
   @ViewChild('chatContainer') chatContainer!: ElementRef;
+
+  currentUserSub?: Subscription;
   
 
 
 
 
-  constructor(private chatService: ChatService, private activatedRoute: ActivatedRoute, private chatCachedService:ChatCacheService) { }
+  constructor(private chatService: ChatService, private activatedRoute: ActivatedRoute, 
+    private chatCachedService:ChatCacheService, private authService:AuthService) { }
 
 
 
@@ -96,14 +111,23 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
     this.activatedRoute.paramMap.subscribe(params => {
 
-    
+   
       const _groupId = params.get('group_id');
       const groupDescription = params.get('description');
 
-      const _grpAdminId = params.get('group_admin_id')
+      const _grpAdminId = params.get('group_admin_id');
+
+      
+
+    //  get the object of the current user
+    this._currentUser();
 
 
       if (_groupId && groupDescription && _grpAdminId) {
+
+        this.subscribeToJoinedDate(_groupId);
+
+       
 
         // unsubscribe from the receiving background message for the this group, then subscribe to receiving background message for the previous group
       this.chatMessageSub?.unsubscribe();
@@ -142,15 +166,37 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
 
   }
+
+  // subscribes to service method to get date the user joined the group chat
+  private subscribeToJoinedDate(groupId:string){
+    
+
+    setTimeout(() => {
+      
+    
+       // forces the service to emit the date the user joined this group chat
+     this.getJoinedDate(groupId);
+        // subscribes to receive the date the user joined the group chat
+        this.groupJoinDateSub = this.authService.groupJoinDateOb$.subscribe(date => this.groupJoinDate = date);
+
+    }, 2000);
+
+  }
+
+  getJoinedDate(_groupId: string) {
+    
+   this.authService.getJoinDates(Number(_groupId));
+  }
   async loadChats(_groupId: string) {
    
     // try loading cached chats first
 
     this.chatMessages = await this.chatCachedService.getCachedChat(_groupId);
 
-    if(this.chatMessages.length === 0){
+    // if messages where received and user is logged in(cachingKey stored in the session storage helps to verify a user was logged in)
+    if(this.chatMessages.length === 0 && this.currentUser){
 
-      this.chatService.connectToChatMessages(Number(_groupId), this.loggedInStudentId());
+      this.chatService.connectToChatMessages(Number(_groupId),this.currentUser!.id);
 
      
     }
@@ -174,6 +220,10 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
     this.chatNotificationSub?.unsubscribe();
 
+    this.currentUserSub?.unsubscribe();
+
+    this.groupJoinDateSub?.unsubscribe();
+
     // disconnect from the receiving chat messages
     //this.chatService.disconnectFromSSE();
 
@@ -196,6 +246,23 @@ export class GroupChatComponent implements OnInit, OnDestroy {
     })
   }
 
+  get isLoggedIn(){
+
+    return sessionStorage.getItem('logged') !== null;
+  }
+
+ private _currentUser(){
+
+  this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user => {
+    this.currentUser = user;
+
+   
+  
+  });
+
+  }
+
+  
 
   private streamChats() {
 
@@ -333,9 +400,9 @@ export class GroupChatComponent implements OnInit, OnDestroy {
   deleteChat() {
 
     // only the chat author or the group admin is permitted to delete the chat
-    if (this.currentlyClickedChat?.senderId === this.loggedInStudentId() || this.isGroupAdmin()) {
+    if (this.currentlyClickedChat?.senderId === this.currentUser?.id || this.isGroupAdmin()) {
 
-      this.chatService.deleteChatMessage({ [this.currentlyClickedChat!.groupId]: this.currentlyClickedChat!.id! }, this.loggedInStudentId())
+      this.chatService.deleteChatMessage({ [this.currentlyClickedChat!.groupId]: this.currentlyClickedChat!.id! }, this.currentUser!.id)
         .pipe(take(1)).subscribe({
 
           next: (response: HttpResponse<number>) => {
@@ -363,10 +430,10 @@ export class GroupChatComponent implements OnInit, OnDestroy {
                     let replier = repliers[index];
 
                     // update the deleteBy property
-                    replier.deleterId = this.loggedInStudentId();
+                    replier.deleterId = this.currentUser?.id;
 
                     // set deleter's name
-                    (replier.deleter === this.username) ? this.username : undefined;
+                    (replier.deleter === this.currentUser?.firstName) ? this.currentUser?.firstName : undefined;
 
 
                     // replace the old chat with the updated chat
@@ -389,11 +456,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
   }
 
-  // returns logged in username
-  private get username() {
-
-    return sessionStorage.getItem('username');
-  }
+  
 
   // get the IDs of chat that replied to a given chat
   private getRepliers(id: number): ChatMessage[] {
@@ -406,7 +469,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
     if (this.currentlyClickedChat) {
 
-      return this.loggedInStudentId() === this.currentlyClickedChat.senderId;
+      return this.currentUser?.id === this.currentlyClickedChat.senderId;
     }
 
     return false;
@@ -507,11 +570,11 @@ export class GroupChatComponent implements OnInit, OnDestroy {
   //This is used to control the display of spinner while waiting for the retrieval of previous chats
   private hadRecentPosts() {
 
-    const studentId = sessionStorage.getItem('studentId');
+   
 
-    if (studentId && this.groupId) {
+    if (this.currentUser?.id && this.groupId) {
 
-      this.chatService.hadPreviousPosts(Number(studentId), this.groupId).pipe(take(1)).subscribe({
+      this.chatService.hadPreviousPosts(this.currentUser.id, this.groupId).pipe(take(1)).subscribe({
         next: (result) => {
           if (result) {
             sessionStorage.setItem('recentPosts', 'true');
@@ -523,35 +586,20 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
   }
 
-  joinedAt(): Date {
-
-    const _joinedAt = JSON.parse(sessionStorage.getItem('joinedAt')!);
-
-
-
-    return new Date(_joinedAt[this.groupId!]);
-
-
-  }
+ 
 
   recentPosts(): boolean {
 
     return (sessionStorage.getItem('recentPosts') ? true : false)
   }
 
-  loggedInStudentId(): number {
-
-    const id = Number(sessionStorage.getItem('studentId'));
-
-    return id;
-  }
 
   // triggers sending new chat messages to the group
   sendChat() {
 
 
-    const senderId = sessionStorage.getItem('studentId');
-    if (this.groupId && senderId && this.newChatContent.trim().length) {
+   
+    if (this.groupId && this.currentUser?.id && this.newChatContent.trim().length) {
 
 
 
@@ -615,7 +663,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
         const newChatMessage: ChatMessage = {
           id: 0,//not actually a required field, but to prevent server reporting error 
           groupId: Number(this.groupId),
-          senderId: Number(senderId),
+          senderId: Number(this.currentUser.id),
           senderName: '',//not actually a required field, but to prevent server reporting error 
           content: this.newChatContent,
           isEditedChat: false,
@@ -648,7 +696,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
         const newChatMessage: ChatMessage = {
           id: 0,//not actually a required field, but to prevent server reporting error 
           groupId: Number(this.groupId),
-          senderId: Number(senderId),
+          senderId: Number(this.currentUser.id),
           senderName: '',//not actually a required field, but to prevent server reporting error 
           content: this.newChatContent,
           isEditedChat:false,
@@ -695,7 +743,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
   // returns the name of a user who deleted a given chat
   public chatDeleter(chat: ChatMessage): string {
 
-    if (chat.deleterId === this.loggedInStudentId()) return `deleted by you`;
+    if (chat.deleterId === this.currentUser?.id) return `deleted by you`;
     else if (chat.deleterId === this.groupAdminId) return `deleted by admin`;
 
     return `deleted by ${chat.deleter!}`;
@@ -738,7 +786,7 @@ export class GroupChatComponent implements OnInit, OnDestroy {
 
 
 
-    return this.groupAdminId === this.loggedInStudentId();
+    return this.groupAdminId === this.currentUser?.id;
   }
 
   // validates chat message to enable or disable the sent button
@@ -859,18 +907,20 @@ export class GroupChatComponent implements OnInit, OnDestroy {
   //  this method deletes all notifications(for the currently logged in student) about new members joining the group
   private deleteNewMemberJoinedGroupNotification(notificationIds: number[]) {
 
-    this.chatService.deleteChatNotifications(this.loggedInStudentId(), notificationIds).subscribe({
+    if(this.currentUser){
+      this.chatService.deleteChatNotifications(this.currentUser.id, notificationIds).subscribe({
 
-      complete: () => {
-
-        for (let index = 0; index < notificationIds.length; index++) {
-
-          this.newMemberNotifications.splice(index, 1);
-
+        complete: () => {
+  
+          for (let index = 0; index < notificationIds.length; index++) {
+  
+            this.newMemberNotifications.splice(index, 1);
+  
+          }
         }
-      }
-
-    })
+  
+      })
+    }
   }
 
   // checks if the user is forbidden from posting to the group chat referenced by the ID.

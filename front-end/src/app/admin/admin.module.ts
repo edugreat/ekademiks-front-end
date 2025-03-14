@@ -23,6 +23,7 @@ import { AssessmentQuestionsComponent } from './fetch/assessment-questions/asses
 import { InstitutionRegistrationComponent } from './institution-registration/institution-registration.component';
 import { AddStudentComponent } from './institution-registration/add-student/add-student.component';
 import { AssignmentComponent } from './assignment/assignment.component';
+import { DragDirective } from './assignment/drag.directive';
 
 const uploadComponents = [
  
@@ -42,7 +43,7 @@ const fetchComponents = [
 const bankComponents = [QuestionBankComponent, OptionsBankComponent];
 
 @NgModule({
-  declarations: [ AdminComponent, uploadComponents, fetchComponents, bankComponents, PreviewTestComponent, InstructionsComponent, NotificationsComponent, StudentListComponent, StudentDetailsPageComponent, TestFetchInfoComponent, AssessmentQuestionsComponent, InstitutionRegistrationComponent, AddStudentComponent, AssignmentComponent],
+  declarations: [ AdminComponent, uploadComponents, fetchComponents, bankComponents, PreviewTestComponent, InstructionsComponent, NotificationsComponent, StudentListComponent, StudentDetailsPageComponent, TestFetchInfoComponent, AssessmentQuestionsComponent, InstitutionRegistrationComponent, AddStudentComponent, AssignmentComponent, DragDirective],
   imports: [CommonModule, SharedModule, AdminRoutingModule],
 })
 export class AdminModule {}

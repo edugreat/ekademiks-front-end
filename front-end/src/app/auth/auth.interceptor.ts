@@ -1,17 +1,20 @@
 import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpStatusCode } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { inject, Injectable, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, Observable, switchMap, throwError } from 'rxjs';
-import { AuthService } from './auth.service';
+import { catchError, Observable, Subscription, switchMap, take, throwError } from 'rxjs';
+import { AuthService, User } from './auth.service';
 //Intercepts all outgoing http calls and injects the authorization tokens if it exists
+@Injectable()
 export class AuthInterceptor implements HttpInterceptor{
 
- 
+
+
+
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const router = inject(Router);
     const authService = inject(AuthService);
-    //gets the authorization token from the local storage
+    //gets the authorization token
     const accessToken  = sessionStorage.getItem('accessToken');
    
     if(accessToken){
@@ -25,6 +28,7 @@ export class AuthInterceptor implements HttpInterceptor{
         catchError((error: HttpErrorResponse) =>{
 
           //check if the error is access denied error
+
           if(error.status === HttpStatusCode.Unauthorized && !authService.refreshTokenInProcess){
 
             
@@ -39,7 +43,7 @@ export class AuthInterceptor implements HttpInterceptor{
                 authService.refreshTokenInProcess = false;
 
                 // gets the newly generated access token
-                const accessToken = sessionStorage.getItem('accessToken');
+                const accessToken =  sessionStorage.getItem('accessToken');;
 
                 // creates new authorizatuin header
                 const Authorization = `Bearer ${accessToken}`;
@@ -62,6 +66,7 @@ export class AuthInterceptor implements HttpInterceptor{
 
                 // The user would be notified about the error, then be taken to the login page
                 // router.navigate(['/no-access', error.status]);
+               authService.logout();
                 router.navigate(['/login']);
 
                 return throwError(() => err);
@@ -81,13 +86,11 @@ export class AuthInterceptor implements HttpInterceptor{
           authService.logout();
 
             router.navigate(['/disabled'])
-          }else{
-            console.log(`generic error: ${error.error}`)
           }
           return throwError(() => error)
         })
       )
-    }else{console.log('no access token found')}
+    }
 
   return next.handle(req)
 

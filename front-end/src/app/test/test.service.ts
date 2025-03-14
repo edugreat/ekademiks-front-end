@@ -9,7 +9,7 @@ import { Endpoints } from '../end-point';
   providedIn: 'root'
 })
 export class TestService {
-
+  
  
 
  //the submitting subject emits true or either student's or system initiated assessment submission
@@ -18,6 +18,12 @@ export class TestService {
 
  //boolean flag that shows when user's route navigation is due to assessment submission. This is basically to prevent the 'canDeactivate from blocking navigation
  forSubmission = false;
+
+  // provides in-app cache for student's recent performance just to minimize api call to the server's cache center
+  private _recentPerformance?:PerformanceObject;
+
+  // in-app cache for the assessment test(an object of TestContentDTO)
+  private _testMap = new Map<string, TestContent>();
  
   constructor(private http:HttpClient, private endpoints:Endpoints) {
     this.submissionSubject.asObservable().subscribe(value => this.forSubmission = value)
@@ -29,8 +35,23 @@ getTest(topic:string, category:string):Observable<TestContent>{
 
   return this.http.get<TestContentDTO>(`${this.endpoints.baseTestUrl}?topic=${topic}&category=${category}`).pipe(
     tap(dto => sessionStorage.setItem("testId", dto.testId+"")), 
-    map(dto => this.convertToTestContent(dto)),
+    map(dto => {
+
+      const data = this.convertToTestContent(dto);
+
+      this._testMap.set(topic.concat(category), data);  
+
+      return data;
+    }
+  
+  
   )
+  )
+}
+
+public getTestFor(key:string):TestContent | undefined{
+
+  return this._testMap.get(key)
 }
 
 //helper method to transform the Question dto object fetched from the server side to the question object to display on th front end
@@ -67,6 +88,35 @@ submission(value:boolean){
   this.submissionSubject.next(value)
 }
 
+saveRecentPerformanceToCache(recentPerformance: PerformanceObject, cachingKey:string):Observable<string> {
+ 
+  return this.http.post(`${this.endpoints.recentPerformanceUrl}?key=${cachingKey}`, recentPerformance, {
+    responseType:'text'
+  }).pipe(tap(key => {
+
+  }));
+}
+
+
+public getCachedRecentPerformance(cachingKey:string):Observable<PerformanceObject>{
+
+  cachingKey = encodeURIComponent(cachingKey);
+
+  return this.http.get<PerformanceObject>(`${this.endpoints.recentPerformanceUrl}?key=${cachingKey}`)
+
+
+}
+
+
+public set recentPerformance(performance:PerformanceObject){
+
+  this._recentPerformance = performance;
+}
+
+public get recentPerformance():PerformanceObject | undefined{
+
+  return this._recentPerformance;
+}
 // Method that retrieves an object whose key is the subject name and value is the category using the given test id
 subjectAndCategory(testId:number):Observable<HttpResponse<{[key:string]:string}>>{
 

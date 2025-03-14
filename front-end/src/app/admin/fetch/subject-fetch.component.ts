@@ -123,7 +123,7 @@ export class SubjectFetchComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
 
-    //  Get the category under which the subject is falls
+    //  Get the category under which the subject falls
     const category = this.dataSource.data[this.editingIndex].category;
 
 

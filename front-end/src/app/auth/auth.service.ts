@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, take, tap } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, take, tap } from 'rxjs';
 import { Endpoints } from '../end-point';
 import { ChatCacheService } from '../chat/chat-cache.service';
 
@@ -10,18 +10,34 @@ import { ChatCacheService } from '../chat/chat-cache.service';
 export class AuthService {
   
 
+  // an observable that emits an object of logged in users to subscribers
+  private _loggedInUserSubject = new BehaviorSubject<User|undefined>(undefined);
+
+  loggedInUserObs$ = this._loggedInUserSubject.asObservable();
+
 
   // This flag is used to stop anyother requests from proceeding while refresh token process is ongoing, until it completes
   private _refreshTokenInProcess = false;
+
+
   
 
   // Login event that is used at the app.compoent to trigger connection to the server's notification channel upon student's login ;
-  private studentLoginSubject = new BehaviorSubject<boolean>(this.isLoggedInStudent());
+  private studentLoginSubject = new BehaviorSubject<boolean>(this.isLoggedInStudent);
 
   studentLoginObs$ = this.studentLoginSubject.asObservable();
 
-  
+  // an object of the currently logged in user
+  private _currentUser?:User;
 
+  // key-value pair of group ID and the date the user joined the group
+  private _groupJoinDates = new Map<number, Date>;
+
+  // Subject that emits to subscribers a map object of key(group chat id) and value(dates the user joined the group)
+  private groupJoinedDateSubject = new BehaviorSubject<Date>(new Date());
+
+  public groupJoinDateOb$ = this.groupJoinedDateSubject.asObservable();
+ 
   //A subject to emit the name of the currently logged in user (initially emits the generic placeholder 'Student'). Subscribers receive up to date information
   private currentUserName:BehaviorSubject<string> 
 
@@ -30,9 +46,29 @@ export class AuthService {
   public userName$: Observable<string> ;
   constructor(private http: HttpClient, private endpoints:Endpoints, private chatCachedService:ChatCacheService) {
 
-    this.currentUserName = new BehaviorSubject<string>(sessionStorage.getItem('username')! || 'Student');
-    this.userName$= this.currentUserName.asObservable();
     
+    this.currentUserName = new BehaviorSubject<string>(this.currentUser?.firstName || 'Student');
+    this.userName$= this.currentUserName.asObservable();
+
+  
+   }
+  
+
+  //  set the current logged in user
+   public set loggedInUser(loggedInUser:User | undefined){
+
+    this._loggedInUserSubject.next(loggedInUser);
+
+   }
+
+   private set currentUser(user:User|undefined){
+
+    this._currentUser = user;
+   }
+
+   public get currentUser(){
+
+    return this._currentUser;
    }
   
 
@@ -42,12 +78,54 @@ export class AuthService {
     return this.http.post<User>(`${this.endpoints.baseSignInUrl}?role=${role}`, {email:`${email}`, password:`${password}`}).pipe(
       tap(user =>{
 
+        this.loggedInUser = user;
+
+        this.currentUser = user;
+
+       
+
          this.saveToSession(user)
 
       })
     )
 
 
+  }
+
+
+  // returned redis cached object of loggedin user from the server
+  cachedUser(cacheKey:string):Observable<User> {
+
+    return this.http.get<User>(`
+      ${this.endpoints.cachedUserUrl}?cache=${cacheKey}`).pipe(tap((user) => {
+
+      
+        this.loggedInUser = user;
+        this.currentUser = user;
+        this.currentUserName.next(user.firstName)
+        this.saveToSession(user)
+      
+      }));
+
+  
+  }
+  
+
+  private set groupJoinDates(joinedDate:Map<number, Date>){
+
+    this._groupJoinDates = new Map(Object.entries(joinedDate).map(([key, val])  => [Number(key), new Date(val)]));
+
+    
+
+    
+  }
+
+  // returns into the Observale, the value for the given key(i.e the date the user joined the given group chat)
+  public  getJoinDates(groupId:number){
+
+    this.groupJoinedDateSubject.next(this._groupJoinDates.get(groupId) || new Date());
+
+  
   }
 
   // requests for new token when the existing token has expired
@@ -68,29 +146,22 @@ export class AuthService {
   }
 
   
-  // checks of the current user is belongs to any group chat. This is used for displaying certain chat functionalities
-  isAgroupMember():boolean{
-
-    const aGroupMember = sessionStorage.getItem('groupMember');
-
-    if(aGroupMember === 'true') return true;
-
-    return false;
-
-  }
-
+ 
   // observable of boolean value that checks if the current user belongs in any group chat
   public isGroupMember(studentId:number):Observable<boolean>{
 
-  
     return this.http.get<boolean>(`${this.endpoints.isGroupMemberUrl}?id=${studentId}`);
 
   }
   //saves the just logged in user's token to the session storage
   private saveToSession(user:User){
 
-   
-    sessionStorage.setItem("accessToken", user.accessToken);
+  //  save indication that the user is not guest
+    sessionStorage.setItem("logged", "yes");
+
+    sessionStorage.setItem('cachingKey', user.cachingKey!);
+
+    sessionStorage.setItem('accessToken', user.accessToken);
    
     // sets the refresh token once as it serves only for requesting new tokens
     if(!sessionStorage.getItem('refreshToken')){
@@ -98,87 +169,60 @@ export class AuthService {
       sessionStorage.setItem('refreshToken', user.refreshToken);
     }
 
+    if(this.isLoggedInStudent){
+
+      // confirm the student belongs in a chat group
+      this.isGroupMember(user.id).pipe(take(1)).subscribe(member => {
+        if(member === true){
+          sessionStorage.setItem('inGroup','yes');
+
+          // retrieve information about when they join the group chats
+          this.groupJoinedDates(user.id).pipe(take(1)).subscribe();
+        }
+      })
+    }
+
+   
+    this.currentUserName.next(user.firstName);
     
-    sessionStorage.setItem('username', user.firstName);
-   sessionStorage.setItem('roles', JSON.stringify(user.roles));
-    this.currentUserName.next(sessionStorage.getItem('username')!);
-    sessionStorage.setItem('status', user.status);
-    if(this.isLoggedInStudent()){
+    if(this.isLoggedInStudent){
       this.studentLoginSubject.next(true);//send browser reload notification once a user successfully logs
 
     }
 
-    if(this.isAdmin()){
-
-      sessionStorage.setItem('adminId',`${user.id}`)
-    }else {
-      sessionStorage.setItem("studentId", `${user.id}`)
-    }
-
-    if(this.isLoggedInStudent()){
-
-
-      // indicates that the current user belong in a group chat. This is used to provide some chat functionalities
-    const studentId = Number(sessionStorage.getItem('studentId'));
-    this.isGroupMember(studentId).pipe(take(1)).subscribe((member:boolean) =>{
-
-      if(member){
-
-        sessionStorage.setItem('groupMember', 'true');
-
-        // fetch the date they joined each of the groups. This is used to control the spinner as previous chats are being fetched.
-        // If a group has previous chats but the logged in user joined the group later than those previous messages, the spinner would not
-        // be displayed to indicate network activity trying to fetch previous chat
-        const studentId:number = Number(sessionStorage.getItem('studentId')!);
-        this.updateGroupJoinedDates(studentId);
-
-      }
-    })
-    }
+  
   }
 
   // special method that tests if the logged in user is a super admin
-  isSuperAdmin(){
+  get isSuperAdmin(){
 
-    const roles:string[] = (sessionStorage.getItem('roles') ? JSON.parse(sessionStorage.getItem('roles')!)  : []);
+    return this.currentUser ? this.currentUser.roles.some(role  => role.toLowerCase() === 'superadmin') : false;
 
-    return roles.some(role => role.toLowerCase() === 'superadmin');
+   
   }
 
   
-  private groupJoinedDates(studentId:number):Observable<{[groupId:number]:Date}>{
+  public groupJoinedDates(studentId:number):Observable<Map<number, Date>>{
 
     
-    return this.http.get<{[groupId:number]:Date}>(`${this.endpoints.grp_joined_at}?id=${studentId}`)
+    return this.http.get<Map<number, Date>>(`${this.endpoints.grp_joined_at}?id=${studentId}`).pipe(tap(joinedDates =>{
+
+      this.groupJoinDates = joinedDates;
+
+    }))
 
     
   }
 
-  public get status(){
+ 
 
-    return sessionStorage.getItem('status');
-  }
-
-  updateGroupJoinedDates(studentId:number){
-
-
-    this.groupJoinedDates(studentId).pipe(take(1)).subscribe({
-      next:(val:{[id:number]:Date}) => {
-        if(val){
-
-          sessionStorage.setItem('joinedAt',JSON.stringify(val));
-        }
-      }
-    })
-
-  }
-
+ 
    
 
   //checks if the current user is a logged in user user
-  isLoggedIn():boolean{
+  get isLoggedIn():boolean{
 
-    return sessionStorage.getItem("accessToken") !== null;
+    return sessionStorage.getItem("logged") !== null;
   }
 
   //logs the current user out by simply clearing their token from the session storage
@@ -186,6 +230,7 @@ export class AuthService {
     //clears the user roles stored in memory once the user logs out
    sessionStorage.clear();
 
+   this.loggedInUser = undefined
     this.chatCachedService.clearAllChats();
     this.currentUserName.next('Student');
     this.studentLoginSubject.next(false);
@@ -195,26 +240,23 @@ export class AuthService {
   
 
   //checks if the current user is an admin
-  isAdmin():boolean{
-    const roles:string[] = (sessionStorage.getItem('roles') ? JSON.parse(sessionStorage.getItem('roles')!)  : [])
-   
-    return roles.some(role => role.toLowerCase() === 'admin' ||  roles.toLocaleString() === 'superadmin');
+  get isAdmin():boolean{
+
+    return this.currentUser ?  this.currentUser.roles.some(role => role.toLowerCase() === 'admin') : false;
+
 
    
   }
 
   // Checks if the current user is a logged in student
-   isLoggedInStudent():boolean{
+   get isLoggedInStudent():boolean{
 
-    const roles:string[] = (sessionStorage.getItem('roles') ? JSON.parse(sessionStorage.getItem('roles')!)  : [])
+     return this.currentUser ?  this.currentUser.roles.some(role => role.toLowerCase() === 'student') : false
+    
    
-    return roles.some(role => role.toLowerCase() === 'student');
   }
  
-  get studentId():number{
-
-    return Number(sessionStorage.getItem('studentId')!);
-  }
+  
 
 
   public get refreshTokenInProcess() {
@@ -234,6 +276,7 @@ export interface User{
   mobileNumber: string,
   email:string,
   statusCode:number,
+  cachingKey?:string, // used to look up redis cached object
   status:string //SENIOR or JUNIOR
   accessToken:string,
   refreshToken:string,

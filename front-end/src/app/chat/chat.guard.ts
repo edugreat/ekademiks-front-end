@@ -12,7 +12,7 @@ export const chatGuard: CanActivateFn = () => {
   
   const router = inject(Router);
 
-  if(authService.isLoggedInStudent()) return true;
+  if(authService.isLoggedInStudent) return true;
 
  else{
   router.navigate(['/error','Anauthorized !']);

@@ -1,13 +1,12 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { AssignmentDetails, AssignmentService } from '../assignment.service';
 import { Institution, InstitutionService } from '../institution.service';
-import { range, take, toArray } from 'rxjs';
+import { range, Subscription, take, toArray } from 'rxjs';
 import { Router } from '@angular/router';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { AuthService } from '../../auth/auth.service';
+import { AuthService, User } from '../../auth/auth.service';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatPaginator, MatPaginatorIntl, PageEvent } from '@angular/material/paginator';
-import { HttpResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-assignment',
@@ -15,13 +14,15 @@ import { HttpResponse } from '@angular/common/http';
   styleUrl: './assignment.component.css',
   providers: [provideNativeDateAdapter()]
 })
-export class AssignmentComponent implements OnInit {
+export class AssignmentComponent implements OnInit, OnDestroy {
 
 
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
 
+  // warning received from the child's directive when the wrong file type is dropped
+  fileDroppedWarning = '';
 
   today = new Date();
 
@@ -37,6 +38,9 @@ export class AssignmentComponent implements OnInit {
   objOptions = ['A', 'B', 'C', 'D']
 
   isPdfSelected = false;
+
+  // name of the selected pdf 
+  fileName = ''
 
  _readonly = false;
 
@@ -62,6 +66,11 @@ export class AssignmentComponent implements OnInit {
   //  stores an array of number matching question number according to the number of question admin wants to ask
   countStore: number[] = []
 
+  // an instance of currently logged in user
+  currentUser?:User;
+
+  currentUserSub?: Subscription;
+
 
   constructor(private assignmentService: AssignmentService, private institutionService: InstitutionService,
     public paginatorIntl: MatPaginatorIntl,
@@ -86,14 +95,8 @@ export class AssignmentComponent implements OnInit {
 
   ngOnInit(): void {
 
-    const adminId = this._adminId;
-    if (adminId) {
-
-      // get admin's registered institutions
-      this.getRegisteredInstitutions(adminId);
-
-    }
-
+    this._currentUser()
+    
 
     // customize paginator's label
     this.paginatorIntl.itemsPerPageLabel = 'Questions per page:';
@@ -103,6 +106,11 @@ export class AssignmentComponent implements OnInit {
     this.processFormChanges();
 
 
+  }
+
+  ngOnDestroy(): void {
+    
+    this.currentUserSub?.unsubscribe();
   }
 
 
@@ -178,10 +186,30 @@ export class AssignmentComponent implements OnInit {
     }
     if (fileInput && fileInput.files?.length) {
 
+    
+      this.fileName = Array.from(fileInput.files).map(file => file.name).join('');
+
+      if(this.fileName.split('.').pop()?.toLowerCase() !== 'pdf'){
+
+        this.fileDroppedWarning = 'Requires PDF file only';
+        this.isPdfSelected = false;
+        this.fileToUpload = undefined;
+        this.fileName = '';
+        return;
+      }else{
+
+
       this.isPdfSelected = true;
+      this.fileDroppedWarning = ''
+
+      }
+   
+   
     } else {
 
       this.isPdfSelected = false;
+      
+
     }
 
 
@@ -584,7 +612,7 @@ export class AssignmentComponent implements OnInit {
       id:null,
       name: this.name.value,
       type: this.selectedPdfType ? this.selectedPdfType : this.type.value,
-      admin: this._adminId,
+      admin: this.currentUser!.id,
       subject: this.subject.value,
       category: this.category.value,
       institution: this.institution.value.id,
@@ -652,11 +680,24 @@ export class AssignmentComponent implements OnInit {
   }
 
 
+   // get the object of logged in user
+   private _currentUser(){
+
+    this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user =>{
+
+      if(user){
+
+        this.currentUser = user;
+        this.getRegisteredInstitutions(user.id)
+      }
+    })
+    }
 
 
-
-  private get _adminId() {
-
-    return Number(sessionStorage.getItem('adminId'));
   }
-}
+
+
+
+
+
+  

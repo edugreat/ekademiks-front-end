@@ -4,7 +4,7 @@ import { AssessmentsService } from './assessments.service';
 import { Observable, Subscription, finalize } from 'rxjs';
 import { MediaService } from '../media-service';
 import { MediaChange } from '@angular/flex-layout';
-import { AuthService } from '../auth/auth.service';
+import { AuthService, User } from '../auth/auth.service';
 
 @Component({
   selector: 'app-assessment',
@@ -27,7 +27,11 @@ export class AssessmentComponent implements OnInit, OnDestroy{
   //number of subjects returned for each level of academic assessment
   totalSubjects = 0;
 
+  private currentUser?:User;
+
   subjectNamesSub:Subscription | undefined;
+
+  private currentUserSub?:Subscription;
 
   //Number of columns the mat-grid should span
   col = 0;
@@ -43,13 +47,11 @@ export class AssessmentComponent implements OnInit, OnDestroy{
 
   constructor(private activatedRoute: ActivatedRoute,
               private assessmentService:AssessmentsService,
-              private mediaService: MediaService, 
-              private authService:AuthService
-  ){}
+              private mediaService: MediaService, private authService:AuthService  ){}
 
   ngOnInit(): void {
     
-    
+    this._currentUser();
     this.getSubjectNames();
     //this.totalSubject = this.subjectNames.length;
     this.mediaSubscription = this.mediaAlias();
@@ -61,6 +63,11 @@ export class AssessmentComponent implements OnInit, OnDestroy{
     this.mediaSubscription?.unsubscribe();
 
   }
+
+ private _currentUser(){
+
+  this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user => this.currentUser = user);
+ }
 
   //subscribe to media service to get the current media device
   private mediaAlias(){
@@ -80,9 +87,7 @@ export class AssessmentComponent implements OnInit, OnDestroy{
 
     const level = this.activatedRoute.snapshot.params['level'] ? this.activatedRoute.snapshot.params['level'] : this.DEFAULT_LEVEL ;
 
-    console.log(`the level ${level}`)
-
-    return sessionStorage.getItem('status') ? sessionStorage.getItem('status')! : level;;
+    return this.currentUser ? this.currentUser.status : level;;
   }
 
   
@@ -95,8 +100,9 @@ export class AssessmentComponent implements OnInit, OnDestroy{
 
    
 
-    
-      if(!this.assessmentService.getSubjects(this.selectedLevel)){//when activated router is a result of user's selection of a particular assessment
+
+    // try fetching from the cache if data is available, else make a sever call
+      if(!this.assessmentService.getSubjects(this.selectedLevel)){
 
    
         this.subjectNamesSub =  this.assessmentService.fetchSubjectNames(this.selectedLevel).pipe(
@@ -104,9 +110,7 @@ export class AssessmentComponent implements OnInit, OnDestroy{
          
         ).subscribe( subjectNames =>{
 
-          console.log(`selected level : ${this.selectedLevel}`)
-
-          console.log(subjectNames === null)
+         
      
           this.subjectNames = subjectNames;
      
@@ -120,7 +124,7 @@ export class AssessmentComponent implements OnInit, OnDestroy{
          }
          else {
 
-          console.log(`else block`)
+          
         
            this.subjectNames = this.assessmentService.getSubjects(this.selectedLevel)!
            this.networkBusy = !this.networkBusy;

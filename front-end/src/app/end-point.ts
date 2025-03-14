@@ -5,7 +5,7 @@ import { Injectable } from "@angular/core";
 })
 // class that provides links to the server endpoints
 export class Endpoints {
- 
+  
 
 
 
@@ -74,6 +74,13 @@ export class Endpoints {
         return this._studentTestsUrl;
     }
 
+    // URL for posting student's recent performance to redis cache
+    private _recentPerformanceUrl = `${this.baseUrl}/tests/recent_performance`;
+
+    public get recentPerformanceUrl(){
+
+        return this._recentPerformanceUrl;
+    }
 
 
 
@@ -201,6 +208,12 @@ export class Endpoints {
         return this._addStudent_Records;
     }
 
+    private _cachedUserUrl = `${this.baseUrl}/auth/cached/user`;
+
+    public get cachedUserUrl(){
+
+        return this._cachedUserUrl;
+    }
 
     // CHAT ENDPOINTS
     private chatUrl = 'http://localhost:8080/chats';

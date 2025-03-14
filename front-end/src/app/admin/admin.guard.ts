@@ -16,7 +16,7 @@ const isAdmin = () =>{
 
   const authService = inject(AuthService)
 
-  if((authService.isAdmin())){
+  if((authService.isAdmin)){
     return true
   }else{
   

@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription, take } from 'rxjs';
 import { _Notification } from '../../admin/upload/notifications/notifications.service';
 import { HttpResponse, HttpStatusCode } from '@angular/common/http';
+import { AuthService, User } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-group-request',
@@ -24,11 +25,15 @@ export class GroupRequestComponent implements OnInit{
   // stores all the group ids the current user belongs to
   _myGroupIds?:number[];
 
+  private currentUser?:User;
+
+  private currentUserSub?:Subscription;
+
  
 
   
   
-  constructor(private chatService:ChatService, private activatedRoute:ActivatedRoute){}
+  constructor(private chatService:ChatService, private activatedRoute:ActivatedRoute, private authService:AuthService){}
   
   ngOnInit(): void {
 
@@ -61,10 +66,10 @@ export class GroupRequestComponent implements OnInit{
   }
 
 
-  private studentId():string | null{
+  // private studentId():string | null{
 
-    return sessionStorage.getItem('studentId');
-  }
+  //   return sessionStorage.getItem('studentId');
+  // }
 
 
     // retrieves true if the current user is already a member of the group chat
@@ -86,41 +91,45 @@ export class GroupRequestComponent implements OnInit{
       // fetch id of the groups the user already belong to
       private myGroupIds(){
 
-        const studentId = Number(sessionStorage.getItem('studentId'));
-       if(studentId){
+        
+        // subscribes to get update on the current user
+        this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user => {
 
-        this.chatService.myGroupIds(studentId).pipe(take(1)).subscribe({
+          if(user){
+           
+            this.currentUser = user;
 
-          next:(ids:number[]) => {
+            this.chatService.myGroupIds(this.currentUser.id).pipe(take(1)).subscribe({
 
-            this._myGroupIds = ids;
-          },
-
-          // get the IDs of the group chat the user has already sent join requests awaiting response
-          complete:() => {
-
-            this.chatService.getPendingGroupChatRequestsFor(Number(this.studentId())).pipe(take(1)).subscribe({
-              next:(pendingRequests:number[]) => {
-               // temporarily persist the groups the user has pending pending requests for
-                sessionStorage.setItem('pending_req',JSON.stringify(pendingRequests));
+              next:(ids:number[]) => {
+    
+                this._myGroupIds = ids;
+              },
+    
+              // get the IDs of the group chat the user has already sent join requests awaiting response
+              complete:() => {
+    
+                this.chatService.getPendingGroupChatRequestsFor(user.id).pipe(take(1)).subscribe({
+                  next:(pendingRequests:number[]) => {
+                   // temporarily persist the groups the user has pending pending requests for
+                    sessionStorage.setItem('pending_req',JSON.stringify(pendingRequests));
+                  }
+                })
+    
               }
-            })
+              
+            });
 
           }
-          
-        });
-       }
+        })
 
-
-
-      }
-
-      private username():string{
       
-        const _username = sessionStorage.getItem('username');
 
-        return _username !== null ? _username: '';
+
+
       }
+
+      
 
       sendRequest(groupId: string) {
        
@@ -130,10 +139,10 @@ export class GroupRequestComponent implements OnInit{
 
           let joinRequest:GroupJoinRequest = {
             groupId: groupId,
-            requesterId: this.studentId(),
+            requesterId: `${this.currentUser!.id}`,
             groupAdminId: data.groupAdminId,
             requestedAt: new Date(),
-            requester:this.username()
+            requester:this.currentUser!.firstName
           }
 
          this.chatService.sendJoinRequest(joinRequest).pipe(take(1)).subscribe({

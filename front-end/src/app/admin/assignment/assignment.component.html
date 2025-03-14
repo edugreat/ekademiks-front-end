@@ -1,3 +1,4 @@
+
 <div class="container">
   <div class="row">
     <div class="col-md-6" id="assignment-details">
@@ -166,7 +167,34 @@
         <!-- PDF-based assignment -->
         <div *ngIf="type.value === 'pdf'">
           <h2>PDF Upload</h2>
-          <input #fileInput multiple type="file" accept=".pdf" (change)="onFileSelected(fileInput)" />
+
+          <!-- Drag and drop aread-->
+           <div class="dropZone"
+           
+          appDrag (fileEmitter)="onFileSelected($event)"
+          (warning)="fileDroppedWarning = $event"
+           >
+              
+            <div class="text-wrapper" >
+
+              <div class="centered">
+                Drag and drop or <a  class="browse-btn" (click)="fileInput.click()">browse</a> a file...
+              </div>
+              
+            </div>
+
+           </div>
+           <div *ngIf="fileDroppedWarning" class="warning">{{fileDroppedWarning}}</div>
+
+          <!-- Drag and drop a read ends -->
+
+          <input #fileInput multiple type="file" accept=".pdf"
+          style="display: none;"
+          (change)="onFileSelected(fileInput)" />
+
+          <div *ngIf="isPdfSelected" >
+           Selected file: {{fileName}}
+          </div>
 
           <mat-radio-group  [disabled]="!isPdfSelected" [(ngModel)]="selectedPdfType" [ngModelOptions]="{standalone:true}" >
             <mat-radio-button color="primary" *ngFor="let type of typeOfPDF" [value]="type" >{{type}}</mat-radio-button>

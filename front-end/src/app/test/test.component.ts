@@ -9,7 +9,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { InstructionDialogComponent } from './instruction-dialog.component';
 import { ProgressBarMode } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AuthService } from '../auth/auth.service';
+import { AuthService, User } from '../auth/auth.service';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
 import { ActivityService } from '../activity.service';
 
@@ -95,6 +95,10 @@ testStarted: boolean = false; // boolean flag indicating whether the student has
 
  submissionSub$:Subscription | undefined;
 
+ private currentUser?:User;
+
+ private currentUserSub?:Subscription;
+
   constructor(private testService:TestService,
     private activatedRoute:ActivatedRoute,
     private mediaService:MediaService,
@@ -108,7 +112,7 @@ testStarted: boolean = false; // boolean flag indicating whether the student has
 
   ngOnInit(): void {
 
-   
+   this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user => this.currentUser = user);
    this.getQuestions();
    this.mediaAlias();
    
@@ -119,6 +123,7 @@ testStarted: boolean = false; // boolean flag indicating whether the student has
     
     this.questionSub?.unsubscribe();
     this.submissionSub$?.unsubscribe();
+    this.currentUserSub?.unsubscribe();
     
   }
 
@@ -132,12 +137,40 @@ testStarted: boolean = false; // boolean flag indicating whether the student has
 
   if(this.topic && category){
 
-   this.questionSub =  this.testService.getTest(this.topic, category).subscribe(testContent => {
+    // try accessing the ina-app cache for resource availability
+    if(this.testService.getTestFor(this.topic.concat(category))){
+
+     
+
+      let testContent = this.testService.getTestFor(this.topic.concat(category));
+
+      this.processAssessmentData(testContent!);
+
+    } 
+    // get resource from the server
+    else{
+
+     
+      this.questionSub =  this.testService.getTest(this.topic, category).subscribe(testContent => {
 
 
-    this.testContent = testContent;//set the returned test content to the testContent property
+        this.processAssessmentData(testContent);
+    
+    
+    
+       });
+    }
 
-   
+  
+  }
+  
+}
+
+  private processAssessmentData(testContent: TestContent) {
+    this.testContent = testContent; //set the returned test content to the testContent property
+
+
+
 
     //get the instructions for the test
     this.testInstructions = testContent.instructions;
@@ -147,22 +180,16 @@ testStarted: boolean = false; // boolean flag indicating whether the student has
     this.selectedOptions = new Array(this.testContent.questions.length).fill(null);
 
     //sets the number of questions askd
-     this.totalQuestions = this.testContent.questions.length;
+    this.totalQuestions = this.testContent.questions.length;
 
-     this.remaining = this.totalQuestions;
+    this.remaining = this.totalQuestions;
 
-     //set the initial pagination information
-     this.updatePaginationInfo(this.currentPage);
+    //set the initial pagination information
+    this.updatePaginationInfo(this.currentPage);
 
     //opens the dialog box once the question gets loaded
     this.openDialog(this.enterAnimationDuration, this.exitAnimationDuration);
-
-
-
-   });
   }
-  
-}
 
 //set pagination information
 private updatePaginationInfo(start:number){
@@ -254,12 +281,12 @@ submit() {
          let attempt:Attempt = {
       
           testId:  Number(sessionStorage.getItem('testId')),
-          studentId: Number(sessionStorage.getItem('studentId')),
+          studentId: this.currentUser ? this.currentUser.id : -1,
           selectedOptions: this.selectedOptions
          }
           
       
-          //extracts this part of the test content for use later in the student performance feedback to give a tip to the student for the questions they answers and their correct options
+          //extracts this part of the test content for use later in the student performance feedback to give a tip to the student for the questions they answerred and their correct options
           const data:{problem:string, response:string, answer:string}[] = this.testContent!.questions.map((question, index) =>({
             problem:question.problem,
             response:question.options.filter((option) => this.selectedOptions[index] === option.letter).map(option => option.text)[0],
@@ -269,10 +296,10 @@ submit() {
           //persist to the session storage for later use
           sessionStorage.setItem("testTip", JSON.stringify(data));
       
-         //check if the student is a logged in user or guest
-         const isLoggedInUser = this.authService.isLoggedIn();
+         
       
-        if(isLoggedInUser){
+          // if the user attempting to submit is a logged in user
+        if(this.authService.isLoggedIn){
           
            //submit the student's performance to the back-end
         this.submissionSub$ =  this.testService.submitTest(attempt).subscribe({
@@ -285,15 +312,18 @@ submit() {
             complete:() => {
               this.activityService.currentAction('submission')//notifies the 'canDeactivate' that navigation is intended after assessment submission has been performed 
               
+              
+
               setTimeout(() => {
                 
-                this.router.navigate(['/performance'])
+               // persist student's performance to server's cache
+               this.saveRecentPerformance() ;
               }, 5000);
              
             },
            
             error:(error) =>{
-              console.log(error)
+             
             }
          })
         }else{//for guest students, do not submit to the backend, instead route to the performance page for them to see their recent performance or take more assessment
@@ -303,8 +333,12 @@ submit() {
           this.testSubmitted = true;
           //notifies the 'canDeactivate' that navigation is intended after assessment submission has been performed 
           this.activityService.currentAction('submission');
+
+         
+
           setTimeout(() => {
-            this.router.navigate(['/performance'])
+             // persist student's performance to server's cache
+           this.saveRecentPerformance();
           }, 5000);
           
         }
@@ -330,7 +364,7 @@ submit() {
      let attempt:Attempt = {
   
       testId:  Number(sessionStorage.getItem('testId')),
-      studentId: Number(sessionStorage.getItem('studentId')),
+      studentId: this.currentUser ? this.currentUser.id : -1,
       selectedOptions: this.selectedOptions
      }
       
@@ -345,10 +379,8 @@ submit() {
       //persist to the session storage for later use
       sessionStorage.setItem("testTip", JSON.stringify(data));
   
-     //check if the student is a logged in user or guest
-     const isLoggedInUser = this.authService.isLoggedIn();
-  
-    if(isLoggedInUser){
+     
+    if(this.authService.isLoggedIn){
       
        //submit the student's performance to the back-end
     this.submissionSub$ =  this.testService.submitTest(attempt).subscribe({
@@ -364,11 +396,14 @@ submit() {
 
           //notifies the 'canDeactivate' that navigation is intended after assessment submission has been performed 
          this.activityService.currentAction('submission');
+
+         
          
           setTimeout(() => {
-            this.router.navigate(['/performance'])
+             // persist student's performance to server's cache
+           this.saveRecentPerformance() ;
           }, 5000);
-          this.router.navigate(['/performance']);
+         
         },
        
         error:(err) =>{
@@ -383,8 +418,10 @@ submit() {
       //notifies the 'canDeactivate' that navigation is intended after assessment submission has been performed 
       this.activityService.currentAction('submission');
       
+
       setTimeout(() => {
-        this.router.navigate(['/performance'])
+       // persist student's performance to server's cache
+       this.saveRecentPerformance() ;
       }, 5001);
       
     }
@@ -394,8 +431,7 @@ submit() {
 
   }
 
-  // persist student's performance to temporary storage for display purpose
-  this.saveRecentPerformance();
+  
   
   }
 
@@ -498,7 +534,7 @@ private openSnackBar(message:string){
  //displays users's recent performance if the 'showMyPerformance' evaluates to true due to user's input selection
 private saveRecentPerformance(){
 
-  if(!sessionStorage.getItem('recent-performance')){
+ 
 //extract the correct options for the particular test
 const correctOptions = this.testContent!.questions.map(question => question.answer);
 //get the student's recent performance
@@ -509,10 +545,40 @@ const recentPerformance: PerformanceObject = {
  correctOptions:correctOptions
 }
 
-sessionStorage.setItem('recent-performance', JSON.stringify(recentPerformance));
+// retrieve key to be used in performance redis retrieval of cached value, empty string value for guest users
+  const cachingKey = sessionStorage.getItem('cachingKey') ? sessionStorage.getItem('cachingKey') : '';
+
+  // persist recent performance to server's cache
+  this.testService.saveRecentPerformanceToCache(recentPerformance, cachingKey!).pipe(take(1)).subscribe({
+
+    // persist the returned caching key to the browser storage. This is used to retrieved student's recent performance
+    next:(key) =>{
+      
+    
+      sessionStorage.setItem('cachingKey', key)
 
 
-  }
+    },
+
+    error:(err) => {
+     
+      console.log(err.error)
+    },
+
+    complete:() => {
+     
+
+     
+      // route to the 'performance page' so they can see their recent performance
+      this.router.navigate(['/performance']);
+
+
+    }
+
+  })
+
+
+  
 
 }
 }

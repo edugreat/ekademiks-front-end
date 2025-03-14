@@ -7,6 +7,7 @@ import { ConfirmationDialogService } from '../../confirmation-dialog.service';
 import { MatInput } from '@angular/material/input';
 import { HttpResponse, HttpStatusCode } from '@angular/common/http';
 import { AuthService } from '../../auth/auth.service';
+import { setsEqual } from 'chart.js/dist/helpers/helpers.core';
 
 @Component({
   selector: 'app-my-groups',
@@ -152,7 +153,8 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
 
               complete:() => {
                 
-                this.isGroupMember();
+                // clears off
+              sessionStorage.removeItem('inGroup');
               }
             })
           }
@@ -162,24 +164,7 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
         }
       }
 
-      // use to check if the user still belongs to a group after deleting an existing group. This is especially for the admin
-      private isGroupMember(){
-
-        if(this.studentId()){
-          this.authService.isGroupMember(Number(this.studentId())).pipe(take(1)).subscribe({
-            next:(response:boolean)=>{
-              if(!response){
-
-                sessionStorage.removeItem("groupMember");
-              }
-            }
-          })
-        }
-
-        
-
-      }
-
+     
       // determines if the current user the group admin
       isGroupAdmin():boolean{
 
@@ -260,7 +245,7 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
 
         isLoggedInStudent(){
 
-          return this.authService.isLoggedInStudent();
+          return this.authService.isLoggedInStudent;
         }
 
         leaveGroup() {
@@ -280,8 +265,8 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
                   // checks if the student still belongs to some other groups after exiting the current group chat
                   if(response.status === HttpStatusCode.Ok){
 
-                    // set a flag that forbids them from sending messages to the group while they're yet logged in. 
-                    // This flag would not be needed if the page were refreshed.
+                    // set a flag that forbids them from sending messages to the group immediately they leave the group chat. 
+                    // This flag would not be needed if the page were refreshed as the system will update user legibility to post.
                     sessionStorage.setItem('forbidden', (this.editableChat.key as string));
 
                     this.authService.isGroupMember(Number(this.studentId())).pipe(take(1)).subscribe(member => {
@@ -289,7 +274,7 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
                       // does not belong to any group chat
                       if(!member){
 
-                        sessionStorage.removeItem('groupMember');
+                        sessionStorage.removeItem('inGroup');
 
                         // route them to the home page
                         this.router.navigate(['/home']);

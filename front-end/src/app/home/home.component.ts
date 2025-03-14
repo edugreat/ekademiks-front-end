@@ -5,7 +5,7 @@ import { AssessmentsService, Levels } from '../assessment/assessments.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MediaService } from '../media-service';
 import { HomeService } from './home.service';
-import { AuthService } from '../auth/auth.service';
+import { AuthService, User } from '../auth/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -29,6 +29,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
  welcomeMessages$:Observable<string[]> | undefined;
 
+  private currentUser?:User;
+
+  private currentUserSub?:Subscription;
 
   //the user selected assessment test, as recieved from the radio button selection
   selectedLevel ='';
@@ -50,6 +53,8 @@ private authService:AuthService
 
     //if activation of this component is a result of the student's wish to take more assessment, then present them with assessment level rather than the usual welcome messages
     this.activatedRoute.paramMap.subscribe(params =>{
+
+      this._currentUser();
 
       const param = params.get('more');
       if(param !== null){
@@ -89,6 +94,19 @@ private authService:AuthService
 
   ngOnDestroy(): void {
    this.mediaSubscription?.unsubscribe();
+   this.currentUserSub?.unsubscribe();
+  }
+
+  private _currentUser(){
+
+    // subscribe to get up to date object of logged user
+    this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user => {
+
+      this.currentUser = user
+    
+    });
+
+
   }
 
   //calls the service to retrieve the academic levels
@@ -96,14 +114,16 @@ private authService:AuthService
 
     if(!this.isGuestUser()){
 
-      const level = this.authService.status;
+      // get the academic status of current user(SENIOR or JUNIOR status)
+      const level = this.currentUser?.status;
 
       console.log('level '+level)
 
       if(level) this.router.navigate(['/assessments', level]);
     } else {
 
-      if(! this.assessmentService.assessmentLevels){
+      // get assessment levels from in-app cache or from the server if not present
+      if(!this.assessmentService.assessmentLevels){
      
         this.levels$ = this.assessmentService.getAssessmentLevels();
          this.assessmentService.assessmentLevels = this.levels$;
@@ -134,17 +154,17 @@ private authService:AuthService
   
 
   isAdmin(): boolean {
-    return this.authService.isAdmin();
+    return this.authService.isAdmin;
     }
 
     isLoggedIn():boolean{
 
-      return this.authService.isLoggedIn()
+      return this.authService.isLoggedIn
     }
 
     isGuestUser():boolean{
 
-      return !this.authService.isLoggedIn();
+      return !this.authService.isLoggedIn;
     }
 }
 
