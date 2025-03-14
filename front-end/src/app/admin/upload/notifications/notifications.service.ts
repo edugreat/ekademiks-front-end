@@ -49,7 +49,7 @@ export class NotificationsService {
     // subscribe to get notified on student's log in . If a student has logged in, connect to server's notification
     authService.loggedInUserObs$.subscribe(user => {
 
-      if (user) {
+      if (user && this.isLoggedStudent ) {
 
         this.currentUser = user;
 
@@ -62,6 +62,7 @@ export class NotificationsService {
 
     })
   }
+   
 
 
   // return all unread notifications
@@ -78,6 +79,10 @@ export class NotificationsService {
   }
 
 
+  public get isLoggedStudent(){
+
+    return this.currentUser ? this.currentUser.roles.some(role  => role.toLowerCase() === 'student') : false;
+  }
 
   private connectToNotifications() {
 

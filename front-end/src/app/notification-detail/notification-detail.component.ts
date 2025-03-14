@@ -53,13 +53,17 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
 
   private getNotifications(){
 
+    if(this.currentUser){
+
     this.notificationService.unreadNotifications$.subscribe(notifications =>{
 
       this.unreadNotifications = notifications;
     
     })
+    }
   }
 
+  
   // Extracts 'metadata' and fetches assessment information using it, remove the current notification from the notifications array
   processSelection(metadata:number, index:number, notificationId:number) {
 

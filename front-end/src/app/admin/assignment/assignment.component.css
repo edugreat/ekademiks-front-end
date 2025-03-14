@@ -164,6 +164,46 @@ button:not(.bin):hover{
   border-radius: 8px;
 }
 
+.dropZone{
+
+  height: 100px;
+  min-width: 100px;
+  display: table;
+  background-color: #eee;
+  width: 300px;
+  border: dashed 1px #aaa;
+  border-radius: 10px;
+  margin-left: auto;
+  margin-right: auto;
+
+}
+
+.text-wrapper{
+
+  display: table-cell;
+  vertical-align: middle;
+
+}
+
+.centered{
+
+  text-align: center;
+}
+
+.browse-btn{
+  color: blue;
+  cursor: pointer;
+}
+
+.warning{
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-style: italic;
+  color: red;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .col-md-6 {

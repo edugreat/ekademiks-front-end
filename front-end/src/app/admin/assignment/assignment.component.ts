@@ -1,13 +1,12 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { AssignmentDetails, AssignmentService } from '../assignment.service';
 import { Institution, InstitutionService } from '../institution.service';
-import { range, Subscription, take, tap, toArray } from 'rxjs';
+import { range, Subscription, take, toArray } from 'rxjs';
 import { Router } from '@angular/router';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AuthService, User } from '../../auth/auth.service';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatPaginator, MatPaginatorIntl, PageEvent } from '@angular/material/paginator';
-import { HttpResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-assignment',
@@ -22,6 +21,8 @@ export class AssignmentComponent implements OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
 
+  // warning received from the child's directive when the wrong file type is dropped
+  fileDroppedWarning = '';
 
   today = new Date();
 
@@ -37,6 +38,9 @@ export class AssignmentComponent implements OnInit, OnDestroy {
   objOptions = ['A', 'B', 'C', 'D']
 
   isPdfSelected = false;
+
+  // name of the selected pdf 
+  fileName = ''
 
  _readonly = false;
 
@@ -182,10 +186,30 @@ export class AssignmentComponent implements OnInit, OnDestroy {
     }
     if (fileInput && fileInput.files?.length) {
 
+    
+      this.fileName = Array.from(fileInput.files).map(file => file.name).join('');
+
+      if(this.fileName.split('.').pop()?.toLowerCase() !== 'pdf'){
+
+        this.fileDroppedWarning = 'Requires PDF file only';
+        this.isPdfSelected = false;
+        this.fileToUpload = undefined;
+        this.fileName = '';
+        return;
+      }else{
+
+
       this.isPdfSelected = true;
+      this.fileDroppedWarning = ''
+
+      }
+   
+   
     } else {
 
       this.isPdfSelected = false;
+      
+
     }
 
 
