@@ -12,6 +12,7 @@ export class Endpoints {
      //routes to the backend server to fetch test based on the request parameters
  private _baseTestUrl = 'http://localhost:8080/tests/start';
  
+ 
   
   
 
@@ -352,7 +353,7 @@ export class Endpoints {
    // ASSIGNMENT ENDPOINTS
    private _assignmentUrl = `${this.baseUrl}/assignments`;
 
-   public get assignment(){
+   public get assignmentUrl(){
 
     return this._assignmentUrl;
    }
@@ -364,6 +365,12 @@ export class Endpoints {
     return this._pdfAssignmentUrl;
    }
 
+   private _assignmentDetailsUrl = `${this.assignmentUrl}/details`;
+
+   public get assignmentDetailsUrl(){
+
+    return this._assignmentDetailsUrl;
+   }
 }
 
 

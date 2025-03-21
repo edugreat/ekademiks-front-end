@@ -30,13 +30,7 @@ export class NotificationsService {
   // An array that stores all received notifications
   private _notifications: _Notification[] = [];
 
-  currentUser?:User;
-
-  
-
-
-
-
+ 
 
   // Timeout for reconnection to sse notification event 
   private reconnectionTimeout: any;
@@ -46,21 +40,22 @@ export class NotificationsService {
 
   constructor(private zone: NgZone, private authService: AuthService, private http:HttpClient) {
 
-    // subscribe to get notified on student's log in . If a student has logged in, connect to server's notification
-    authService.loggedInUserObs$.subscribe(user => {
+   setTimeout(() => {
+     // subscribe to get notified on student's log in . If a student has logged in, connect to server's notification
+     this.authService.loggedInUserObs$.subscribe(user => {
 
-      if (user && this.isLoggedStudent ) {
+      if (user && this.isLoggedStudent(user) ) {
 
-        this.currentUser = user;
-
-        this.connectToNotifications();
+        this.connectToNotifications(user);
       } else {
+
 
         // disconnect from receiving notification if a student has logged out
         this.disconnectFromSSE();
       }
 
     })
+   }, 1000);
   }
    
 
@@ -79,18 +74,18 @@ export class NotificationsService {
   }
 
 
-  public get isLoggedStudent(){
+  public isLoggedStudent(currentUser:User){
 
-    return this.currentUser ? this.currentUser.roles.some(role  => role.toLowerCase() === 'student') : false;
+    return currentUser ? currentUser.roles.some(role  => role.toLowerCase() === 'student') : false;
   }
 
-  private connectToNotifications() {
+  private connectToNotifications(currentUser:User) {
 
     // Close previous event source before connecting to avoid cyclic issues
     if (this.eventSource) this.eventSource.close();
 
     // create a new event source passing the sse notification api
-    this.eventSource = new EventSource(`${this.notificationUrl}?studentId=${this.currentUser!.id}`);
+    this.eventSource = new EventSource(`${this.notificationUrl}?studentId=${currentUser!.id}`);
 
     this.eventSource.addEventListener('notifications', (event: MessageEvent<any>) => {
 
@@ -123,7 +118,7 @@ export class NotificationsService {
 
 
         // connect back to notification
-        this.connectToNotifications();
+        this.connectToNotifications(currentUser);
       }, reconnectionTime);
 
     };

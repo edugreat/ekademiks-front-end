@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AssessmentsService } from '../assessment/assessments.service';
 import { AuthService, User } from '../auth/auth.service';
+import { AssignmentService } from '../admin/assignment.service';
 
 
 @Component({
@@ -24,12 +25,15 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
 
   private currentUserSub?:Subscription;
 
+ 
+
 
   // this is used to unsubscribe from the event that retrieves the assessment topic and duration
   private topicAndDurationSub$?:Subscription;
 
   constructor(private notificationService:NotificationsService, private testService:TestService,
-    private router:Router, private assessmentService:AssessmentsService, private authService:AuthService
+    private router:Router, private assessmentService:AssessmentsService, private authService:AuthService,
+    private assignmentService:AssignmentService
 
   ){
 
@@ -38,9 +42,9 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
   
   ngOnInit(): void {
 
-    this.getNotifications();
+   this.getNotifications()
 
-    this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user => this.currentUser = user);
+   this.trackAssignmentsMarkedAsRead();
     
   }
   ngOnDestroy(): void {
@@ -50,23 +54,57 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
     this.currentUserSub?.unsubscribe();
   }
 
+ 
 
   private getNotifications(){
-
-    if(this.currentUser){
 
     this.notificationService.unreadNotifications$.subscribe(notifications =>{
 
       this.unreadNotifications = notifications;
     
     })
-    }
   }
 
+  // subscribes to the assignment service to be notified of assignments the user has read.
+  // It receives the emitted information(ID) of the assignment, deletes it from the notification view. 
+  private trackAssignmentsMarkedAsRead(){
+
+    this.assignmentService.assignmentMarkedAsRead$.subscribe(assignmentId => {
+
+      const index = this.unreadNotifications?.findIndex(n => n.id === assignmentId);
+
+      if(index && index >= 0){
+
+        // get the notification ID
+        const notificationId = this.unreadNotifications![index].id;
+
+        // remove notification from list of unread notifications
+        this.unreadNotifications!.splice(index, 1);
+
+
+        this.notificationService.updateNotificationsCounts(this.unreadNotifications!.length);
+
+        // delete the just read notification from the server
+        this.notificationService.notificationIsRead(notificationId, this.currentUser!.id).subscribe();
+
+      }
+    })
+
+
+  }
   
   // Extracts 'metadata' and fetches assessment information using it, remove the current notification from the notifications array
   processSelection(metadata:number, index:number, notificationId:number) {
 
+    switch (this.unreadNotifications![index].type.toLowerCase()) {
+      case 'assignment':
+        
+      // routes to the assignment attempt component if notification is that of assignment
+      this.router.navigate(['/assignment', metadata]);
+        break;
+    
+      default:
+      
     // Basic asssessment information(subject name, category, topic and duration)
   let category = '';
   let subjectName = '';
@@ -114,6 +152,10 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
    
    }
    })
+
+
+    }
+
     }
 
     // gets the assessment topic and its duration

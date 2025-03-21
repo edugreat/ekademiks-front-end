@@ -5,6 +5,7 @@ import { AssessmentExpansionPanelComponent } from './assessment-expansion-panel/
 import { SharedModule } from '../shared/shared.module';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { AssignmentAttemptComponent } from './assignment-attempt/assignment-attempt.component';
 
 
 
@@ -12,7 +13,8 @@ import { RouterModule } from '@angular/router';
 @NgModule({
     declarations: [
         AssessmentComponent,
-        AssessmentExpansionPanelComponent
+        AssessmentExpansionPanelComponent,
+        AssignmentAttemptComponent
         
     ],
     imports: [
