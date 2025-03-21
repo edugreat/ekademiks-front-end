@@ -84,7 +84,7 @@
   
           <mat-form-field appearance="outline">
             <mat-label>Submission ends</mat-label>
-            <input [min]="today" formControlName="submissionEnds" matInput [matDatepicker]="dp3" readonly="">
+            <input [min]="today" formControlName="submissionEnds" matInput (dateChange)="submissionDateChange($event)" [matDatepicker]="dp3">
             <mat-hint>MM/DD/YYYY</mat-hint>
             <mat-datepicker-toggle matIconSuffix [for]="dp3"></mat-datepicker-toggle>
             <mat-datepicker #dp3 disabled="false"></mat-datepicker>
@@ -93,7 +93,7 @@
   
   
   
-          <button *ngIf="!shouldDisable" mat-raised-button color="primary" type="submit">Submit</button>
+          <button #submitBtn *ngIf="!shouldDisable" mat-raised-button color="primary" type="submit">Submit</button>
           <button *ngIf="shouldDisable" mat-raised-button disabled>Submit</button>
         </form>
 

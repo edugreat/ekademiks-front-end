@@ -25,6 +25,7 @@ import { authGuard } from '../chat/auth.guard';
 import { InstitutionRegistrationComponent } from '../admin/institution-registration/institution-registration.component';
 import { AddStudentComponent } from '../admin/institution-registration/add-student/add-student.component';
 import { AssignmentComponent } from '../admin/assignment/assignment.component';
+import { AssignmentAttemptComponent } from '../assessment/assignment-attempt/assignment-attempt.component';
 
 
 
@@ -98,6 +99,12 @@ const routes: Routes = [
    path: 'assignment', component: AssignmentComponent,
    canActivate:[adminGuard],
    canMatch: [adminGuard]
+  },
+
+  {
+    path:'assignment/:id', component: AssignmentAttemptComponent,
+    canActivate:[authGuard],
+    canMatch:[authGuard]
   },
   
   { path: 'no-access/:code', component: AccessDeniedComponent },

@@ -7,6 +7,7 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
 import { AuthService, User } from '../../auth/auth.service';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatPaginator, MatPaginatorIntl, PageEvent } from '@angular/material/paginator';
+import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 
 @Component({
   selector: 'app-assignment',
@@ -20,11 +21,14 @@ export class AssignmentComponent implements OnInit, OnDestroy {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
+  @ViewChild('submitBtn')submitBtn!:HTMLButtonElement;
+
 
   // warning received from the child's directive when the wrong file type is dropped
   fileDroppedWarning = '';
 
-  today = new Date();
+  today = new Date().setHours(0,0,0,0);
+  
 
 
   disable = true;
@@ -79,6 +83,7 @@ export class AssignmentComponent implements OnInit, OnDestroy {
   ) {
 
     this.assignmentForm = this.fb.group({
+      id:new FormControl(0),
       name: new FormControl('', Validators.required),
       type: new FormControl('', Validators.required),
       subject: new FormControl('', Validators.required),
@@ -87,7 +92,7 @@ export class AssignmentComponent implements OnInit, OnDestroy {
       allocatedMark: new FormControl<number | undefined>(undefined, [Validators.required]),
       totalQuestion: new FormControl<number | undefined>(undefined, [Validators.required, Validators.min(1)]),
       creationDate: new FormControl(new Date()),
-      submissionEnds: new FormControl(null, Validators.required),
+      submissionEnds: new FormControl(new Date(), Validators.required),
       assignment: this.fb.array([])
     });
 
@@ -142,7 +147,7 @@ export class AssignmentComponent implements OnInit, OnDestroy {
   onPageChange(event: PageEvent): void {
 
 
-    const totalPage = Math.ceil(this.assignment.length / this.paginator.pageSize);
+    //const totalPage = Math.ceil(this.assignment.length / this.paginator.pageSize);
 
     this.pageIndex = this.paginator.pageIndex;
 
@@ -332,7 +337,8 @@ export class AssignmentComponent implements OnInit, OnDestroy {
 
    
     return this.fb.group({
-
+       
+      type:new FormControl('objectives'),
       _index: new FormControl<number | undefined>(this.countStore.shift(), [Validators.required]),
       problem: new FormControl<string | undefined>(undefined, [Validators.required]),
       options: this.options,
@@ -369,6 +375,8 @@ export class AssignmentComponent implements OnInit, OnDestroy {
 
     return this.fb.group({
 
+
+      type: new FormControl('theory'),
       _index: new FormControl<number | undefined>(this.countStore.shift(), [Validators.required]),
       problem: new FormControl<string | undefined>(undefined, [Validators.required]),
       answer: new FormControl<string | undefined>(undefined, [Validators.required])
@@ -593,6 +601,15 @@ export class AssignmentComponent implements OnInit, OnDestroy {
     return this.assignmentForm?.get('allocatedMark') as FormControl;
   }
 
+  // processes submission date change event called when the user changes date for assignment submissio
+  submissionDateChange($event: MatDatepickerInputEvent<Date>) {
+
+    console.log(`date changed to: ${$event.value} -> ${this.submissionEnds.value}`)
+    
+    this.submissionEnds.setValue($event.value);
+    }
+    
+
   private get submissionEnds(): FormControl {
 
     return this.assignmentForm?.get('submissionEnds') as FormControl;
@@ -608,8 +625,10 @@ export class AssignmentComponent implements OnInit, OnDestroy {
 
   postAssignment() {
 
+
+
     let assignmentDetails: AssignmentDetails = {
-      id:null,
+      id:0,
       name: this.name.value,
       type: this.selectedPdfType ? this.selectedPdfType : this.type.value,
       admin: this.currentUser!.id,
@@ -623,6 +642,7 @@ export class AssignmentComponent implements OnInit, OnDestroy {
 
     }
 
+    this.submitBtn.disabled = true;
    
     switch ((this.type.value as string).toLowerCase()) {
       case 'pdf':
@@ -636,7 +656,8 @@ export class AssignmentComponent implements OnInit, OnDestroy {
 
           this.assignmentService.postPDFAssignment(this.prepareFormData(assignmentDetails)).subscribe({
             next:(val:number) =>{console.log(val)},
-            error:(err) => console.log(err)
+            error:(err) => console.log(err),
+            complete:() => this.assignmentForm?.reset()
           })
         }
 
@@ -647,21 +668,47 @@ export class AssignmentComponent implements OnInit, OnDestroy {
      
      
 
+      console.log(`submission: ${this.submissionEnds.value}`)
       assignmentDetails.assignmentResourceDTO = [];
 
-      assignmentDetails.assignmentResourceDTO.push(...this.assignment.value)
+    
 
+      assignmentDetails.assignmentResourceDTO.push(...this.assignment.value);
+
+      assignmentDetails.assignmentResourceDTO.forEach((resourceDto, index) => {
+
+        resourceDto.options = this.transformToArrayOfOptions(index)
+      })
+
+     
+
+      console.log(`${JSON.stringify(assignmentDetails, null, 1)}`)
 
         this.assignmentService.postAssignment(assignmentDetails).pipe(take(1)).subscribe({
           next:(val) => console.log(val),
 
-          error:(err) => console.log(err)
+          error:(err) => console.log(err),
+
+          complete:() => this.assignmentForm?.reset()
         });
         break;
     }
 
 
 
+  }
+
+  // converts the options from the format [{A:'opion1',B:'option2'}] to the format [{'A:opion1','B:option2'}], compatible with the server's options object
+  private transformToArrayOfOptions(index:number): string[]{
+
+   let stringArrayOptions:string[] = [];
+
+   Object.entries((this.assignment.at(index).get('options') as FormGroup).controls).forEach(([key, control]) => {
+
+    stringArrayOptions.push(`${key}:${control.value}`)
+   })
+  
+   return stringArrayOptions;
   }
 
   prepareFormData(details: AssignmentDetails): FormData {
