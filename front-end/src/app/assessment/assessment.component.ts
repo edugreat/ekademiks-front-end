@@ -2,9 +2,9 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AssessmentsService } from './assessments.service';
 import { Observable, Subscription, finalize } from 'rxjs';
-import { MediaService } from '../media-service';
-import { MediaChange } from '@angular/flex-layout';
+
 import { AuthService, User } from '../auth/auth.service';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-assessment',
@@ -47,7 +47,9 @@ export class AssessmentComponent implements OnInit, OnDestroy{
 
   constructor(private activatedRoute: ActivatedRoute,
               private assessmentService:AssessmentsService,
-              private mediaService: MediaService, private authService:AuthService  ){}
+             private authService:AuthService,
+            private breakpointObserver:BreakpointObserver
+            ){}
 
   ngOnInit(): void {
     
@@ -71,15 +73,16 @@ export class AssessmentComponent implements OnInit, OnDestroy{
 
   //subscribe to media service to get the current media device
   private mediaAlias(){
-  return this.mediaService.mediaChanges().subscribe((changes: MediaChange[]) =>{
 
-    //returns true if the current device is extra small
-  this.deviceXs = changes.some(change => change.mqAlias === 'xs');
 
-  this.updateGridSettings();
-  
-})
+    return this.breakpointObserver.observe([
+      Breakpoints.XSmall
+    ]).subscribe(result => {
+      this.deviceXs = result.matches;
+      this.updateGridSettings()
+    })
 
+ 
   }
 
   // gets the student's academic level(or status)

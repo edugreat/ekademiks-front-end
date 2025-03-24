@@ -1,11 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { MediaChange } from '@angular/flex-layout';
 import { Observable, Subscription } from 'rxjs';
 import { AssessmentsService, Levels } from '../assessment/assessments.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MediaService } from '../media-service';
 import { HomeService } from './home.service';
 import { AuthService, User } from '../auth/auth.service';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-home',
@@ -25,7 +24,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   //If the user's device is medium
   deviceSm: boolean = false;
-  mediaSubscription?:Subscription;
+  
 
  welcomeMessages$:Observable<string[]> | undefined;
 
@@ -38,14 +37,14 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   timer:any;
   
-  constructor(private mediaService: MediaService,
-
+  constructor(
     private homeService:HomeService,
 
     private assessmentService:AssessmentsService,
 
   private router:Router, private activatedRoute:ActivatedRoute,
-private authService:AuthService
+private authService:AuthService,
+private breakpointObserver:BreakpointObserver
 ){}
  
 
@@ -70,7 +69,22 @@ private authService:AuthService
         }
       }else{
       this.getWelcomeMessages();
-      this.mediaSubscription = this.mediaAlias();
+      this.breakpointObserver.observe([
+        Breakpoints.XSmall, // xs
+        Breakpoints.Small,  // sm
+        Breakpoints.Medium, // md
+        Breakpoints.Large,  // lg
+      ]).subscribe(result => {
+        // Check for xs breakpoint
+        this.deviceXs = result.breakpoints[Breakpoints.XSmall];
+    
+        // Check for sm breakpoint
+        this.deviceSm = result.breakpoints[Breakpoints.Small];
+    
+        // Check for md or lg breakpoints
+        const isMediumOrLarge = result.breakpoints[Breakpoints.Medium] || result.breakpoints[Breakpoints.Large];
+        this.rowspan = isMediumOrLarge ? 1.5 : 1;
+      });
 
       }
     })
@@ -79,21 +93,8 @@ private authService:AuthService
   }
 
 
-  private mediaAlias() {
-   
-    return this.mediaService.mediaChanges().subscribe((changes:MediaChange[]) =>{
-
-      this.deviceXs = changes.some(change => change.mqAlias === 'xs');
-      this.deviceSm = changes.some(change => change.mqAlias === 'sm');
-      
-
-      this.rowspan = changes.some(change => change.mqAlias === 'lg' ||  change.mqAlias === 'md') ? 1.5 : 1;
-    })
-    
-  }
-
+  
   ngOnDestroy(): void {
-   this.mediaSubscription?.unsubscribe();
    this.currentUserSub?.unsubscribe();
   }
 
