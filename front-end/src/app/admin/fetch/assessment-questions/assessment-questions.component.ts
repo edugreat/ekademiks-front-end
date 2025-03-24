@@ -2,10 +2,10 @@ import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { AdminService } from '../../admin.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, take } from 'rxjs';
-import { MediaService } from '../../../media-service';
-import { MediaChange } from '@angular/flex-layout';
-import { HttpResponse, HttpStatusCode } from '@angular/common/http';
+
+import { HttpResponse } from '@angular/common/http';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-assessment-questions',
@@ -55,9 +55,10 @@ export class AssessmentQuestionsComponent implements OnInit, OnDestroy, AfterVie
   private updateQuestions:Question[] = [];
 
 
-  constructor(private adminService:AdminService, private activatedRoute:ActivatedRoute, private mediaService:MediaService,
+  constructor(private adminService:AdminService, private activatedRoute:ActivatedRoute,
 
-    private router:Router, private confirmationService:ConfirmationDialogService
+    private router:Router, private confirmationService:ConfirmationDialogService,
+    private breakpointObserver:BreakpointObserver
   ){}
   
   
@@ -234,11 +235,14 @@ this.currentIndex = endIndex;
       // This is used to change the header tag depending on the screen size
       private userDevice(){
 
-        this.mediaSub = this.mediaService.mediaChanges().subscribe((changes:MediaChange[]) => {
 
-      this.smallScreenDevice = changes.some(change => change.mqAlias === 'sm' || change.mqAlias === 'xs');
+        this.mediaSub = this.breakpointObserver.observe([
+          Breakpoints.Small,
+          Breakpoints.XSmall
+        ]).subscribe(result => {
 
-      const el1 = document.getElementById('parent');
+          this.smallScreenDevice = result.matches;
+          const el1 = document.getElementById('parent');
       const el2 = document.getElementById('container');
        if(!this.smallScreenDevice && el1 && el2){
 
@@ -251,8 +255,10 @@ this.currentIndex = endIndex;
         el2.classList.remove('auto-aligned');
         el2.classList.add('right-padding');
        }
+
         })
 
+      
 
       }
     
