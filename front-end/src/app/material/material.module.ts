@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { FlexLayoutModule } from '@angular/flex-layout';
+
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -35,7 +35,6 @@ const materials = [
   MatMenuModule,
   MatIconModule,
   MatSidenavModule,
-  FlexLayoutModule,
   MatCardModule,
   MatGridListModule,
   MatRadioModule,

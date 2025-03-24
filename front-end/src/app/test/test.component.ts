@@ -3,8 +3,7 @@ import { Attempt, TestService } from './test.service';
 import { Option, TestContent } from './test-interface';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, take } from 'rxjs';
-import { MediaService } from '../media-service';
-import { MediaChange } from '@angular/flex-layout';
+
 import { MatDialog } from '@angular/material/dialog';
 import { InstructionDialogComponent } from './instruction-dialog.component';
 import { ProgressBarMode } from '@angular/material/progress-bar';
@@ -12,6 +11,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService, User } from '../auth/auth.service';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
 import { ActivityService } from '../activity.service';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-test',
@@ -101,7 +101,8 @@ testStarted: boolean = false; // boolean flag indicating whether the student has
 
   constructor(private testService:TestService,
     private activatedRoute:ActivatedRoute,
-    private mediaService:MediaService,
+    
+    private breakingPointObserver:BreakpointObserver,
     public dialog: MatDialog,
     private successSnackBar:MatSnackBar,
     private router:Router,
@@ -463,16 +464,16 @@ this.submit();//reuse the existing code
 //checks the screen size of the current user and update the 'smallScreen' boolean flag
 private mediaAlias(){
 
-  return this.mediaService.mediaChanges().subscribe((changes:MediaChange[]) =>{
+this.breakingPointObserver.observe([
 
-   
-    this.smallScreen = changes.some(change => change.mqAlias === 'xs' || change.mqAlias === 'sm');
+  Breakpoints.XSmall
+]).subscribe(result => {
+  this.smallScreen = result.matches;
+  this.dialogWidth = this.smallScreen  ? '250px':'500px';
+})
 
 
-    
-    
-    this.dialogWidth = this.smallScreen ? '250px':'500px'; 
-  })
+
 }
 
 
