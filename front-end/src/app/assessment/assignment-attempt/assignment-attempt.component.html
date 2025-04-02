@@ -1,1 +1,37 @@
-<p>assignment-attempt works!</p>
+
+
+<div *ngIf="assignmentDetails; else none">
+<div class="assignment-details-container mat-elevation-z4">
+    <h2 class="mat-title">{{ assignmentDetails.name }}</h2>
+    <mat-divider></mat-divider>
+  
+    <div class="details">
+      <p><strong>Subject:</strong> {{ assignmentDetails.subject }}</p>
+      <p><strong>Allocated Mark:</strong> {{ assignmentDetails.allocatedMark }}</p>
+      <p><strong>Date Posted:</strong> {{ assignmentDetails.creationDate | date: 'medium' }}</p>
+      <p><strong>Submission Ends:</strong> {{ assignmentDetails.submissionEnds | date: 'medium' }}</p>
+      <p><strong>Category:</strong> {{ assignmentDetails.category }}</p>
+      <p><strong>Type:</strong> {{ assignmentDetails.type }}</p>
+    </div>
+  
+    <div class="actions">
+      <button mat-raised-button color="primary" class="take-assignment-btn" (click)="takeAssignment()">
+        Take Me to Assignment
+      </button>
+      <button mat-raised-button color="warn" class="take-later-btn" (click)="takeLater()">
+        Take Later
+      </button>
+    </div>
+  </div>
+</div>
+<div><mat-spinner [diameter]="1" ></mat-spinner></div>
+<ng-template #none>
+
+  <div *ngIf="!timeout">
+    <mat-spinner [diameter]="1" ></mat-spinner>
+  </div>
+  <div *ngIf="timeout" class="no-assignment">
+    <h2 class="mat-title">No Assignment Available</h2>
+    <p>There is no assignment available for you at the moment. Please check back later.</p>
+  </div>
+</ng-template>

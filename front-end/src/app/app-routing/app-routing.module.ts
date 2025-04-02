@@ -52,6 +52,12 @@ const routes: Routes = [
   {path: 'new-group', component: NewGroupChatComponent, canActivate:[chatGuard], canMatch:[chatGuard]
   },
 
+  {
+    path:'assignment/:id', component: AssignmentAttemptComponent,
+    canActivate:[authGuard],
+    canMatch:[authGuard]
+  },
+
   {path: 'group-request',component: GroupRequestComponent,
     canActivate:[authGuard],
     canMatch:[authGuard]
@@ -95,18 +101,13 @@ const routes: Routes = [
     canMatch:[adminGuard]
   },
 
-  {
-   path: 'assignment', component: AssignmentComponent,
-   canActivate:[adminGuard],
-   canMatch: [adminGuard]
-  },
 
-  {
-    path:'assignment/:id', component: AssignmentAttemptComponent,
-    canActivate:[authGuard],
-    canMatch:[authGuard]
-  },
   
+  {
+    path: 'assignment', component: AssignmentComponent,
+    canActivate:[adminGuard],
+    canMatch: [adminGuard]
+   },
   { path: 'no-access/:code', component: AccessDeniedComponent },
 
   {path: 'admin/:parameter',

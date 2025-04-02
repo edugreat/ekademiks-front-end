@@ -13,6 +13,7 @@ export class Endpoints {
  private _baseTestUrl = 'http://localhost:8080/tests/start';
  
  
+ 
   
   
 
@@ -370,6 +371,13 @@ export class Endpoints {
    public get assignmentDetailsUrl(){
 
     return this._assignmentDetailsUrl;
+   }
+
+   private _assignmentResourceUrl = `${this.assignmentUrl}/resource`;
+
+   public get  assignmentResourcesUrl(){    
+
+    return this._assignmentResourceUrl;
    }
 }
 
