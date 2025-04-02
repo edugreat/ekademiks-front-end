@@ -1,0 +1,28 @@
+.assignment-details-container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #fff;
+  }
+  
+  .details p {
+    margin: 8px 0;
+    font-size: 16px;
+  }
+  
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  
+  .take-assignment-btn {
+    background-color: #4caf50; /* Green */
+    color: white;
+  }
+  
+  .take-later-btn {
+    background-color: #f44336; /* Red */
+    color: white;
+  }

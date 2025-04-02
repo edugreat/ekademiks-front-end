@@ -11,9 +11,12 @@ export const authGuard: CanActivateFn = () => {
   // this shows a logged in user
   if(authService.currentUser){
 
+    console.log('current user exists')
+
     return true;
   }else{
 
+    console.log('no current user')
     authService.logout();
     router.navigate(['/login']);
 

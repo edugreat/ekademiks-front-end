@@ -33,6 +33,11 @@ export class  AssignmentService {
 
   }
 
+  public getAssignmentResources(assignmentId:string):Observable<AssignmentResourceDTO[]>{
+    
+    return this.http.get<AssignmentResourceDTO[]>(`${this.endpoints.assignmentResourcesUrl}?assId=${assignmentId}`)
+  
+  }
   public postPDFAssignment(formData:FormData):Observable<number>{
 
    
@@ -70,7 +75,7 @@ interface AssignmentResourceDTO{
 
   id?:number,
   type:string,
-  _index:number,
+  _index?:number,
   problem:string,
   options?:string[]
   answer:string,

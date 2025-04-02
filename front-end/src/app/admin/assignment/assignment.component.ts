@@ -630,7 +630,7 @@ export class AssignmentComponent implements OnInit, OnDestroy {
     let assignmentDetails: AssignmentDetails = {
       id:0,
       name: this.name.value,
-      type: this.selectedPdfType ? this.selectedPdfType : this.type.value,
+      type: this.selectedPdfType ? `pdf_${this.selectedPdfType}` : this.type.value,
       admin: this.currentUser!.id,
       subject: this.subject.value,
       category: this.category.value,

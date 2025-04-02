@@ -99,8 +99,9 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
     switch (this.unreadNotifications![index].type.toLowerCase()) {
       case 'assignment':
         
+      console.log('processing assignment notification: '+metadata);
       // routes to the assignment attempt component if notification is that of assignment
-      this.router.navigate(['/assignment', metadata]);
+      this.router.navigate(['assignment', metadata]);
         break;
     
       default:
