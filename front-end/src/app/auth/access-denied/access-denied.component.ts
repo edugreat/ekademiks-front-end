@@ -1,10 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
-  selector: 'app-access-denied',
-  templateUrl: './access-denied.component.html',
-  styleUrl: './access-denied.component.css'
+    selector: 'app-access-denied',
+    templateUrl: './access-denied.component.html',
+    styleUrl: './access-denied.component.css',
+    standalone: true,
+    imports: [MatProgressBar, MatIcon]
 })
 export class AccessDeniedComponent implements OnInit, OnDestroy{
   

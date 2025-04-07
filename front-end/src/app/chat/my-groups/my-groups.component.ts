@@ -1,18 +1,32 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ChatService, GroupChatInfo } from '../chat.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { Subscription, take } from 'rxjs';
-import { MatMenuTrigger } from '@angular/material/menu';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { ConfirmationDialogService } from '../../confirmation-dialog.service';
 import { MatInput } from '@angular/material/input';
 import { HttpResponse, HttpStatusCode } from '@angular/common/http';
 import { AuthService } from '../../auth/auth.service';
 import { setsEqual } from 'chart.js/dist/helpers/helpers.core';
+import { MatToolbar } from '@angular/material/toolbar';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { NgFor, NgIf, KeyValuePipe } from '@angular/common';
+import { MatOption } from '@angular/material/core';
+import { MatBadge } from '@angular/material/badge';
+import { MatTooltip } from '@angular/material/tooltip';
+import { RightClickDirective } from '../../shared/right-click.directive';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatSidenavContainer, MatSidenav, MatSidenavContent } from '@angular/material/sidenav';
+import { MatList, MatListItem } from '@angular/material/list';
 
 @Component({
-  selector: 'app-my-groups',
-  templateUrl: './my-groups.component.html',
-  styleUrl: './my-groups.component.css'
+    selector: 'app-my-groups',
+    templateUrl: './my-groups.component.html',
+    styleUrl: './my-groups.component.css',
+    standalone: true,
+    imports: [MatToolbar, MatFormField, MatLabel, MatSelect, NgFor, MatOption, MatBadge, MatTooltip, RightClickDirective, NgIf, MatInput, MatIconButton, MatMenuTrigger, MatMenu, MatMenuItem, MatIcon, MatSidenavContainer, MatSidenav, MatList, MatListItem, MatSidenavContent, RouterOutlet, KeyValuePipe]
 })
 // components that displays all the group chats the student belongs to
 export class MyGroupsComponent implements OnInit, OnDestroy{

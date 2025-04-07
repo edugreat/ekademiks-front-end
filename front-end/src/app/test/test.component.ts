@@ -12,11 +12,26 @@ import { AuthService, User } from '../auth/auth.service';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
 import { ActivityService } from '../activity.service';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatAnchor, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { NgIf, NgClass, NgFor } from '@angular/common';
+import { ProgressBarComponent } from '../shared/progress-bar/progress-bar.component';
+import { TimerComponent } from './timer/timer.component';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { MathJaxDirective } from '../shared/math-jax.directive';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
+import { FormsModule } from '@angular/forms';
+import { MatPrefix, MatSuffix } from '@angular/material/form-field';
+import { ConfirmationComponent } from '../shared/confirmation/confirmation.component';
+import { OptionSortPipe } from '../option-sort.pipe';
 
 @Component({
-  selector: 'app-test',
-  templateUrl: './test.component.html',
-  styleUrl: './test.component.css'
+    selector: 'app-test',
+    templateUrl: './test.component.html',
+    styleUrl: './test.component.css',
+    standalone: true,
+    imports: [MatTooltip, MatAnchor, MatIcon, NgIf, ProgressBarComponent, NgClass, TimerComponent, MatAccordion, NgFor, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MathJaxDirective, MatRadioGroup, FormsModule, MatRadioButton, MatButton, MatPrefix, MatSuffix, ConfirmationComponent, OptionSortPipe]
 })
 export class TestComponent implements OnInit, OnDestroy{
 

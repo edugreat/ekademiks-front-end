@@ -12,18 +12,16 @@ import { NotificationsDetailComponent } from './group-chat/request-notifications
 
 
 @NgModule({
-  declarations: [
-    NewGroupChatComponent,
-    ChatPolicyComponent,
-    MyGroupsComponent,
-    GroupChatComponent,
-    GroupRequestComponent,
-    NotificationsDetailComponent
-  ],
-  imports: [
-    CommonModule,
-    SharedModule,
-    RouterModule
-  ]
+    imports: [
+        CommonModule,
+        SharedModule,
+        RouterModule,
+        NewGroupChatComponent,
+        ChatPolicyComponent,
+        MyGroupsComponent,
+        GroupChatComponent,
+        GroupRequestComponent,
+        NotificationsDetailComponent
+    ]
 })
 export class ChatModule { }

@@ -5,7 +5,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 declare const MathJax:any;
 
 @Directive({
-  selector: '[appMathJax]'
+    selector: '[appMathJax]',
+    standalone: true
 })
 export class MathJaxDirective implements OnChanges{
 

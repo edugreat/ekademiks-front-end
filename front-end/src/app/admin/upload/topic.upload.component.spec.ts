@@ -9,8 +9,8 @@ describe('TopicComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TopicUploadComponent]
-    })
+    declarations: [TopicUploadComponent]
+})
     .compileComponents();
     
     fixture = TestBed.createComponent(TopicUploadComponent);

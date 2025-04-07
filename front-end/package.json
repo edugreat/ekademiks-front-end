@@ -31,7 +31,7 @@
     "zone.js": "~0.14.3"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^19.2.6",
+    "@angular-devkit/build-angular": "18.0.0",
     "@angular/cli": "^18.2.17",
     "@angular/compiler-cli": "^18.2.13",
     "@types/jasmine": "~5.1.0",
@@ -42,5 +42,13 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "^5.4.5"
-  }
+  },
+ 
+"resolutions": {
+  "@babel/runtime": "^7.26.10",
+  "esbuild": "^0.24.3",
+  "http-proxy-middleware": "^2.0.6",
+  "undici": "^6.21.1",
+  "webpack": "^5.93.1"
+}
 }

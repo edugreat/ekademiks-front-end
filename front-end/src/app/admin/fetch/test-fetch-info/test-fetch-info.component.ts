@@ -1,13 +1,21 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AdminService, AssessmentInfo } from '../../admin.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { Subscription, take } from 'rxjs';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { NgIf, NgFor } from '@angular/common';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { NumericDirective } from '../../../shared/numeric.directive';
 
 @Component({
-  selector: 'app-test-fech-info',
-  templateUrl: './test-fetch-info.component.html',
-  styleUrl: './test-fetch-info.component.css'
+    selector: 'app-test-fech-info',
+    templateUrl: './test-fetch-info.component.html',
+    styleUrl: './test-fetch-info.component.css',
+    standalone: true,
+    imports: [NgIf, MatProgressSpinner, NgFor, MatFormField, MatLabel, MatInput, FormsModule, NumericDirective, RouterOutlet]
 })
 export class TestFetchInfoComponent implements OnInit, OnDestroy {
 

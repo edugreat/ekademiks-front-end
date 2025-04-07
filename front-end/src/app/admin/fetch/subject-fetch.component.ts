@@ -2,17 +2,21 @@ import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular
 import { AdminService } from '../admin.service';
 import { Router } from '@angular/router';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { elementAt, take } from 'rxjs';
 import { MatInput } from '@angular/material/input';
 import { STRING_TYPE } from '@angular/compiler';
 import { HttpResponse, HttpStatusCode } from '@angular/common/http';
 import { ConfirmationDialogService } from '../../confirmation-dialog.service';
+import { MatButton } from '@angular/material/button';
+import { MatFormField } from '@angular/material/form-field';
 
 @Component({
-  selector: 'app-subject-fetch',
-  templateUrl: './subject-fetch.component.html',
-  styleUrl: './subject-fetch.component.css'
+    selector: 'app-subject-fetch',
+    templateUrl: './subject-fetch.component.html',
+    styleUrl: './subject-fetch.component.css',
+    standalone: true,
+    imports: [MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatButton, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFormField, MatInput]
 })
 export class SubjectFetchComponent implements OnInit, OnDestroy, AfterViewInit {
 

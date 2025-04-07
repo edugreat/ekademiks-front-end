@@ -3,11 +3,17 @@ import { AssignmentDetails, AssignmentService } from '../../admin/assignment.ser
 import { ActivatedRoute } from '@angular/router';
 import { AuthService, User } from '../../auth/auth.service';
 import { catchError, of, take, timeout } from 'rxjs';
+import { NgIf, DatePipe } from '@angular/common';
+import { MatDivider } from '@angular/material/divider';
+import { MatButton } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
-  selector: 'app-assignment-attempt',
-  templateUrl: './assignment-attempt.component.html',
-  styleUrl: './assignment-attempt.component.css'
+    selector: 'app-assignment-attempt',
+    templateUrl: './assignment-attempt.component.html',
+    styleUrl: './assignment-attempt.component.css',
+    standalone: true,
+    imports: [NgIf, MatDivider, MatButton, MatProgressSpinner, DatePipe]
 })
 // component renders a particular assignment based on user selection
 export class AssignmentAttemptComponent implements OnInit {

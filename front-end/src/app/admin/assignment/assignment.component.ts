@@ -3,17 +3,28 @@ import { AssignmentDetails, AssignmentService } from '../assignment.service';
 import { Institution, InstitutionService } from '../institution.service';
 import { range, Subscription, take, toArray } from 'rxjs';
 import { Router } from '@angular/router';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthService, User } from '../../auth/auth.service';
-import { provideNativeDateAdapter } from '@angular/material/core';
+import { provideNativeDateAdapter, MatOption } from '@angular/material/core';
 import { MatPaginator, MatPaginatorIntl, PageEvent } from '@angular/material/paginator';
-import { MatDatepickerInputEvent } from '@angular/material/datepicker';
+import { MatDatepickerInputEvent, MatDatepickerInput, MatDatepickerToggle, MatDatepickerToggleIcon, MatDatepicker } from '@angular/material/datepicker';
+import { NgIf, NgFor, UpperCasePipe, SlicePipe } from '@angular/common';
+import { MatFormField, MatLabel, MatSuffix, MatHint } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { DragDirective } from './drag.directive';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
 
 @Component({
-  selector: 'app-assignment',
-  templateUrl: './assignment.component.html',
-  styleUrl: './assignment.component.css',
-  providers: [provideNativeDateAdapter()]
+    selector: 'app-assignment',
+    templateUrl: './assignment.component.html',
+    styleUrl: './assignment.component.css',
+    providers: [provideNativeDateAdapter()],
+    standalone: true,
+    imports: [NgIf, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatSelect, NgFor, MatOption, MatIcon, MatTooltip, MatSuffix, MatDatepickerInput, MatHint, MatDatepickerToggle, MatDatepickerToggleIcon, MatDatepicker, MatButton, MatIconButton, DragDirective, MatRadioGroup, MatRadioButton, MatPaginator, UpperCasePipe, SlicePipe]
 })
 export class AssignmentComponent implements OnInit, OnDestroy {
 

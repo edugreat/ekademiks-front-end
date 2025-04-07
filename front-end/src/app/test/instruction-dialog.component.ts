@@ -1,11 +1,15 @@
 import { Component, OnInit,Inject } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
+import { NgFor } from '@angular/common';
+import { MatButton } from '@angular/material/button';
 
 
 @Component({
-  selector: 'app-instruction-dialog',
-  templateUrl: './instruction-dialog.component.html',
-  styleUrl: './instruction-dialog.component.css'
+    selector: 'app-instruction-dialog',
+    templateUrl: './instruction-dialog.component.html',
+    styleUrl: './instruction-dialog.component.css',
+    standalone: true,
+    imports: [MatDialogTitle, MatDialogContent, NgFor, MatDialogActions, MatButton, MatDialogClose]
 })
 
 //Component provides dialog box that displays instructions students must adhere to while taking the test assessment

@@ -1,19 +1,43 @@
 import { Component, OnInit } from '@angular/core';
 
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { emailValidator, nameValidator, passwordValidator } from './valid.credentials';
 import { NewUser, SignUpService } from './sign-up.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { ProgressBarMode } from '@angular/material/progress-bar';
 import { HttpErrorResponse } from '@angular/common/http';
+import { NgIf, NgFor } from '@angular/common';
+import { MatFormField, MatSuffix, MatHint, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { NumericDirective } from '../shared/numeric.directive';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
 
 
 @Component({
-  selector: 'app-sign-up',
-  templateUrl: './sign-up.component.html',
-  styleUrl: './sign-up.component.css',
-  
+    selector: 'app-sign-up',
+    templateUrl: './sign-up.component.html',
+    styleUrl: './sign-up.component.css',
+    standalone: true,
+    imports: [
+        NgIf,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormField,
+        MatInput,
+        MatIconButton,
+        MatSuffix,
+        MatIcon,
+        MatHint,
+        MatError,
+        NumericDirective,
+        MatRadioGroup,
+        NgFor,
+        MatRadioButton,
+        MatButton,
+    ],
 })
 export class SignUpComponent implements OnInit {
 selectedStatus?:string;

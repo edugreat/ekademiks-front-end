@@ -1,15 +1,20 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Institution, InstitutionService } from '../institution.service';
 import { Subscription, take } from 'rxjs';
 import { HttpStatusCode } from '@angular/common/http';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService, User } from '../../auth/auth.service';
+import { MatIcon } from '@angular/material/icon';
+import { NgIf, NgFor } from '@angular/common';
+import { MatButton } from '@angular/material/button';
 
 @Component({
-  selector: 'app-institution-registration',
-  templateUrl: './institution-registration.component.html',
-  styleUrl: './institution-registration.component.css'
+    selector: 'app-institution-registration',
+    templateUrl: './institution-registration.component.html',
+    styleUrl: './institution-registration.component.css',
+    standalone: true,
+    imports: [MatIcon, NgIf, RouterLink, FormsModule, ReactiveFormsModule, NgFor, MatButton]
 })
 export class InstitutionRegistrationComponent implements OnInit, OnDestroy {
 

@@ -1,14 +1,23 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, FormControl, FormGroup, FormArray, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLinkActive, RouterLink } from '@angular/router';
+import { FormBuilder, FormControl, FormGroup, FormArray, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Institution, InstitutionService } from '../../institution.service';
 import { take } from 'rxjs';
 import { HttpStatusCode } from '@angular/common/http';
+import { NgIf, NgFor } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatInput } from '@angular/material/input';
+import { MatIconButton, MatButton } from '@angular/material/button';
 
 @Component({
-  selector: 'app-add-student',
-  templateUrl: './add-student.component.html',
-  styleUrls: ['./add-student.component.css']
+    selector: 'app-add-student',
+    templateUrl: './add-student.component.html',
+    styleUrls: ['./add-student.component.css'],
+    standalone: true,
+    imports: [NgIf, MatIcon, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatSelect, NgFor, MatOption, MatInput, MatIconButton, MatSuffix, MatButton, RouterLinkActive, RouterLink]
 })
 export class AddStudentComponent implements OnInit {
 

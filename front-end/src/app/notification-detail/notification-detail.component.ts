@@ -7,12 +7,15 @@ import { Subscription } from 'rxjs';
 import { AssessmentsService } from '../assessment/assessments.service';
 import { AuthService, User } from '../auth/auth.service';
 import { AssignmentService } from '../admin/assignment.service';
+import { NgIf, NgFor, UpperCasePipe, DatePipe } from '@angular/common';
 
 
 @Component({
-  selector: 'app-notification-detail',
-  templateUrl: './notification-detail.component.html',
-  styleUrl: './notification-detail.component.css'
+    selector: 'app-notification-detail',
+    templateUrl: './notification-detail.component.html',
+    styleUrl: './notification-detail.component.css',
+    standalone: true,
+    imports: [NgIf, NgFor, UpperCasePipe, DatePipe]
 })
 export class NotificationDetailComponent implements OnInit, OnDestroy{
 

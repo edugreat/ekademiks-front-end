@@ -8,8 +8,8 @@ describe('OptionsBankComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [OptionsBankComponent]
-    })
+    imports: [OptionsBankComponent]
+})
     .compileComponents();
     
     fixture = TestBed.createComponent(OptionsBankComponent);

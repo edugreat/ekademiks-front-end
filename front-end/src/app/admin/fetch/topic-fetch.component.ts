@@ -3,11 +3,21 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AdminService } from '../admin.service';
 import { ConfirmationDialogService } from '../../confirmation-dialog.service';
 import { take } from 'rxjs';
+import { MatToolbar } from '@angular/material/toolbar';
+import { MatAnchor, MatButton } from '@angular/material/button';
+import { NgFor, NgIf, KeyValuePipe } from '@angular/common';
+import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { MatList, MatListItem } from '@angular/material/list';
+import { MatFormField } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-topic-fetch',
-  templateUrl: './topic-fetch.component.html',
-  styleUrl: './topic-fetch.component.css'
+    selector: 'app-topic-fetch',
+    templateUrl: './topic-fetch.component.html',
+    styleUrl: './topic-fetch.component.css',
+    standalone: true,
+    imports: [MatToolbar, MatAnchor, NgFor, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatList, MatListItem, NgIf, MatFormField, MatInput, FormsModule, MatButton, KeyValuePipe]
 })
 export class TopicFetchComponent implements OnInit {
 

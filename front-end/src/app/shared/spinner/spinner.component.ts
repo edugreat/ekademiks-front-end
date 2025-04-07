@@ -1,11 +1,14 @@
 
 
 import { Component, Input, OnInit } from '@angular/core';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
-  selector: 'app-spinner',
-  templateUrl: './spinner.component.html',
-  styleUrl: './spinner.component.css',
+    selector: 'app-spinner',
+    templateUrl: './spinner.component.html',
+    styleUrl: './spinner.component.css',
+    standalone: true,
+    imports: [MatProgressSpinner],
 })
 export class SpinnerComponent implements OnInit{
 

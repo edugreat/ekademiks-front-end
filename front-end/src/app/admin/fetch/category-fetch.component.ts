@@ -1,17 +1,21 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { AdminService, AssessmentCategory } from '../admin.service';
 import { Router } from '@angular/router';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatInput } from '@angular/material/input';
 import { DataSource } from '@angular/cdk/collections';
 import { HttpResponse, HttpStatusCode } from '@angular/common/http';
 import { ConfirmationDialogService } from '../../confirmation-dialog.service';
+import { MatButton } from '@angular/material/button';
+import { MatFormField } from '@angular/material/form-field';
 
 @Component({
-  selector: 'app-category-fetch',
-  templateUrl: './category-fetch.component.html',
-  styleUrl: './category-fetch.component.css'
+    selector: 'app-category-fetch',
+    templateUrl: './category-fetch.component.html',
+    styleUrl: './category-fetch.component.css',
+    standalone: true,
+    imports: [MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatButton, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFormField, MatInput]
 })
 export class CategoryFetchComponent implements OnInit, OnDestroy, AfterViewInit{
 

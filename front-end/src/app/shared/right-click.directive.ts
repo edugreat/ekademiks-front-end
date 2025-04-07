@@ -2,7 +2,8 @@ import { Directive, EventEmitter, HostListener, Output } from '@angular/core';
 
 // emits true when the directive to which this custom directive is right clicked
 @Directive({
-  selector: '[appRightClick]',
+    selector: '[appRightClick]',
+    standalone: true,
 })
 export class RightClickDirective {
 

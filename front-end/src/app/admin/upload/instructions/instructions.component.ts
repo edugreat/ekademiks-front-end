@@ -1,14 +1,23 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AdminService } from '../../admin.service';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpStatusCode } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NgIf, NgFor } from '@angular/common';
+import { NotificationsComponent } from '../notifications/notifications.component';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatTooltip } from '@angular/material/tooltip';
 
 // This component is the assessment instructions guides which the student taking the assessment is expected to adhere to
 @Component({
-  selector: 'app-instructions',
-  templateUrl: './instructions.component.html',
-  styleUrl: './instructions.component.css'
+    selector: 'app-instructions',
+    templateUrl: './instructions.component.html',
+    styleUrl: './instructions.component.css',
+    standalone: true,
+    imports: [NgIf, NotificationsComponent, MatButton, MatIcon, FormsModule, ReactiveFormsModule, NgFor, MatFormField, MatInput, MatTooltip]
 })
 export class InstructionsComponent implements OnInit{
 

@@ -1,16 +1,29 @@
 import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { PerformanceObject } from '../../test.component';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../auth/auth.service';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { take } from 'rxjs';
+import { MatCard, MatCardContent, MatCardTitle } from '@angular/material/card';
+import { NgIf } from '@angular/common';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
+import { FormsModule } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
+import { MatGridList, MatGridTile } from '@angular/material/grid-list';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatSuffix } from '@angular/material/form-field';
+import { DetailPageComponent } from './detail-page.component';
+import { ConfirmationComponent } from '../../../shared/confirmation/confirmation.component';
 
 @Component({
-  selector: 'app-performance-report',
-  templateUrl: './performance-report.component.html',
-  styleUrl: './performance-report.component.css'
+    selector: 'app-performance-report',
+    templateUrl: './performance-report.component.html',
+    styleUrl: './performance-report.component.css',
+    standalone: true,
+    imports: [MatCard, MatCardContent, NgIf, MatRadioGroup, FormsModule, MatRadioButton, MatButton, MatCardTitle, MatGridList, MatGridTile, MatIcon, MatTooltip, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSuffix, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DetailPageComponent, ConfirmationComponent]
 })
 export class PerformanceReportComponent implements OnInit, OnDestroy, AfterViewInit{
 

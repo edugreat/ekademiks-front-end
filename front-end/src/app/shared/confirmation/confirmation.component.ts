@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { ConfirmationDialogService } from '../../confirmation-dialog.service';
 
 @Component({
-  selector: 'app-confirmation',
-  templateUrl: './confirmation.component.html',
-  styleUrl: './confirmation.component.css'
+    selector: 'app-confirmation',
+    templateUrl: './confirmation.component.html',
+    styleUrl: './confirmation.component.css',
+    standalone: true
 })
 
 //component that provides confirmation dialog for users to confirm their initiated actions

@@ -9,14 +9,20 @@ type pageInfo = {
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AdminService, Student } from '../../admin.service';
 import { Subscription } from 'rxjs';
-import { Router } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { HttpResponse, HttpStatusCode } from '@angular/common/http';
+import { NgIf, NgFor } from '@angular/common';
+import { MatButton, MatAnchor } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatSuffix } from '@angular/material/form-field';
 
 @Component({
-  selector: 'app-student-list',
-  templateUrl: './student-list.component.html',
-  styleUrl: './student-list.component.css'
+    selector: 'app-student-list',
+    templateUrl: './student-list.component.html',
+    styleUrl: './student-list.component.css',
+    standalone: true,
+    imports: [NgIf, NgFor, MatButton, MatIcon, MatSuffix, MatAnchor, RouterOutlet]
 })
 
 // component that handles rendering of students list as received from the server

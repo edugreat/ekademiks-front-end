@@ -5,11 +5,16 @@ import { Subscription, take } from 'rxjs';
 import { _Notification } from '../../admin/upload/notifications/notifications.service';
 import { HttpResponse, HttpStatusCode } from '@angular/common/http';
 import { AuthService, User } from '../../auth/auth.service';
+import { MatButton } from '@angular/material/button';
+import { NgFor, NgIf, KeyValuePipe } from '@angular/common';
+import { MatCard, MatCardHeader, MatCardTitle, MatCardActions } from '@angular/material/card';
 
 @Component({
-  selector: 'app-group-request',
-  templateUrl: './group-request.component.html',
-  styleUrl: './group-request.component.css'
+    selector: 'app-group-request',
+    templateUrl: './group-request.component.html',
+    styleUrl: './group-request.component.css',
+    standalone: true,
+    imports: [MatButton, NgFor, MatCard, MatCardHeader, MatCardTitle, MatCardActions, NgIf, KeyValuePipe]
 })
 
 // component that handles user's requests to join already created group chats.

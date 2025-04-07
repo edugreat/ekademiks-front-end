@@ -4,13 +4,16 @@ import { Subscription } from 'rxjs';
 
 import { ActivatedRoute } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
+import { NgIf, NgFor, NgStyle, DatePipe } from '@angular/common';
 
 Chart.register(...registerables);
 
 @Component({
-  selector: 'app-student-details-page',
-  templateUrl: './student-details-page.component.html',
-  styleUrl: './student-details-page.component.css'
+    selector: 'app-student-details-page',
+    templateUrl: './student-details-page.component.html',
+    styleUrl: './student-details-page.component.css',
+    standalone: true,
+    imports: [NgIf, NgFor, NgStyle, DatePipe]
 })
 export class StudentDetailsPageComponent implements OnInit,  OnDestroy{
   

@@ -6,11 +6,16 @@ import { Subscription, take } from 'rxjs';
 import { HttpResponse } from '@angular/common/http';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { NgIf, NgFor } from '@angular/common';
+import { MathJaxDirective } from '../../../shared/math-jax.directive';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-assessment-questions',
-  templateUrl: './assessment-questions.component.html',
-  styleUrl: './assessment-questions.component.css'
+    selector: 'app-assessment-questions',
+    templateUrl: './assessment-questions.component.html',
+    styleUrl: './assessment-questions.component.css',
+    standalone: true,
+    imports: [NgIf, NgFor, MathJaxDirective, FormsModule]
 })
 
 // Component that serves assessment test for a given test id

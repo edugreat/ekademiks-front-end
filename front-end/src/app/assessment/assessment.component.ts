@@ -1,15 +1,24 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AssessmentsService } from './assessments.service';
 import { Observable, Subscription, finalize } from 'rxjs';
 
 import { AuthService, User } from '../auth/auth.service';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { NgIf, NgFor } from '@angular/common';
+import { SpinnerComponent } from '../shared/spinner/spinner.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatAnchor } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatGridList, MatGridTile } from '@angular/material/grid-list';
+import { SortPipe } from '../sort.pipe';
 
 @Component({
-  selector: 'app-assessment',
-  templateUrl: './assessment.component.html',
-  styleUrl: './assessment.component.css'
+    selector: 'app-assessment',
+    templateUrl: './assessment.component.html',
+    styleUrl: './assessment.component.css',
+    standalone: true,
+    imports: [NgIf, SpinnerComponent, MatTooltip, MatAnchor, MatIcon, MatGridList, NgFor, MatGridTile, RouterLink, SortPipe]
 })
 export class AssessmentComponent implements OnInit, OnDestroy{
 

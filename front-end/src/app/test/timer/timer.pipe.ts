@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 // Transorms the time duration of the test in minutes and seconds with a zero padding if second portion is one-digit
 @Pipe({
-  name: 'timer'
+    name: 'timer',
+    standalone: true
 })
 export class TimerPipe implements PipeTransform {
 

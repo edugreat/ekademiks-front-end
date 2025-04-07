@@ -1,7 +1,8 @@
 import { Directive, ElementRef, HostListener } from '@angular/core';
 
 @Directive({
-  selector: '[appNumeric]'
+    selector: '[appNumeric]',
+    standalone: true
 })
 //Directive that rejects non numeric input, especially useful in a mobile contact input field
 export class NumericDirective {

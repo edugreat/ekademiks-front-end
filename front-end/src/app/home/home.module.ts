@@ -10,18 +10,13 @@ import { RouterModule } from '@angular/router';
 
 
 @NgModule({
-  declarations: [
-    HomeComponent,
-    WelcomeComponent
-  ],
-  imports: [
-    CommonModule,
-    FormsModule,
-    SharedModule,
-    RouterModule
-   
-   
-  ],
-  //exports:[HomeComponent]
+    imports: [
+        CommonModule,
+        FormsModule,
+        SharedModule,
+        RouterModule,
+        HomeComponent,
+        WelcomeComponent
+    ],
 })
 export class HomeModule { }

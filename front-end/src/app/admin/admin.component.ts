@@ -1,13 +1,30 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { AdminService } from './admin.service';
 import { Subscription, timeout } from 'rxjs';
-import { MatStepper } from '@angular/material/stepper';
+import { MatStepper, MatStep, MatStepLabel } from '@angular/material/stepper';
+import { NgIf } from '@angular/common';
+import { MatAnchor } from '@angular/material/button';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
-  selector: 'app-admin',
-  templateUrl: './admin.component.html',
-  styleUrl: './admin.component.css',
+    selector: 'app-admin',
+    templateUrl: './admin.component.html',
+    styleUrl: './admin.component.css',
+    standalone: true,
+    imports: [
+        NgIf,
+        MatStepper,
+        MatStep,
+        MatStepLabel,
+        MatAnchor,
+        MatMenuTrigger,
+        MatIcon,
+        MatMenu,
+        MatMenuItem,
+        RouterOutlet,
+    ],
 })
 export class AdminComponent implements OnInit, AfterViewInit, OnDestroy {
   //acivated route parameter

@@ -1,15 +1,25 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { AssessmentsService, Levels } from '../assessment/assessments.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HomeService } from './home.service';
 import { AuthService, User } from '../auth/auth.service';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { NgIf, NgFor, AsyncPipe } from '@angular/common';
+import { WelcomeComponent } from './welcome/welcome.component';
+import { MatGridList, MatGridTile } from '@angular/material/grid-list';
+import { MatAnchor, MatButton } from '@angular/material/button';
+import { MatDivider } from '@angular/material/divider';
+import { MatIcon } from '@angular/material/icon';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+    selector: 'app-home',
+    templateUrl: './home.component.html',
+    styleUrls: ['./home.component.css'],
+    standalone: true,
+    imports: [NgIf, WelcomeComponent, MatGridList, MatGridTile, MatAnchor, MatDivider, MatIcon, RouterLink, MatRadioGroup, FormsModule, NgFor, MatRadioButton, MatButton, AsyncPipe]
 })
 export class HomeComponent implements OnInit, OnDestroy {
 

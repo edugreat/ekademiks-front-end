@@ -2,9 +2,10 @@ import { Component } from '@angular/core';
 
 // Component that provides policies on the creation and use of in-app group chats.
 @Component({
-  selector: 'app-chat-policy',
-  templateUrl: './chat-policy.component.html',
-  styleUrl: './chat-policy.component.css'
+    selector: 'app-chat-policy',
+    templateUrl: './chat-policy.component.html',
+    styleUrl: './chat-policy.component.css',
+    standalone: true
 })
 export class ChatPolicyComponent  {
 

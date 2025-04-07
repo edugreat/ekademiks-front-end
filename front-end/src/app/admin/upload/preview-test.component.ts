@@ -1,15 +1,25 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Option, Question, TestDTO } from './upload-test.component';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subscription, take } from 'rxjs';
 import { AdminService } from '../admin.service';
 import { HttpResponse, HttpStatusCode } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { NgIf, NgFor } from '@angular/common';
+import { MatFormField, MatPrefix, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { InstructionsComponent } from './instructions/instructions.component';
 
 @Component({
-  selector: 'app-preview-test',
-  templateUrl: './preview-test.component.html',
-  styleUrl: './preview-test.component.css'
+    selector: 'app-preview-test',
+    templateUrl: './preview-test.component.html',
+    styleUrl: './preview-test.component.css',
+    standalone: true,
+    imports: [NgIf, FormsModule, ReactiveFormsModule, MatFormField, MatInput, NgFor, MatSelect, MatOption, MatButton, MatIcon, MatPrefix, MatSuffix, InstructionsComponent]
 })
 export class PreviewTestComponent implements OnInit, OnDestroy {
 

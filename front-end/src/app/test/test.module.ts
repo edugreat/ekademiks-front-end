@@ -14,23 +14,17 @@ import { DetailPageComponent } from './performance/performance-report/detail-pag
 
 
 @NgModule({
-  declarations: [
-    TestComponent,
-    
-    TimerComponent,
-    TimerPipe,
-    InstructionDialogComponent,
-    PerformanceComponent,
-    PerformanceReportComponent,
-    DetailPageComponent
-    
-  ],
-  
-  imports: [
-    CommonModule,
-    SharedModule,
-    
-  ],
-  exports:[TestComponent, SharedModule]
+    imports: [
+        CommonModule,
+        SharedModule,
+        TestComponent,
+        TimerComponent,
+        TimerPipe,
+        InstructionDialogComponent,
+        PerformanceComponent,
+        PerformanceReportComponent,
+        DetailPageComponent,
+    ],
+    exports: [TestComponent, SharedModule]
 })
 export class TestModule { }

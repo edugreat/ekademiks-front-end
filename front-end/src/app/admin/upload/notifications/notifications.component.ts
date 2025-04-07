@@ -1,19 +1,27 @@
 import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AdminService } from '../../admin.service';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatCheckbox, MatCheckboxChange } from '@angular/material/checkbox';
 import { HttpResponse, HttpStatusCode } from '@angular/common/http';
 import { Institution, InstitutionService } from '../../institution.service';
 import { pipe, Subscription, take, tap } from 'rxjs';
-import { MatOptionSelectionChange } from '@angular/material/core';
+import { MatOptionSelectionChange, MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
 import { AuthService, User } from '../../../auth/auth.service';
+import { NgIf, NgFor } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { NumericDirective } from '../../../shared/numeric.directive';
+import { MatButton } from '@angular/material/button';
 
 @Component({
-  selector: 'app-notifications',
-  templateUrl: './notifications.component.html',
-  styleUrl: './notifications.component.css'
+    selector: 'app-notifications',
+    templateUrl: './notifications.component.html',
+    styleUrl: './notifications.component.css',
+    standalone: true,
+    imports: [NgIf, FormsModule, ReactiveFormsModule, MatIcon, MatFormField, MatInput, NumericDirective, MatCheckbox, MatLabel, MatSelect, MatOption, NgFor, MatButton]
 })
 // Component used to draft notifications forwarded to the students for certain reasons (e.g assessment upload, result releases etc)
 

@@ -8,8 +8,8 @@ describe('AssessmentExpansionPanelComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [AssessmentExpansionPanelComponent]
-    })
+    imports: [AssessmentExpansionPanelComponent]
+})
     .compileComponents();
     
     fixture = TestBed.createComponent(AssessmentExpansionPanelComponent);

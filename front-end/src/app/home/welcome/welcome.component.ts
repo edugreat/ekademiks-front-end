@@ -1,11 +1,14 @@
 import { Component, Input, OnDestroy, OnInit, input } from '@angular/core';
 import { HomeService } from '../home.service';
 import { Observable, Subscription } from 'rxjs';
+import { NgStyle } from '@angular/common';
 
 @Component({
-  selector: 'app-welcome',
-  templateUrl: './welcome.component.html',
-  styleUrl: './welcome.component.css'
+    selector: 'app-welcome',
+    templateUrl: './welcome.component.html',
+    styleUrl: './welcome.component.css',
+    standalone: true,
+    imports: [NgStyle]
 })
 export class WelcomeComponent implements OnInit, OnDestroy{
 

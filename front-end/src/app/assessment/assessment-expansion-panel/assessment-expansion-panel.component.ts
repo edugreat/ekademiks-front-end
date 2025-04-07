@@ -1,13 +1,43 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AssessmentsService, TopicAndDuration } from '../assessments.service';
-import { Observable, Subscription, tap } from 'rxjs';
+import { from, Observable, Subscription } from 'rxjs';
 import { AuthService, User } from '../../auth/auth.service';
+import { NgFor, NgIf, AsyncPipe } from '@angular/common';
+
+
+
+import { SortPipe } from '../../sort.pipe';
+import { MatAnchor, MatButton } from '@angular/material/button';
+import { MatDivider } from '@angular/material/divider';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelActionRow } from '@angular/material/expansion';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
-  selector: 'app-assessment-expansion-panel',
-  templateUrl: './assessment-expansion-panel.component.html',
-  styleUrl: './assessment-expansion-panel.component.css',
+    selector: 'app-assessment-expansion-panel',
+    templateUrl: './assessment-expansion-panel.component.html',
+    styleUrl: './assessment-expansion-panel.component.css',
+    standalone: true,
+    imports: [
+      MatTooltip,
+      MatAnchor,
+      MatIcon,
+     
+      MatAccordion,
+      MatExpansionPanel,
+      MatExpansionPanelHeader,
+      MatExpansionPanelTitle,
+      MatExpansionPanelDescription,
+      MatExpansionPanelActionRow,
+      MatButton,
+      
+      MatDivider,
+        AsyncPipe,
+        SortPipe,
+        NgFor,
+        NgIf,
+    ],
 })
 export class AssessmentExpansionPanelComponent implements OnInit, OnDestroy {
 

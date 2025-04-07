@@ -1,15 +1,23 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { afterNextRender, afterRender, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { AuthService } from './auth.service';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { HttpStatusCode } from '@angular/common/http';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { MatIconButton, MatButton, MatAnchor } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatSuffix, MatFormField, MatHint, MatError } from '@angular/material/form-field';
+import { NgStyle, NgIf } from '@angular/common';
+import { MatInput } from '@angular/material/input';
+import { MatDivider } from '@angular/material/divider';
 
 
 @Component({
-  selector: 'app-auth',
-  templateUrl: './auth.component.html',
-  styleUrl: './auth.component.css'
+    selector: 'app-auth',
+    templateUrl: './auth.component.html',
+    styleUrl: './auth.component.css',
+    standalone: true,
+    imports: [MatIconButton, MatIcon, MatSuffix, NgStyle, FormsModule, ReactiveFormsModule, MatFormField, MatInput, MatHint, NgIf, MatError, MatButton, MatCheckbox, MatAnchor, RouterLink, MatDivider]
 })
 export class AuthComponent implements OnDestroy {
 
@@ -25,6 +33,7 @@ export class AuthComponent implements OnDestroy {
   showPassword = false;
 
 
+  @ViewChild('emailInput')emailInput!:ElementRef<HTMLInputElement>;
   
  dynamicPasswordInputType = 'password'; //property that toggles the password input field type between 'text' and 'password'
 
@@ -38,20 +47,32 @@ export class AuthComponent implements OnDestroy {
 
 
 
-  constructor(private authService: AuthService, 
-    
-  private formBuilder: FormBuilder,
+  constructor(
+    private authService: AuthService,
+    private formBuilder: FormBuilder,
+    private router: Router  ) {
+    afterNextRender(() => {
 
-  private router:Router){}
+      // gives one-time focus to the email input field
+     this.emailInput.nativeElement.focus();
+    });
+  }
 
   @ViewChild(MatCheckbox) adminCheckbox!:MatCheckbox; //check box
 
 
   ngOnDestroy(): void {
-    clearInterval(this.timer)
+    clearInterval(this.timer);
+
+    document.removeEventListener('click', this.globalClickHandler);
   }
 
-  
+  // Handler reference for proper cleanup
+  private globalClickHandler = (event: MouseEvent) => {
+    if (!this.emailInput.nativeElement.contains(event.target as Node)) {
+      this.emailInput.nativeElement.blur();
+    }
+  };
 
   //logs a user in
   public login(email:string,password:string):void{

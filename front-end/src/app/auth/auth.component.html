@@ -18,7 +18,7 @@
   <div class="login-form" [formGroup]="form">
     <div>
       <mat-form-field appearance="outline">
-        <input type="email" formControlName="email" matInput placeholder="Email">
+        <input type="email" #emailInput formControlName="email" matInput placeholder="Email">
         <mat-icon matSuffix>mail</mat-icon>
         <mat-hint>Your Email Address</mat-hint>
         <mat-error *ngIf="form.get('email')!.hasError('email')">Email is not valid</mat-error>

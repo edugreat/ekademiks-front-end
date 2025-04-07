@@ -8,15 +8,14 @@ import { RouterModule } from '@angular/router';
 
 
 @NgModule({
-  declarations: [AuthComponent, AccessDeniedComponent],
-  imports: [
-    CommonModule,
-    SharedModule,
-    RouterModule
-   
-  ],
-  exports: [
-    AuthComponent
-  ]
+    imports: [
+        CommonModule,
+        SharedModule,
+        RouterModule,
+        AuthComponent, AccessDeniedComponent
+    ],
+    exports: [
+        AuthComponent
+    ]
 })
 export class AuthModule { }

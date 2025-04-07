@@ -3,11 +3,15 @@ import { _Notification } from '../../../admin/upload/notifications/notifications
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ChatService } from '../../chat.service';
 import { Subscription, take } from 'rxjs';
+import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { MatButton } from '@angular/material/button';
 
 @Component({
-  selector: 'app-request-notifications-detail',
-  templateUrl: './notifications-detail.component.html',
-  styleUrl: './notifications-detail.component.css'
+    selector: 'app-request-notifications-detail',
+    templateUrl: './notifications-detail.component.html',
+    styleUrl: './notifications-detail.component.css',
+    standalone: true,
+    imports: [NgIf, MatButton, NgFor, DatePipe]
 })
 
 // component that displays all the notifications a user has got

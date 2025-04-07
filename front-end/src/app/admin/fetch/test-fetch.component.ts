@@ -1,12 +1,16 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AdminService, AssessmentCategory } from '../admin.service';
 import { Subscription } from 'rxjs';
-import { Router } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
+import { NgIf, NgFor } from '@angular/common';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
-  selector: 'app-test-fetch',
-  templateUrl: './test-fetch.component.html',
-  styleUrl: './test-fetch.component.css'
+    selector: 'app-test-fetch',
+    templateUrl: './test-fetch.component.html',
+    styleUrl: './test-fetch.component.css',
+    standalone: true,
+    imports: [NgIf, MatProgressSpinner, NgFor, RouterOutlet]
 })
 export class TestFetchComponent implements OnInit, OnDestroy {
 

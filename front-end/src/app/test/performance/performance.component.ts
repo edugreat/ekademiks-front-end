@@ -4,11 +4,19 @@ import { PerformanceObject } from '../test.component';
 import { Router } from '@angular/router';
 import { Subscription, take, tap } from 'rxjs';
 import { AuthService } from '../../auth/auth.service';
+import { NgIf } from '@angular/common';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
+import { FormsModule } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { PerformanceReportComponent } from './performance-report/performance-report.component';
 
 @Component({
-  selector: 'app-performance',
-  templateUrl: './performance.component.html',
-  styleUrl: './performance.component.css'
+    selector: 'app-performance',
+    templateUrl: './performance.component.html',
+    styleUrl: './performance.component.css',
+    standalone: true,
+    imports: [NgIf, MatRadioGroup, FormsModule, MatRadioButton, MatButton, MatIcon, PerformanceReportComponent]
 })
 
 

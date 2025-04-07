@@ -1,9 +1,15 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { NgIf } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { TimerPipe } from './timer.pipe';
 
 @Component({
-  selector: 'app-timer',
-  templateUrl: './timer.component.html',
-  styleUrl: './timer.component.css'
+    selector: 'app-timer',
+    templateUrl: './timer.component.html',
+    styleUrl: './timer.component.css',
+    standalone: true,
+    imports: [NgIf, MatIcon, MatTooltip, TimerPipe]
 })
 
 //Takes care of providing functionalities for assesment timing

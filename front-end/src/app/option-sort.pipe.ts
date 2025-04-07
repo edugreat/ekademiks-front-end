@@ -2,8 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { Option } from './test/test-interface';
 
 @Pipe({
-  name: 'optionSort'
-  
+    name: 'optionSort',
+    standalone: true
 })
 export class OptionSortPipe implements PipeTransform {
 

@@ -1,14 +1,37 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthService, User } from './auth/auth.service';
-import { Subscription, take } from 'rxjs';
-import { Router } from '@angular/router';
+import { from, Subscription, take } from 'rxjs';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { ConfirmationDialogService } from './confirmation-dialog.service';
 import { ActivityService } from './activity.service';
 import { NotificationsService } from './admin/upload/notifications/notifications.service';
 
+import { CommonModule } from '@angular/common';
+import { ConfirmationComponent } from './shared';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 
 @Component({
+  standalone: true,
+  imports:[
+    CommonModule,
+    MatToolbarModule,
+    MatIconModule,
+    MatButtonModule,
+    MatMenuModule,
+    MatTooltipModule,
+    MatBadgeModule,
+    MatSidenavModule,
+    RouterLink,
+    RouterOutlet,
+    ConfirmationComponent
+  ],
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',

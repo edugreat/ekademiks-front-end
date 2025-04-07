@@ -1,16 +1,26 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ConfirmationDialogService } from '../../confirmation-dialog.service';
 import { Router } from '@angular/router';
 import { Subscription, take } from 'rxjs';
 import { ChatService } from '../chat.service';
 import { HttpResponse, HttpStatusCode } from '@angular/common/http';
 import { AuthService, User } from '../../auth/auth.service';
+import { NgIf, NgFor } from '@angular/common';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatButton, MatAnchor } from '@angular/material/button';
+import { ChatPolicyComponent } from '../chat-policy/chat-policy.component';
 
 @Component({
-  selector: 'app-new-group-chat',
-  templateUrl: './new-group-chat.component.html',
-  styleUrl: './new-group-chat.component.css'
+    selector: 'app-new-group-chat',
+    templateUrl: './new-group-chat.component.html',
+    styleUrl: './new-group-chat.component.css',
+    standalone: true,
+    imports: [NgIf, MatProgressSpinner, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatSelect, NgFor, MatOption, MatButton, MatAnchor, ChatPolicyComponent]
 })
 export class NewGroupChatComponent implements OnInit {
 

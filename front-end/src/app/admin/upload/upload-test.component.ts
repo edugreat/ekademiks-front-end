@@ -1,10 +1,20 @@
 import { Component, computed, OnDestroy, OnInit, Signal, signal } from '@angular/core';
 import { AdminService, CategoryObject, SubjectObject } from '../admin.service';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Institution, InstitutionService } from '../institution.service';
 import { AuthService, User } from '../../auth/auth.service';
-import { MatSelectChange } from '@angular/material/select';
+import { MatSelectChange, MatSelect } from '@angular/material/select';
 import { Subscription, tap } from 'rxjs';
+import { NgIf, NgFor } from '@angular/common';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatOption } from '@angular/material/core';
+import { MatInput } from '@angular/material/input';
+import { NumericDirective } from '../../shared/numeric.directive';
+import { MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { RouterLinkActive, RouterLink } from '@angular/router';
+import { PreviewTestComponent } from './preview-test.component';
 
 //Declares an object type Option
 export type Option = { text: string | undefined; letter: string | undefined };
@@ -30,9 +40,28 @@ export type TestDTO = {
 };
 
 @Component({
-  selector: 'app-upload-test',
-  templateUrl: './upload-test.component.html',
-  styleUrl: './upload-test.component.css',
+    selector: 'app-upload-test',
+    templateUrl: './upload-test.component.html',
+    styleUrl: './upload-test.component.css',
+    standalone: true,
+    imports: [
+        NgIf,
+        FormsModule,
+        MatFormField,
+        MatLabel,
+        MatSelect,
+        MatOption,
+        NgFor,
+        ReactiveFormsModule,
+        MatInput,
+        NumericDirective,
+        MatButton,
+        MatTooltip,
+        MatIcon,
+        RouterLinkActive,
+        RouterLink,
+        PreviewTestComponent,
+    ],
 })
 export class UploadTestComponent implements OnInit, OnDestroy {
 

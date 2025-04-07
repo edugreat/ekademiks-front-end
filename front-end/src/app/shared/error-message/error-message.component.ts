@@ -1,10 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-error-message',
-  templateUrl: './error-message.component.html',
-  styleUrl: './error-message.component.css'
+    selector: 'app-error-message',
+    templateUrl: './error-message.component.html',
+    styleUrl: './error-message.component.css',
+    standalone: true,
+    imports: [NgIf]
 })
 export class ErrorMessageComponent implements OnInit {
 
