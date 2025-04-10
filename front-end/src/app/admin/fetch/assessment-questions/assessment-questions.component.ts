@@ -63,7 +63,7 @@ export class AssessmentQuestionsComponent implements OnInit, OnDestroy, AfterVie
   constructor(private adminService:AdminService, private activatedRoute:ActivatedRoute,
 
     private router:Router, private confirmationService:ConfirmationDialogService,
-    private breakpointObserver:BreakpointObserver
+   // private breakpointObserver:BreakpointObserver
   ){}
   
   
@@ -87,7 +87,7 @@ export class AssessmentQuestionsComponent implements OnInit, OnDestroy, AfterVie
   }
 
   ngAfterViewInit(): void {
-    this.userDevice();
+   // this.userDevice();
   }
   ngOnDestroy(): void {
     this.mediaSub?.unsubscribe();
@@ -238,34 +238,34 @@ this.currentIndex = endIndex;
 
       // gets information about user's screen device size.
       // This is used to change the header tag depending on the screen size
-      private userDevice(){
+      // private userDevice(){
 
 
-        this.mediaSub = this.breakpointObserver.observe([
-          Breakpoints.Small,
-          Breakpoints.XSmall
-        ]).subscribe(result => {
+      //   this.mediaSub = this.breakpointObserver.observe([
+      //     Breakpoints.Small,
+      //     Breakpoints.XSmall
+      //   ]).subscribe(result => {
 
-          this.smallScreenDevice = result.matches;
-          const el1 = document.getElementById('parent');
-      const el2 = document.getElementById('container');
-       if(!this.smallScreenDevice && el1 && el2){
+      //     this.smallScreenDevice = result.matches;
+      //     const el1 = document.getElementById('parent');
+      // const el2 = document.getElementById('container');
+      //  if(!this.smallScreenDevice && el1 && el2){
 
-          el1.classList.remove('flex-start');
-          el2.classList.add('auto-aligned')
+      //     el1.classList.remove('flex-start');
+      //     el2.classList.add('auto-aligned')
         
-       }else if(this.smallScreenDevice && el1 && el2){
+      //  }else if(this.smallScreenDevice && el1 && el2){
 
-        el1.classList.add('flex-start');
-        el2.classList.remove('auto-aligned');
-        el2.classList.add('right-padding');
-       }
+      //   el1.classList.add('flex-start');
+      //   el2.classList.remove('auto-aligned');
+      //   el2.classList.add('right-padding');
+      //  }
 
-        })
+      //   })
 
       
 
-      }
+      // }
     
 }
 

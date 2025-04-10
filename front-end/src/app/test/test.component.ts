@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, effect, OnDestroy, OnInit } from '@angular/core';
 import { Attempt, TestService } from './test.service';
 import { Option, TestContent } from './test-interface';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -25,6 +25,8 @@ import { FormsModule } from '@angular/forms';
 import { MatPrefix, MatSuffix } from '@angular/material/form-field';
 import { ConfirmationComponent } from '../shared/confirmation/confirmation.component';
 import { OptionSortPipe } from '../option-sort.pipe';
+import { BreakpointService } from '../breakpoint.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-test',
@@ -114,25 +116,31 @@ testStarted: boolean = false; // boolean flag indicating whether the student has
 
  private currentUserSub?:Subscription;
 
+//  get information about user's device
+private userDevice = toSignal(this.breakpointService.breakpoint$);
+
   constructor(private testService:TestService,
     private activatedRoute:ActivatedRoute,
     
-    private breakingPointObserver:BreakpointObserver,
+    private breakpointService:BreakpointService,
     public dialog: MatDialog,
     private successSnackBar:MatSnackBar,
     private router:Router,
     private authService:AuthService,
     private confirmService:ConfirmationDialogService,
     private activityService:ActivityService
-  ){}
+  ){
+
+    effect(() => {
+
+      (this.userDevice && this.userDevice()) === breakpointService.XS ? this.dialogWidth = '250px' : this.dialogWidth = '500px';
+    })
+  }
 
   ngOnInit(): void {
 
    this.currentUserSub = this.authService.loggedInUserObs$.subscribe(user => this.currentUser = user);
    this.getQuestions();
-   this.mediaAlias();
-   
-   
   }
 
   ngOnDestroy(): void {
@@ -476,20 +484,6 @@ this.submit();//reuse the existing code
 
   }
 
-//checks the screen size of the current user and update the 'smallScreen' boolean flag
-private mediaAlias(){
-
-this.breakingPointObserver.observe([
-
-  Breakpoints.XSmall
-]).subscribe(result => {
-  this.smallScreen = result.matches;
-  this.dialogWidth = this.smallScreen  ? '250px':'500px';
-})
-
-
-
-}
 
 
 goBack() {

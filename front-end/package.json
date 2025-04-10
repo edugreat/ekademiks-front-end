@@ -11,7 +11,7 @@
   "private": true,
   "dependencies": {
     "@angular/animations": "^18.2.13",
-    "@angular/cdk": "^17.3.8",
+    "@angular/cdk": "^17.3.10",
     "@angular/common": "^18.2.13",
     "@angular/compiler": "^18.2.13",
     "@angular/core": "^18.2.13",
@@ -43,12 +43,11 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "^5.4.5"
   },
- 
-"resolutions": {
-  "@babel/runtime": "^7.26.10",
-  "esbuild": "^0.24.3",
-  "http-proxy-middleware": "^2.0.6",
-  "undici": "^6.21.1",
-  "webpack": "^5.93.1"
-}
+  "resolutions": {
+    "@babel/runtime": "^7.26.10",
+    "esbuild": "^0.24.3",
+    "http-proxy-middleware": "^2.0.6",
+    "undici": "^6.21.1",
+    "webpack": "^5.93.1"
+  }
 }

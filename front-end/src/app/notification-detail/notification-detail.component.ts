@@ -35,7 +35,7 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
   private topicAndDurationSub$?:Subscription;
 
   constructor(private notificationService:NotificationsService, private testService:TestService,
-    private router:Router, private assessmentService:AssessmentsService, private authService:AuthService,
+    private router:Router, private assessmentService:AssessmentsService, 
     private assignmentService:AssignmentService
 
   ){

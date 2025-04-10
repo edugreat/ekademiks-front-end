@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, effect } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { AssessmentsService, Levels } from '../assessment/assessments.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -13,14 +13,19 @@ import { MatDivider } from '@angular/material/divider';
 import { MatIcon } from '@angular/material/icon';
 import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
 import { FormsModule } from '@angular/forms';
+import { BreakpointService } from '../breakpoint.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-home',
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.css'],
     standalone: true,
-    imports: [NgIf, WelcomeComponent, MatGridList, MatGridTile, MatAnchor, MatDivider, MatIcon, RouterLink, MatRadioGroup, FormsModule, NgFor, MatRadioButton, MatButton, AsyncPipe]
-})
+
+    
+    imports: [NgIf, WelcomeComponent, MatGridList, MatGridTile, MatAnchor, MatDivider, MatIcon, RouterLink, MatRadioGroup, FormsModule, NgFor, MatRadioButton, MatButton, AsyncPipe],
+
+  })
 export class HomeComponent implements OnInit, OnDestroy {
 
 
@@ -32,8 +37,31 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   rowspan = 1; //default mat-grid row span
 
-  //If the user's device is medium
-  deviceSm: boolean = false;
+  // subscribes to the breakpointService to get notified of the user's device description
+ userDevice = toSignal(this.breakpointService.breakpoint$);
+
+
+
+
+  private breakpointSub?:Subscription;
+
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private assessmentService: AssessmentsService,
+    private homeService: HomeService,
+    private breakpointService: BreakpointService
+  ) { 
+
+   effect(() => {
+
+    if(this.userDevice() === breakpointService.LG || this.userDevice() === breakpointService.MD){
+
+      this.rowspan = 1.5;
+    }
+   })
+  }
   
 
  welcomeMessages$:Observable<string[]> | undefined;
@@ -47,15 +75,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   timer:any;
   
-  constructor(
-    private homeService:HomeService,
-
-    private assessmentService:AssessmentsService,
-
-  private router:Router, private activatedRoute:ActivatedRoute,
-private authService:AuthService,
-private breakpointObserver:BreakpointObserver
-){}
+   
  
 
   ngOnInit(): void {
@@ -79,23 +99,7 @@ private breakpointObserver:BreakpointObserver
         }
       }else{
       this.getWelcomeMessages();
-      this.breakpointObserver.observe([
-        Breakpoints.XSmall, // xs
-        Breakpoints.Small,  // sm
-        Breakpoints.Medium, // md
-        Breakpoints.Large,  // lg
-      ]).subscribe(result => {
-        // Check for xs breakpoint
-        this.deviceXs = result.breakpoints[Breakpoints.XSmall];
     
-        // Check for sm breakpoint
-        this.deviceSm = result.breakpoints[Breakpoints.Small];
-    
-        // Check for md or lg breakpoints
-        const isMediumOrLarge = result.breakpoints[Breakpoints.Medium] || result.breakpoints[Breakpoints.Large];
-        this.rowspan = isMediumOrLarge ? 1.5 : 1;
-      });
-
       }
     })
     
@@ -106,7 +110,12 @@ private breakpointObserver:BreakpointObserver
   
   ngOnDestroy(): void {
    this.currentUserSub?.unsubscribe();
+   this.breakpointSub?.unsubscribe();
+
+   
   }
+
+
 
   private _currentUser(){
 

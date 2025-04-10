@@ -1,14 +1,15 @@
-import { Injectable, NgZone } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { effect, Injectable, NgZone } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { AuthService, User } from '../../../auth/auth.service';
-import { HttpBackend, HttpClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root'
 })
 export class NotificationsService {
-  
-  
+
+
 
   // Delivers the notifications counts to subscribes
   // This is used to update the number of unread notifications at the app-component
@@ -30,7 +31,7 @@ export class NotificationsService {
   // An array that stores all received notifications
   private _notifications: _Notification[] = [];
 
- 
+
 
   // Timeout for reconnection to sse notification event 
   private reconnectionTimeout: any;
@@ -38,26 +39,25 @@ export class NotificationsService {
   // timer for retry connection
   private retryCount = 0;
 
-  constructor(private zone: NgZone, private authService: AuthService, private http:HttpClient) {
+  constructor(private zone: NgZone, private authService: AuthService, private http: HttpClient) {
 
-   setTimeout(() => {
-     // subscribe to get notified on student's log in . If a student has logged in, connect to server's notification
-     this.authService.loggedInUserObs$.subscribe(user => {
 
-      if (user && this.isLoggedStudent(user) ) {
+    let currentUser = toSignal(this.authService.loggedInUserObs$);
 
-        this.connectToNotifications(user);
+    effect(() => {
+
+      if (currentUser() && this.isLoggedStudent(currentUser()!)) {
+
+
+        this.connectToNotifications(currentUser()!);
       } else {
 
-
-        // disconnect from receiving notification if a student has logged out
         this.disconnectFromSSE();
       }
 
     })
-   }, 1000);
   }
-   
+
 
 
   // return all unread notifications
@@ -74,12 +74,12 @@ export class NotificationsService {
   }
 
 
-  public isLoggedStudent(currentUser:User){
+  public isLoggedStudent(currentUser: User) {
 
-    return currentUser ? currentUser.roles.some(role  => role.toLowerCase() === 'student') : false;
+    return currentUser ? currentUser.roles.some(role => role.toLowerCase() === 'student') : false;
   }
 
-  private connectToNotifications(currentUser:User) {
+  private connectToNotifications(currentUser: User) {
 
     // Close previous event source before connecting to avoid cyclic issues
     if (this.eventSource) this.eventSource.close();
@@ -124,7 +124,7 @@ export class NotificationsService {
     };
 
     // resets reconnection time once notification begin to come
-    this.eventSource.onopen = () =>{
+    this.eventSource.onopen = () => {
 
       this.retryCount = 0;
     }
@@ -173,7 +173,7 @@ export class NotificationsService {
 
         // emits the size of unread notifications so that subscriber can update notifications counts
         this.unreaNotificationsCount.next(this.notifications.length)
-       
+
 
 
       }
@@ -185,7 +185,7 @@ export class NotificationsService {
 
   // communicates to the server to delete this notifcation for the particular student id = "studentId".
   // This is to avoid serving stale notification after they have alerad read the notification
-  notificationIsRead(notificationId:number, studentId:number):Observable<void>{
+  notificationIsRead(notificationId: number, studentId: number): Observable<void> {
 
     return this.http.patch<void>(`http://localhost:8080/notice/read?studentId=${studentId}`, notificationId);
 
@@ -204,8 +204,8 @@ export type _Notification = {
   message: string,
   createdAt: string,
   //in the case of notification for request to join new group chat, 'notifier' is the name of the user who wants to join the group chat.
-  notifier?:string 
- 
+  notifier?: string
+
 
 
 }

@@ -242,7 +242,6 @@ export class AuthService {
   //checks if the current user is an admin
   get isAdmin():boolean{
 
-    console.log('role = ', this.currentUser?.roles);
 
     return this.currentUser ?  this.currentUser.roles.some(role => role.toLowerCase() === 'admin') : false;
 
