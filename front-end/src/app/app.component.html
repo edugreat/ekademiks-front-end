@@ -6,6 +6,7 @@
     <span id="menuTitle"> <b>e-</b><i>Kademiks</i> </span>
     
 
+
     <a *ngIf="!isAdmin()" mat-button routerLink="/home" class="top-menu-item" ><mat-icon>home</mat-icon>Home</a>
     
     <a *ngIf="!isAdmin()" mat-button routerLink="/assessments" class="top-menu-item"><mat-icon>school</mat-icon>Assessments</a>
@@ -74,6 +75,10 @@
 
     <span *ngIf="isGuestUser()" id="user" > 👋 Hi {{userName | uppercase}} </span>
     <span *ngIf="isLoggedInStudent() || isAdmin()" id="user" > <mat-icon>person</mat-icon> Hi {{userName | uppercase}} </span>
+
+  <span  style="margin-left: 100px;" *ngIf="isAdmin()">
+    <ad-notifier (notifierEmitter)="adminUnreadNotifications=$event.toString()" [matTooltip]="adminUnreadNotifications ?? '' " ></ad-notifier>
+</span>
     <button routerLink="/notifications" *ngIf="isLoggedInStudent() && unreadNotifications === 0 "  id="notifications" ><mat-icon   >notifications</mat-icon></button>
     <button  routerLink="/notifications" *ngIf="isLoggedInStudent() &&  unreadNotifications > 0"  id="notifications"  ><mat-icon aria-hidden="false" [matBadge]="unreadNotifications" matBadgePosition="above after" matBadgeSize="small" matBadgeColor="warn" >notifications_active</mat-icon></button>
     <span id="topMenuLoginLogout" >

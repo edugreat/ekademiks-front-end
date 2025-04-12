@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, computed, effect, ElementRef, EventEmitter, forwardRef, inject, OnDestroy, OnInit, Output } from '@angular/core';
 import { AuthService, User } from './auth/auth.service';
-import { from, Subscription, take } from 'rxjs';
+import { debounceTime, from, fromEvent, Subscription, take } from 'rxjs';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { ConfirmationDialogService } from './confirmation-dialog.service';
 import { ActivityService } from './activity.service';
@@ -15,6 +15,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { AdminNotificationsService } from './admin/admin-notifications.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 
 @Component({
@@ -30,7 +32,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatSidenavModule,
     RouterLink,
     RouterOutlet,
-    ConfirmationComponent
+    ConfirmationComponent,
+    forwardRef(() => AdminNotificationIndicatorComponent),
   ],
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -47,7 +50,8 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
  currentUser?:User;
 
- 
+//  description for unread notifications counts for admin user's notifications
+public adminUnreadNotifications?:string;
 
  currentUserSub?:Subscription;
   
@@ -205,6 +209,94 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
       }
      
    
+  }
+
+  // component provides customized notificaton icon on the tool bar
+
+  @Component({
+    selector: 'ad-notifier',
+    template: `
+      <div class="notification-container">
+       @if(!unreadNotifications){
+        <button mat-icon-button class="notification-button">
+          <mat-icon>notifications</mat-icon>
+        </button>
+       }
+       @if(unreadNotifications()){
+        <button mat-icon-button class="notification-button" matBadge="{{ unreadNotifications() }}" matBadgeColor="warn">
+          <mat-icon>notifications_active</mat-icon>
+        </button>
+       }
+      </div>
+    `,
+    standalone: true,
+    imports: [MatIconModule, MatBadgeModule, CommonModule],
+    styles: [
+      `
+        .notification-container {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+  
+        .notification-button {
+          background-color: #f5f5f5;
+          border-radius: 50%;
+          padding: 4px;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+  
+        .notification-button:hover {
+          transform: scale(1.1);
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+  
+        .notification-button mat-icon {
+          font-size: 24px;
+          color: #3f51b5;
+        }
+  
+        .notification-button[matBadge] {
+          position: relative;
+        }
+      `,
+    ],
+  })
+  export class AdminNotificationIndicatorComponent implements OnDestroy{
+   
+    
+
+    private el = inject(ElementRef);
+
+    private notificationService = inject(AdminNotificationsService);
+
+    protected unreadNotifications  =  computed(() => this.notificationService.notifications().length);
+    @Output()
+    notifierEmitter = new EventEmitter<string>();
+
+    constructor() {
+      // emits the number of unread notifications on intentional mouse hovering(waits for 3ms before emitting value)
+      fromEvent(this.el.nativeElement, 'mouseover').pipe(
+        debounceTime(300),
+      take(1)
+      ).subscribe(() => {
+        
+        const wordCount = this.unreadNotifications() > 1 ? 'notifications' : 'notification';
+
+        const msg = this.unreadNotifications ? `You have ${this.unreadNotifications} unread ${wordCount}` : 'No new notifications';
+
+        this.notifierEmitter.emit(msg);
+      });
+     
+    }
+
+    
+  
+    ngOnDestroy(): void {
+    
+    }
+  
   }
 
 

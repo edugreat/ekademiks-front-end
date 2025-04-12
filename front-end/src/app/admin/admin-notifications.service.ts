@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
-import { effect, Injectable, NgZone } from '@angular/core';
+import { effect, inject, Injectable, Injector, NgZone, signal } from '@angular/core';
 import { AuthService, User } from '../auth/auth.service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, catchError } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { EventSourceMessage, fetchEventSource } from '@microsoft/fetch-event-source';
 
 @Injectable({
   providedIn: 'root'
@@ -11,23 +12,15 @@ export class AdminNotificationsService {
 
   private connectionUrl = 'http://localhost:8080/admins/assessment/notify_me';
 
-  // emits number of unread notifications to subscribers
-  private unreadNotificationCounts = new BehaviorSubject<number>(0);  
+  private retryCount = 0;
+  private maxRetries = 5;
+  private baseDelay = 1000;
+  private abortController:AbortController | null = null;
 
-  notificationCount$ = this.unreadNotificationCounts.asObservable();
+  notifications = signal<AssessmentResponseRecord[]>([]);
 
-  private assessmentNotifications:AssessmentResponseRecord[] = [];
 
-  private unreadAssessmentResponseNotifications = new BehaviorSubject<AssessmentResponseRecord[]>(this.assessmentNotifications);
-
-  private eventSource?:EventSource;
-
-   // Timeout for reconnection to sse notification event 
-   private reconnectionTimeout: any;
-
-   // timer for retry connection
-   private retryCount = 0;
- 
+  connectionState = signal<'disconnected'|'connected'|'connecting'|'error'>('disconnected');
 
   constructor(private http:HttpClient, 
     private authService:AuthService, private zone:NgZone) {
@@ -35,87 +28,139 @@ export class AdminNotificationsService {
 
       const currentUser = toSignal(this.authService.loggedInUserObs$);
 
-      effect(() => {
+      effect((onCleanup) => {
 
         const user = currentUser?.();
 
         if(user && this.isAdminUser(user)){
+          
 
           this.connectToNotifications(user)
         } else {
 
           this.disconnectFromSSE();
         }
-      })
 
+
+        onCleanup(() => {
+          this.disconnectFromSSE();
+        }
+        )
+      }, {allowSignalWrites:true});
+   
+      
+      
      }
 
     //  disconnect from SSE notifications
   disconnectFromSSE() {
     
-    if(this.eventSource){
-
-      this.eventSource.close();
-
-      clearTimeout(this.reconnectionTimeout)
-    }
+   this.abortController?.abort();
+   this.abortController = null;
+   this.connectionState.set('disconnected');
   }
-  connectToNotifications(user: User) {
-   
-    // close previously opened connection
-    if(this.eventSource) this.eventSource.close();
-    this.eventSource = new EventSource(`${this.connectionUrl}?_xxid=${user.id}`);
+  private async connectToNotifications(user: User) {
 
-    this.eventSource.addEventListener('processUpdate', (event) => { 
+    this.disconnectFromSSE();
+    this.connectionState.set('connecting');
+
+    this.abortController = new AbortController();
+
+    const token = user.accessToken;
+
+    try{
+
+      await fetchEventSource(`${this.connectionUrl}?_xxid=${user.id}`, {
+
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+
+        },
+
+        signal: this.abortController.signal,
+        onopen: async (response) => {
+
+          this.zone.run(() => {
+
+            if(response.ok && response.status === 200){
+
+              console.log('200 ok response')
+
+              this.connectionState.set('connected');
+
+            this.retryCount = 0;
+
+            return;
+            }else{  console.log('not 200 ok response')
+            }
+
+            throw new Error(`Connection failed: ${response.status} ${response.statusText}`);
+          });
+
+        },
+
+        onmessage:(event:EventSourceMessage) => {
+          
+          this.zone.run(() => {
+
+            try{
+
+              if(event.event === 'responseUpdate'){
+
+                console.log('response update notification received');
+
+                const data:AssessmentResponseRecord = JSON.parse(event.data);
+
+                console.log(JSON.stringify(data, null,1))
+
+               const index = this.notifications().findIndex((n) => n.topic === data.topic && n.instructorId === data.instructorId && n.postedOn === data.postedOn);
+               if(index === -1){
+
+                console.log('adding new notifications')
+                
+                this.notifications.update(prev => [...prev, data]);
+               
+
+               }
+              }
+
+            } catch (error) {
+              console.error('Error processing event message:', error);
+            }
+          });
+        },
+
+        onerror:(err) => {
+
+          this.zone.run(() => {
+
+            console.error('SSE error', err);
+            this.connectionState.set('error');
+
+            if(err.name === 'AbortError') return;
+
+              if(this.retryCount < this.maxRetries){
+
+                const delay = Math.min(this.baseDelay * 2 ** this.retryCount, 30000);
+
+                this.retryCount++;
+
+                setTimeout(() => 
+                  this.connectToNotifications(user), delay);
+              }
+            
+          });
+        }
+      });
+    }catch(err){
 
       this.zone.run(() => {
-
-        if(event){
-
-          console.log('connected to assessment notifications')
-       
-          const notification: AssessmentResponseRecord = JSON.parse(event.data);
-
-          this.addToNotifications(notification);
-       
-       
-        }
+        this.connectionState.set('error');
+        console.error('SSE connection failed:', err)
       })
-    });
-
-    // execute once there is error on connection
-    this.eventSource.onerror = () => {
-
-      console.log('reconnecting to notifications');
-
-      const reconnectionTime = Math.min(1000 * Math.pow(2, this.retryCount), 30000);
-
-      this.retryCount++;
-
-      // closes and attempts reconnection after some time
-      this.reconnectionTimeout = setTimeout(() => {
-        
-        this.connectToNotifications(user);
-      }, reconnectionTime);
-    };
-
-    // resets connection time on successful connection
-    this.eventSource.onopen = () => {
-
-      this.retryCount = 0;
-    }
-
-
-  }
-  addToNotifications(notification: AssessmentResponseRecord) {
-    
-    // pushes initial notification to the array of notification
-    if(!this.assessmentNotifications.length){
-
-      this.assessmentNotifications.push(notification);
-
-      this.unreadAssessmentResponseNotifications.next(this.assessmentNotifications);
-
     }
 
   }

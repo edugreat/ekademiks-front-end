@@ -20,25 +20,3 @@ export const chatGuard: CanActivateFn = () => {
   return false;
  }
 };
-
-// awaits confirmation from the user when they intend to leave the page.
-// export const canRoute: CanDeactivateFn<NewGroupChatComponent> = () =>{
-
- 
-//   return new Promise<boolean>((resolve) =>{
-
-
-//   const confirmationService = inject(ConfirmationDialogService);
-
-//   confirmationService.confirmAction('Leave current page ?');
-
-//   confirmationService.userConfirmationResponse$.pipe(take(1)).subscribe(confirm => {
-
-
-//     resolve(confirm);
-
-//   });
-//   });
-  
- 
-// }
