@@ -23,6 +23,13 @@ export const myAppRoutes: Routes = [
     canActivate: [authGuard], 
     canMatch: [authGuard] 
   },
+
+  {
+   path: 'admin/notifications', loadComponent:() => import('../admin/notification-grid/notification-grid.component').then(m => m.NotificationGridComponent),
+  
+   canActivate:[adminGuard],
+   canMatch:[adminGuard]
+  },
   { path: 'home/:more', loadComponent: () => import('../home/home.component').then(m => m.HomeComponent) },
   { path: 'assessments/:level', loadComponent: () => import('../assessment/assessment.component').then(m => m.AssessmentComponent) },
   { path: 'disabled', loadComponent: () => import('../account-disabled/account-disabled.component').then(m => m.AccountDisabledComponent) },

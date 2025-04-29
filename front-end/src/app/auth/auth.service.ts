@@ -99,6 +99,14 @@ export class AuthService {
     return this.http.get<User>(`
       ${this.endpoints.cachedUserUrl}?cache=${cacheKey}`).pipe(tap((user) => {
 
+        if(!user){
+
+          this.logout();
+
+          
+
+          return;
+        }
       console.log(`user from cache: ${user}`)
         this.loggedInUser = user;
         this.currentUser = user;

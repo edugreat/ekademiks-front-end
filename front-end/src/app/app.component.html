@@ -14,7 +14,7 @@
     <a *ngIf="!isAdmin()" mat-button routerLink="/contact" class="top-menu-item" ><mat-icon>call</mat-icon>Contact</a>
 
     <a *ngIf="isLoggedInStudent()" mat-button routerLink="/new-group" class="top-menu-item" ><mat-icon>group_add</mat-icon>new group</a>
-    <a *ngIf="isLoggedInStudent() && isGroupMemeber" mat-button [routerLink]="['/my-groups', currentUser!.id]" class="top-menu-item" > <mat-icon>group</mat-icon>my groups</a>
+    <a *ngIf="isLoggedInStudent() && isGroupMemeber" mat-button [routerLink]="['/my-groups', currentUser()!.id]" class="top-menu-item" > <mat-icon>group</mat-icon>my groups</a>
 
     <a *ngIf="isLoggedInStudent()" [routerLink]="['/group-request']" mat-button  class="top-menu-item" > <mat-icon>person_add</mat-icon>join a group</a>
 
@@ -77,13 +77,13 @@
     <span *ngIf="isLoggedInStudent() || isAdmin()" id="user" > <mat-icon>person</mat-icon> Hi {{userName | uppercase}} </span>
 
   <span  style="margin-left: 100px;" *ngIf="isAdmin()">
-    <ad-notifier (notifierEmitter)="adminUnreadNotifications=$event.toString()" [matTooltip]="adminUnreadNotifications ?? '' " ></ad-notifier>
+    <ad-notifier/>
 </span>
     <button routerLink="/notifications" *ngIf="isLoggedInStudent() && unreadNotifications === 0 "  id="notifications" ><mat-icon   >notifications</mat-icon></button>
     <button  routerLink="/notifications" *ngIf="isLoggedInStudent() &&  unreadNotifications > 0"  id="notifications"  ><mat-icon aria-hidden="false" [matBadge]="unreadNotifications" matBadgePosition="above after" matBadgeSize="small" matBadgeColor="warn" >notifications_active</mat-icon></button>
     <span id="topMenuLoginLogout" >
-        <a *ngIf="!isLoggedIn" mat-button [routerLink]="['/login']" class="top-menu-item" ><mat-icon>login</mat-icon>Login</a>
-        <a (click)="logout()" *ngIf="isLoggedIn"  mat-button class="top-menu-item"  ><mat-icon>logout</mat-icon>Logout</a>
+        <a *ngIf="!loggedIn()" mat-button [routerLink]="['/login']" class="top-menu-item" ><mat-icon>login</mat-icon>Login</a>
+        <a (click)="logout()" *ngIf="loggedIn()"  mat-button class="top-menu-item"  ><mat-icon>logout</mat-icon>Logout</a>
         
     </span>
    
@@ -114,7 +114,7 @@
         
       
         <div >
-            <a  *ngIf="!isLoggedIn"  (click)="sidenav.close()" mat-button routerLink="/login" class="side-menu-item"> <mat-icon>login</mat-icon> Login</a>
+            <a  *ngIf="!loggedIn()"  (click)="sidenav.close()" mat-button routerLink="/login" class="side-menu-item"> <mat-icon>login</mat-icon> Login</a>
         </div>
 
         <div *ngIf="isLoggedInStudent()">
@@ -123,7 +123,7 @@
         
 
         <div *ngIf="isLoggedInStudent() && isGroupMemeber"  >
-            <a (click)="sidenav.close()" [routerLink]="['/my-groups', currentUser!.id]" mat-button class="side-menu-item"> <mat-icon>group</mat-icon>my groups</a>
+            <a (click)="sidenav.close()" [routerLink]="['/my-groups', currentUser()!.id]" mat-button class="side-menu-item"> <mat-icon>group</mat-icon>my groups</a>
         </div>
 
         <div *ngIf="isLoggedInStudent()"  >
@@ -142,7 +142,7 @@
         </div>
 
        
-        <div matTooltip="Register you school" >
+        <div matTooltip="Register your school" >
             <a *ngIf="isAdmin()"  mat-button (click)="sidenav.close()" [routerLink]="['/register']" class="side-menu-item"  >
 
                 <mat-icon >school</mat-icon>
@@ -154,7 +154,7 @@
 
 
         <div >
-            <a (click)="logout()" *ngIf="isLoggedIn" (click)="sidenav.close()" mat-button class="side-menu-item"> <mat-icon>logout</mat-icon> Logout</a>
+            <a (click)="logout()" *ngIf="loggedIn()" (click)="sidenav.close()" mat-button class="side-menu-item"> <mat-icon>logout</mat-icon> Logout</a>
         </div>
     </div>
         </mat-sidenav>
