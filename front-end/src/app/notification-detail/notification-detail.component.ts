@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { _Notification, NotificationsService } from '../admin/upload/notifications/notifications.service';
 import { TestService } from '../test/test.service';
 import { HttpResponse } from '@angular/common/http';
@@ -19,10 +19,14 @@ import { NgIf, NgFor, UpperCasePipe, DatePipe } from '@angular/common';
 })
 export class NotificationDetailComponent implements OnInit, OnDestroy{
 
+ private notificationService = inject(NotificationsService);
+ private testService = inject(TestService);
+ private router = inject(Router);
+ private assessmentService = inject(AssessmentsService);
+ private assignmentService = inject(AssignmentService);
 
-
-  // unread notifications initialized to an empty array
-  unreadNotifications?:_Notification[];
+  // subscribe to receive unread notifications
+   unreadNotifications = signal(this.notificationService.unreadNotifications());
 
   private currentUser?:User;
 
@@ -34,18 +38,11 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
   // this is used to unsubscribe from the event that retrieves the assessment topic and duration
   private topicAndDurationSub$?:Subscription;
 
-  constructor(private notificationService:NotificationsService, private testService:TestService,
-    private router:Router, private assessmentService:AssessmentsService, 
-    private assignmentService:AssignmentService
 
-  ){
-
-   
-  }
   
   ngOnInit(): void {
 
-   this.getNotifications()
+  
 
    this.trackAssignmentsMarkedAsRead();
     
@@ -59,14 +56,7 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
 
  
 
-  private getNotifications(){
-
-    this.notificationService.unreadNotifications$.subscribe(notifications =>{
-
-      this.unreadNotifications = notifications;
-    
-    })
-  }
+  
 
   // subscribes to the assignment service to be notified of assignments the user has read.
   // It receives the emitted information(ID) of the assignment, deletes it from the notification view. 
@@ -74,21 +64,18 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
 
     this.assignmentService.assignmentMarkedAsRead$.subscribe(assignmentId => {
 
-      const index = this.unreadNotifications?.findIndex(n => n.id === assignmentId);
+      const index = this.unreadNotifications().findIndex(n => n.id === assignmentId);
 
-      if(index && index >= 0){
+      if(index >= 0){
 
         // get the notification ID
-        const notificationId = this.unreadNotifications![index].id;
+        const readNotificationId = this.unreadNotifications()[index].id;
 
-        // remove notification from list of unread notifications
-        this.unreadNotifications!.splice(index, 1);
-
-
-        this.notificationService.updateNotificationsCounts(this.unreadNotifications!.length);
-
-        // delete the just read notification from the server
-        this.notificationService.notificationIsRead(notificationId, this.currentUser!.id).subscribe();
+        // filter out the just read notification
+        const unread = this.notificationService.unreadNotifications().filter(n => n.id !== readNotificationId);
+        
+        // update the notification to just remove the just read notification
+        this.notificationService.unreadNotifications.set(unread);
 
       }
     })
@@ -99,7 +86,7 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
   // Extracts 'metadata' and fetches assessment information using it, remove the current notification from the notifications array
   processSelection(metadata:number, index:number, notificationId:number) {
 
-    switch (this.unreadNotifications![index].type.toLowerCase()) {
+    switch (this.unreadNotifications()[index].type.toLowerCase()) {
       case 'assignment':
         
       console.log('processing assignment notification: '+metadata);
@@ -125,7 +112,7 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
     if(mapValue){
 
 
-  //  extractthe subject name as the key of mapValue
+  //  extract the subject name as the key of mapValue
     subjectName = Object.keys(mapValue)[0]
 // extract the category as the value of mapValue using the key(subjectName) property
     category = mapValue[subjectName];
@@ -135,14 +122,10 @@ export class NotificationDetailComponent implements OnInit, OnDestroy{
     },
    complete:() => {
 
-    
-    // remove the current notification from the notifcations array
-    this.unreadNotifications?.splice(index, 1);
+    // remove the notification from the notification service
+   const unreadNotifications = this.notificationService.unreadNotifications().filter(n => n.id !== notificationId);
 
-    // update unread notification count so that subscribers can be notification about the update
-    this.notificationService.updateNotificationsCounts(this.unreadNotifications!.length);
-
-   
+   this.notificationService.unreadNotifications.set(unreadNotifications);
     
     // make a server call to notifying that the notification has been read
     // This enables the server keep track of read notification so as not to serve stale notification subsequently

@@ -77,6 +77,9 @@ export class WelcomeComponent implements OnInit, OnDestroy{
        
       }, 60000)
        
+     }),
+     error:((error) => {
+      console.error('Error fetching welcome messages:', error);
      })
     })
   }

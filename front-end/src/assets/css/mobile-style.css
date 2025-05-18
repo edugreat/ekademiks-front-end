@@ -1,0 +1,271 @@
+/* Mobile Base Styles */
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2ecc71;
+    --dark-color: #2c3e50;
+    --light-color: #ecf0f1;
+    --warning-color: #e74c3c;
+    --today-color: #3498db;
+    --yesterday-color: #2ecc71;
+    --older-color: #95a5a6;
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  }
+  
+  body {
+    background-color: #f5f7fa;
+    color: #333;
+    font-size: 14px;
+  }
+  
+  /* Mobile Layout */
+  .mobile-container {
+    padding: 15px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Mobile Header */
+  .mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .mobile-menu-toggle {
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+  
+  /* Mobile Date Tabs */
+  .mobile-date-tabs {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    margin-bottom: 20px;
+    padding-bottom: 5px;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .mobile-date-tab {
+    padding: 8px 15px;
+    margin-right: 8px;
+    border-radius: 20px;
+    background-color: #eee;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  
+  .mobile-date-tab.active {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  /* Mobile Notification Card */
+  .mobile-notification {
+    background-color: white;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    position: relative;
+  }
+  
+  .mobile-notification.unread::after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+  }
+  
+  .mobile-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .mobile-top-row h3 {
+    font-size: 1rem;
+    color: var(--dark-color);
+    font-weight: 600;
+    flex: 1;
+    margin-right: 10px;
+  }
+  
+  .mobile-time-indicator {
+    font-size: 0.8rem;
+    padding: 3px 8px;
+    border-radius: 10px;
+  }
+  
+  .mobile-today .mobile-time-indicator {
+    background-color: var(--today-color);
+    color: white;
+  }
+  
+  .mobile-yesterday .mobile-time-indicator {
+    background-color: var(--yesterday-color);
+    color: white;
+  }
+  
+  .mobile-older .mobile-time-indicator {
+    background-color: var(--older-color);
+    color: white;
+  }
+  
+  .mobile-middle-row {
+    display: flex;
+    justify-content: space-between;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+  }
+  
+  .mobile-action-row {
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .mobile-compact-btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-left: 10px;
+    font-size: 0.9rem;
+  }
+  
+  .mobile-compact-btn-grade {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  .mobile-compact-btn-remind {
+    background-color: #f39c12;
+    color: white;
+  }
+  
+  /* Mobile Floating Action Button */
+  .mobile-fab {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    z-index: 100;
+  }
+  
+  /* Mobile Bottom Navigation */
+  .mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: white;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 90;
+  }
+  
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #7f8c8d;
+    text-decoration: none;
+    font-size: 0.8rem;
+  }
+  
+  .mobile-nav-item.active {
+    color: var(--primary-color);
+  }
+  
+  .mobile-nav-icon {
+    font-size: 1.2rem;
+    margin-bottom: 3px;
+  }
+  
+  /* Mobile Swipe Actions */
+  .mobile-notification-swipe {
+    overflow: hidden;
+    border-radius: 10px;
+  }
+  
+  .mobile-swipe-content {
+    padding: 15px;
+    background-color: white;
+  }
+  
+  .mobile-swipe-actions {
+    display: flex;
+    height: 100%;
+  }
+  
+  .mobile-swipe-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    color: white;
+    font-weight: 500;
+  }
+  
+  .mobile-swipe-grade {
+    background-color: var(--primary-color);
+  }
+  
+  .mobile-swipe-remind {
+    background-color: #f39c12;
+  }
+  .mobile-view-grade {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  .mobile-already-graded {
+    background-color: var(--secondary-color);
+    color: white;
+  }
+  
+  .mobile-view-all-grades-container {
+    position: fixed;
+    bottom: 100px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    padding: 15px;
+  }
+  
+  .mobile-view-all-grades {
+    padding: 12px 25px;
+    border-radius: 25px;
+    background-color: var(--dark-color);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }

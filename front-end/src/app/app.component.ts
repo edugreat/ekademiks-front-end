@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, computed, effect, ElementRef, EventEmitter, forwardRef, inject, OnDestroy, OnInit, Output, signal } from '@angular/core';
-import { AuthService, User } from './auth/auth.service';
-import { debounceTime, from, fromEvent, interval, Subscription, take } from 'rxjs';
+import { AfterViewInit, Component, computed, effect, forwardRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { AuthService } from './auth/auth.service';
+import { interval, Subscription, take } from 'rxjs';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { ConfirmationDialogService } from './confirmation-dialog.service';
 import { ActivityService } from './activity.service';
@@ -45,28 +45,36 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
   userSub?: Subscription; //subscription that receives the currently logged in user's name (their first name)
 
-  // The number of unread notifications
-  unreadNotifications = 0;
+  
 
-  // one-time subscription to logged in user object
- currentUser = toSignal(this.authService.loggedInUserObs$);
+  
 
  public loggedIn = signal(false);
+ private authService = inject(AuthService);
+ private router = inject(Router);
+ private confirmationService = inject(ConfirmationDialogService);
+ private activityService = inject(ActivityService);
+ private notificationService = inject(NotificationsService);
 
+
+ // one-time subscription to logged in user object
+ currentUser = toSignal(this.authService.loggedInUserObs$);
+
+// The number of unread notifications
+protected unreadNotificationsCount = computed(() => this.notificationService.notificationCount());
 
 // shows network connection state(espacially for notifications)
-conncectionState = '';
+connectionState = computed(() => this.notificationService.connectionState());
 
- currentUserSub?:Subscription;
-  
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    private confirmationService: ConfirmationDialogService,
-    private activityService:ActivityService,
-    private notificationService:NotificationsService  
-    
-  ) {
+// property that emits a period at fixed interval when network reconnections are being processed
+private x = ['.', '.', '.'];
+
+ networkBusyIndicator = '';
+ 
+ notificationMsg = '';
+
+ 
+  constructor() {
 
     effect(() => {
 
@@ -75,46 +83,66 @@ conncectionState = '';
       this.loggedIn.set(true);
 
 
-      return;
-
-     }else if(!this.currentUser() && authService.isLoggedIn){
+     }else if(!this.currentUser() && this.authService.isLoggedIn){
 
       // fetch current user from server's cache system
      const  cachingKey = sessionStorage.getItem('cachingKey');
 
-    authService.cachedUser(cachingKey!).subscribe();
+    this.authService.cachedUser(cachingKey!).subscribe();
 
      if(!this.currentUser()){
 
 
       //finally, the user is logged out
       this.loggedIn.set(false);
-      return;
+      
      }
      }else{
       this.loggedIn.set(false);
-      return;
+      
      }
 
-    },{allowSignalWrites:true})
+
+
+
+    const count = this.unreadNotificationsCount();
+    const wordCount = count > 1 ? 'notifications' : 'notification';
+
+     this.notificationMsg =  count > 0 ? `You have ${count} unread ${wordCount}` : `No new notifications`;
+
+
+
+    if (this.connectionState() === 'connecting') {
+    
+        interval(500).subscribe(() =>{
+
+         if(this.x.length > 0){
+
+          this.networkBusyIndicator = `${this.networkBusyIndicator}  ${this.x.pop()}`;
+         }else{
+
+          this.networkBusyIndicator = '';
+          this.x = ['.','.','.'];
+         }
+        })
+
+        
+    }
+
+    },{allowSignalWrites:true});
+
 
    }
   
 
   ngOnInit(): void {
 
-    console.log('app component init')
+    
    
     this.updateUserName();
 
     //this._currentUser();
-    
-   this.authService.studentLoginObs$.subscribe(isLoggedIn =>{
-
-    if(isLoggedIn){
-      this.countUnreadNotifications();
-    }
-   })
+  
   }
 
   ngAfterViewInit(): void {
@@ -177,16 +205,7 @@ conncectionState = '';
     
   }
 
-  // get the number of unread notifications for logged in students
-  private countUnreadNotifications(){
-
-  
-     
-      this.notificationService.notificationCount$.subscribe(unread =>{
-
-        this.unreadNotifications = unread;
-      })
-    }
+ 
 
     // checks if the current user belongs in any group chat. This is for conditional display of chat functionalities
     get isGroupMemeber(): boolean {
@@ -204,7 +223,7 @@ conncectionState = '';
   // component provides customized notificaton icon on the tool bar
 
   @Component({
-    selector: 'ad-notifier',
+    selector: 'admin-notifier',
 
     
     template: `
@@ -230,15 +249,21 @@ conncectionState = '';
       }
 
       @if(connectionState() === 'connecting'){
-       <span class="connecting" >connection {{networkBusyIndicator}}</span>
+       <span class="connecting" >reconnecting {{networkBusyIndicator}}</span>
       }
 
       @if(connectionState() === 'disconnected'){
 
-        <span class="disconnected" >
+        <span matTooltip='disconnected' class="disconnected" >
         <mat-icon  >signal_wifi_4_bar</mat-icon>
         </span>
       }
+
+      @if(connectionState() === 'error'){
+            <span matTooltip="unstable connection" class="disconnected" >
+            <mat-icon  >signal_wifi_statusbar_not_connected</mat-icon>
+            </span>
+          }
       </div>
       </div>
     `,
@@ -285,7 +310,7 @@ conncectionState = '';
         .connected{
 
           color: #FFFFFF
-        },
+        }
         #connectionState{
 
           margin-left:10px;

@@ -1,8 +1,42 @@
-<div class="tablet-dashboard">
+
+@if (submissionNotifications().length > 0) {
+
+  <!-- For mobile view -->
+@if (breaks === 'xs' || breaks === 'sm') {
+  <div class="mobile-notification mobile-today">
+    <div class="mobile-top-row">
+      <h3 class="mobile-topic">Ordinary differential calculus</h3>
+      <span class="mobile-time-indicator">Today</span>
+    </div>
+    <div class="mobile-middle-row">
+      <span class="mobile-student-id">Student #4</span>
+      <span class="mobile-post-date">Posted Mar 21</span>
+    </div>
+    <div class="mobile-action-row">
+      <button class="mobile-compact-btn mobile-compact-btn-grade">Grade</button>
+
+      <button class="mobile-compact-btn mobile-already-graded">Already Graded</button>
+      <button class="mobile-compact-btn mobile-view-grade">View Grade</button>
+    </div>
+  </div>
+
+<!-- view all grade button functionality -->
+  <div class="mobile-view-all-grades-container">
+    <button class="mobile-view-all-grades">View All Grades</button>
+  </div>
+}
+
+<!-- TABLET VIEW -->
+@if (breaks === 'md') {
+  <div class="tablet-dashboard">
     <!-- Collapsible Sidebar -->
     <div class="tablet-sidebar">
       <h3>Filters</h3>
-      <!-- Filter options here -->
+     <span>
+      <mat-icon>filter_alt</mat-icon>
+      <mat-icon style="cursor: pointer;">south</mat-icon>
+      <mat-icon style="cursor: pointer;">north</mat-icon>
+     </span>
     </div>
     
     <!-- Main Content -->
@@ -28,51 +62,64 @@
           </div>
           <div class="tablet-actions">
             <button class="tablet-btn grade">Grade</button>
+            <button class="tablet-btn tablet-already-graded">Already Graded</button>
+            <button class="tablet-btn tablet-view-grade">View Grade</button>
             <button class="tablet-btn remind">Remind</button>
           </div>
+
+          <!-- VIEW ALL GRADE BUTTON FUNCTIONALITY -->
+
+           <!-- Bottom View Grades Button -->
+    <div class="tablet-view-all-grades-container">
+      <button class="tablet-view-all-grades">View All Grades</button>
+    </div>
         </div>
         <!-- More cards... -->
       </div>
-
-
-
-
-       <!-- Collapsible Sidebar -->
-    <div class="tablet-sidebar">
-        <h3>Filters</h3>
-        <!-- Filter options here -->
-      </div>
-      
-      <!-- Main Content -->
-      <div class="tablet-main">
-        <div class="tablet-header">
-          <h2>Submissions</h2>
-          <input class="tablet-search-bar" type="search" placeholder="Search...">
-        </div>
-        
-        <div class="tablet-date-tabs">
-          <div class="tablet-date-tab active">Today</div>
-          <div class="tablet-date-tab">Yesterday</div>
-          <div class="tablet-date-tab">Older</div>
-        </div>
-        
-        <div class="tablet-notification-grid">
-          <!-- Notification Cards -->
-          <div class="tablet-notification-card today">
-            <h3>Ordinary differential calculus</h3>
-            <div class="tablet-meta-info">
-              <span>Student #4</span>
-              <span>Posted Mar 21</span>
-            </div>
-            <div class="tablet-actions">
-              <button class="tablet-btn grade">Grade</button>
-              <button class="tablet-btn remind">Remind</button>
-            </div>
-          </div>
-          <!-- More cards... -->
-        </div>
     </div>
     
     <!-- FAB for primary action -->
     <button class="tablet-fab">+</button>
   </div>
+}
+
+<!-- DESKTOP VIEW -->
+@if (breaks === 'lg' || breaks ==='xl') {
+
+
+<div class="desktop-notification-card">
+  <div class="desktop-card-header">
+    <span class="desktop-topic">Ordinary differential calculus</span>
+    <span class="desktop-date-badge">Submitted: Apr 12</span>
+  </div>
+  <div class="desktop-card-body">
+    <div class="desktop-meta-info">
+      <span class="desktop-label">Assignment Posted:</span>
+      <span class="desktop-value">Mar 21</span>
+    </div>
+    <div class="desktop-meta-info">
+      <span class="desktop-label">Student ID:</span>
+      <span class="desktop-value">#4</span>
+    </div>
+  </div>
+  <div class="desktop-card-actions">
+    <button class="desktop-btn-grade">Grade Now</button>
+    <button class="desktop-btn-already-graded">Already Graded</button>
+    <button class="desktop-btn-view-grade">View Grade</button>
+    <button class="desktop-btn-remind">Remind Student</button>
+  </div>
+
+</div>
+
+ <!-- View all grades button functionality -->
+ <div class="desktop-view-all-grades-container">
+  <button class="desktop-view-all-grades">View All Grades</button>
+</div>
+
+}
+} @else{
+  <div class="no-notifications">
+    <h2>No notifications available</h2>
+  </div>
+
+}

@@ -41,6 +41,25 @@
  cursor: pointer;
    }
 
+   .connecting{
+    color:rgb(243, 239, 23);;
+  }
+
+  .disconnected{
+    color:rgb(181, 63, 108);
+    margin-left: 15px;
+  }
+
+  .connected{
+
+    color: #FFFFFF;
+    margin-left: 15px;
+  }
+  #connectionDiv{
+
+    margin-left:15px;
+  }
+
   
 
 @media(min-width:1158.1px){

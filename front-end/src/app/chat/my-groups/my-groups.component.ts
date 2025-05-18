@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ChatService, GroupChatInfo } from '../chat.service';
 import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { Subscription, take } from 'rxjs';
@@ -20,6 +20,7 @@ import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatSidenavContainer, MatSidenav, MatSidenavContent } from '@angular/material/sidenav';
 import { MatList, MatListItem } from '@angular/material/list';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-my-groups',
@@ -35,7 +36,7 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
 
 
   // an object representing the user's group chat. The key is the group the user belong to and the value is the previous chats
-  groupChatInfo?:GroupChatInfo;
+  groupChatInfo?:Map<number, GroupChatInfo>;
 
   editableChat:any;
 
@@ -52,10 +53,16 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
   hideMenuTrigger = true;
   editingMode = false;
 
+  private chatService = inject(ChatService);
+  private activatedRoute = inject(ActivatedRoute);
+  private router = inject(Router);
+  private confirmationService = inject(ConfirmationDialogService);
+  private authService = inject(AuthService);
+
+  private currentUser = toSignal(this.authService.loggedInUserObs$);
+
   
-  constructor(private chatService:ChatService, private activatedRoute:ActivatedRoute, private router:Router,
-    private confirmationService:ConfirmationDialogService, private authService:AuthService
-  ){}
+  constructor(){}
   
   
   ngOnInit(): void {
@@ -79,17 +86,17 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
    
   }
 
- private studentId():string | undefined{
+//  private studentId():string | undefined{
 
-  const id = sessionStorage.getItem('studentId');
+//   const id = sessionStorage.getItem('studentId');
 
-  return id ? id : undefined; 
- }
+//   return id ? id : undefined; 
+//  }
 
   private getGroupInfo(studentId:number){
 
    this.chatService.groupInfo(studentId).pipe(take(1)).subscribe({
-      next:(info:GroupChatInfo) => {
+      next:(info:Map<number, GroupChatInfo>) => {
 
       
         this.groupChatInfo = info;
@@ -101,12 +108,12 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
 
   }
 
-  connectToChat(groupId:string, groupDescription:string, groupAdminId:string){
+  connectToChat(groupId:number, groupDescription:string, groupAdminId:string){
 
    
    
 
-    sessionStorage.setItem('groupId',groupId);
+    sessionStorage.setItem('groupId',`${groupId}`);
 
     this.router.navigate([groupId, groupAdminId, groupDescription],{relativeTo: this.activatedRoute})
   }
@@ -149,14 +156,14 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
 
         this.confirmationService.userConfirmationResponse$.pipe(take(1)).subscribe(confirm =>{
 
-          const _studentId = this.studentId();
+          const _studentId = `${this.currentUser()?.id}`;
           if(confirm && _studentId){
 
             this.chatService.deleteGroupChat(_studentId, this.editableChat.key).pipe(take(1)).subscribe({
 
               next:(val:HttpResponse<number>) => {
 
-                const _studentId = this.studentId();
+                const _studentId = this.currentUser()?.id;
                 // reload the group chats
                if(_studentId ){
                 this.getGroupInfo(Number(_studentId));
@@ -182,11 +189,7 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
       // determines if the current user the group admin
       isGroupAdmin():boolean{
 
-        if(this.studentId()){
-
-          return Number(this.studentId()) === this.editableChat.value.groupAdminId;
-        } return false
-        
+        return this.currentUser() ? this.currentUser()?.id === this.editableChat.value.groupAdminId : false;
       }
 
       // disables further processing of editing group name when the user supplies empty text
@@ -212,7 +215,7 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
             this.editingMode = false;
 
             // get the student id
-            const _studentId = this.studentId();
+            const _studentId = `${this.currentUser()?.id}`;
 
             if(_studentId){
 
@@ -224,7 +227,8 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
                   if(this.groupChatInfo!.hasOwnProperty(this.editableChat.key)){
 
                     // rename the group chat name at the client side without needing to do page refresh
-                    this.groupChatInfo![this.editableChat.key].groupName = currentGroupName;
+                    
+                    this.groupChatInfo!.get(this.editableChat.key)!.groupName = currentGroupName;
 
                   }
                 },
@@ -259,7 +263,7 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
 
         isLoggedInStudent(){
 
-          return this.authService.isLoggedInStudent;
+          return this.currentUser() ? this.currentUser()!.roles.includes('Student'): false;
         }
 
         leaveGroup() {
@@ -271,7 +275,7 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
 
             if(response && this.isLoggedInStudent()){
 
-              this.chatService.leaveGroup(this.editableChat.key, Number(this.studentId())).pipe(take(1)).subscribe({
+              this.chatService.leaveGroup(this.editableChat.key, this.currentUser()!.id).pipe(take(1)).subscribe({
                 // refetch the group info after status code is 200
                 
                 next:(response:HttpResponse<number>) => {
@@ -283,7 +287,7 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
                     // This flag would not be needed if the page were refreshed as the system will update user legibility to post.
                     sessionStorage.setItem('forbidden', (this.editableChat.key as string));
 
-                    this.authService.isGroupMember(Number(this.studentId())).pipe(take(1)).subscribe(member => {
+                    this.authService.isGroupMember(this.currentUser()!.id).pipe(take(1)).subscribe(member => {
 
                       // does not belong to any group chat
                       if(!member){
@@ -295,7 +299,7 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
                       }else{
 
                         // update the group chat info
-                        this.getGroupInfo(Number(this.studentId));
+                        this.getGroupInfo(this.currentUser()!.id);
                       }
                     })
                   }

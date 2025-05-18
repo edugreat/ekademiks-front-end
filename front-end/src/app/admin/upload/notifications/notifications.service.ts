@@ -1,77 +1,64 @@
-import { effect, Injectable, NgZone } from '@angular/core';
+import { computed, effect, Injectable, NgZone, signal } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AuthService, User } from '../../../auth/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { EventSourceMessage, fetchEventSource } from '@microsoft/fetch-event-source';
 
 @Injectable({
   providedIn: 'root'
 })
 export class NotificationsService {
 
+  // initialize unread notification with 0 count, then recalculate once there are changes.
+  notificationCount = computed(() => {
+    return this.unreadNotifications().length;
+  })
 
+  unreadNotifications = signal<_Notification[]>([]);
 
-  // Delivers the notifications counts to subscribes
-  // This is used to update the number of unread notifications at the app-component
-  private unreaNotificationsCount = new BehaviorSubject<number>(0);
-
-  notificationCount$ = this.unreaNotificationsCount.asObservable();
-
-  // emits all received notifications to subscriber. This is initialized to all notifications received upon login
-  private unreadNotifications = new BehaviorSubject<_Notification[]>(this.notifications)
-
-  unreadNotifications$ = this.unreadNotifications.asObservable();
-
-
-  private eventSource?: EventSource
-
+  private abortController:AbortController | null = null;
   // server notification url
   private notificationUrl = 'http://localhost:8080/notice/notify_me';
 
-  // An array that stores all received notifications
-  private _notifications: _Notification[] = [];
+  
 
-
-
-  // Timeout for reconnection to sse notification event 
-  private reconnectionTimeout: any;
-
-  // timer for retry connection
+  // timer for connection retry
   private retryCount = 0;
+
+  // maximum times to retry
+  private maxRetries = 50;
+
+  private baseDelay = 1000;
+
+  connectionState = signal<'connecting'|'connected'|'disconnected'|'error'>('disconnected');
 
   constructor(private zone: NgZone, private authService: AuthService, private http: HttpClient) {
 
 
     let currentUser = toSignal(this.authService.loggedInUserObs$);
 
-    effect(() => {
+    effect((onCleanup) => {
 
       if (currentUser() && this.isLoggedStudent(currentUser()!)) {
 
 
         this.connectToNotifications(currentUser()!);
+
       } else {
 
         this.disconnectFromSSE();
       }
 
-    })
+      onCleanup(() => {
+        this.disconnectFromSSE();
+      })
+
+    }, {allowSignalWrites:true});
+
+   
   }
 
-
-
-  // return all unread notifications
-  public get notifications(): _Notification[] {
-    return this._notifications;
-  }
-
-
-
-  // Updates the count of unread notifications
-  updateNotificationsCounts(unread: number) {
-
-    this.unreaNotificationsCount.next(unread);
-  }
 
 
   public isLoggedStudent(currentUser: User) {
@@ -79,111 +66,159 @@ export class NotificationsService {
     return currentUser ? currentUser.roles.some(role => role.toLowerCase() === 'student') : false;
   }
 
-  private connectToNotifications(currentUser: User) {
+  private async connectToNotifications(user: User) {
+ 
+     console.log('connecting to notifications');
+ 
+     this.disconnectFromSSE();
+     this.connectionState.set('connecting');
+ 
+     this.abortController = new AbortController();
+ 
+     const token = user.accessToken;
+ 
+     try{
+ 
+       await fetchEventSource(`${this.notificationUrl}?_xxid=${user.id}`, {
+ 
+         headers: {
+           'Authorization': `Bearer ${token}`,
+           'Accept': 'text/event-stream',
+           'Cache-Control': 'no-cache',
+           'Connection': 'keep-alive',
+         //  'X-Accel-Buffering':'no'
+ 
+         },
+ 
+        
+ 
+         signal: this.abortController.signal,
+         onopen: async (response) => {
+ 
+           this.zone.run(() => {
+ 
+             if(response.ok && response.status === 200){
+ 
+               console.log('200 ok response')
+ 
+               this.connectionState.set('connected');
+ 
+             this.retryCount = 0;
+ 
+             return;
+ 
+             
+             }else if(response.status >= 400 && response.status < 500 && response.status !== 429){
+               console.log('4xx error response')
+               this.connectionState.set('error');
+             }
+             
+            
+ 
+             //throw new Error(`Connection failed: ${response.status} ${response.statusText}`);
+           });
+ 
+         },
+ 
+         onmessage:(event:EventSourceMessage) => {
+           
+           this.zone.run(() => {
+ 
+             try{
+ 
+               if(event.event === 'notifications'){
+ 
+                 console.log('response update notification received');
+ 
+                 const data:_Notification = JSON.parse(event.data);
+ 
+                 console.log(JSON.stringify(data, null,1))
+ 
+                const index = this.unreadNotifications().findIndex((n) => n.id === data.id);
+                if(index === -1){
+ 
+                 console.log('adding new notifications')
+                 
+                 this.unreadNotifications.update(prev => [...prev, data]);
+                
+ 
+                }
+               }
+ 
+             } catch (error) {
+               console.error('Error processing event message:', error);
+             }
+           });
+         },
+ 
+         onerror:(err) => {
+ 
+           this.zone.run(() => {
+ 
+             console.error('SSE error', err);
+             this.connectionState.set('error');
+ 
+             if(err.name === 'AbortError') return;
+ 
+               this.attemptReconnection(user);
+             
+           });
+         },
+ 
+         onclose: () => {
+           this.zone.run(() => {
+             console.log('SSE connection closed');
+             this.connectionState.set('disconnected');
+ 
+           
+             
+           });
+         }
+       }).catch((err) => {
+         this.zone.run(() => {
+           console.error('SSE connection closing error:', err);
+           this.connectionState.set('error');
+         });
+       });
+     }catch(err){
+ 
+       this.zone.run(() => {
+         this.connectionState.set('error');
+         console.error('SSE connection failed:', err);
+         
+       //  this.attemptReconnection(user);
+       })
+     }
+ 
+   }
 
-    // Close previous event source before connecting to avoid cyclic issues
-    if (this.eventSource) this.eventSource.close();
+   private attemptReconnection(user: User) {
+    if (this.retryCount < this.maxRetries) {
 
-    // create a new event source passing the sse notification api
-    this.eventSource = new EventSource(`${this.notificationUrl}?studentId=${currentUser!.id}`);
-
-    this.eventSource.addEventListener('notifications', (event: MessageEvent<any>) => {
-
-      this.zone.run(() => {
-
-        // checks if there is notification
-        if (event) {
-
-          console.log('connected to notifications');
-
-          // Parses the received object to its correct json object
-          const notification: _Notification = JSON.parse(event.data);
-
-
-          this.addToNotifications(notification);
-        }
-      })
-    });
-
-    // executes once there is error suc as timeout of the server connection etc
-    this.eventSource.onerror = () => {
-
-      console.log('reconnecting to notifications');
-      // ensures time of reconnection does not exceed 30 sec
-      const reconnectionTime = Math.min(1000 * Math.pow(2, this.retryCount), 30000);
+      const delay = Math.min(this.baseDelay * 2 ** this.retryCount, 30000);
 
       this.retryCount++;
-      // close the event source for error, then reconnect after some timing
-      this.reconnectionTimeout = setTimeout(() => {
 
-
-        // connect back to notification
-        this.connectToNotifications(currentUser);
-      }, reconnectionTime);
-
-    };
-
-    // resets reconnection time once notification begin to come
-    this.eventSource.onopen = () => {
-
-      this.retryCount = 0;
+      setTimeout(() => this.connectToNotifications(user), delay);
+    }else{
+      this.disconnectFromSSE();
     }
-
-
   }
 
 
 
   // Disconnects  from the SSE notification
-  public disconnectFromSSE() {
-    // check if connection had been made before
-    if (this.eventSource) {
-
-      this.eventSource.close();
-      clearTimeout(this.reconnectionTimeout)
-    }
+  private disconnectFromSSE() {
+   
+    this.abortController?.abort();
+    this.abortController = null;
+    this.connectionState.set('disconnected');
 
 
 
   }
-  // Add the just arriving notification if has not been received till not
-  private addToNotifications(newNotification: _Notification) {
-
-
-
-    // pushes the first notification to the notifications array
-    if (this.notifications.length === 0) {
-
-      this._notifications.push(newNotification);
-      this.unreadNotifications.next(this.notifications);
-
-      // emits the size of unread notifications so that subscriber can update notifications counts
-      this.unreaNotificationsCount.next(this.notifications.length)
-
-
-    } else {
-
-      // check if the notification is already pushed
-      const index = this._notifications.findIndex(x => x.id === newNotification.id);
-
-      if (index < 0) {
-        this._notifications.push(newNotification);
-
-        this.unreadNotifications.next(this.notifications)
-
-        // emits the size of unread notifications so that subscriber can update notifications counts
-        this.unreaNotificationsCount.next(this.notifications.length)
-
-
-
-      }
-
-    }
-
-
-  }
-
-  // communicates to the server to delete this notifcation for the particular student id = "studentId".
+ 
+  // communicates to the server to delete this notification for the particular student id = "studentId".
   // This is to avoid serving stale notification after they have alerad read the notification
   notificationIsRead(notificationId: number, studentId: number): Observable<void> {
 

@@ -133,7 +133,7 @@ private userDevice = toSignal(this.breakpointService.breakpoint$);
 
     effect(() => {
 
-      (this.userDevice && this.userDevice()) === breakpointService.XS ? this.dialogWidth = '250px' : this.dialogWidth = '500px';
+      (this.userDevice && this.userDevice()) === 'xs' ? this.dialogWidth = '250px' : this.dialogWidth = '500px';
     })
   }
 

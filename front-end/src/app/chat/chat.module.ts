@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NewGroupChatComponent } from './new-group-chat/new-group-chat.component';
-import { SharedModule } from '../shared/shared.module';
+
 import { ChatPolicyComponent } from './chat-policy/chat-policy.component';
 import { RouterModule } from '@angular/router';
 import { MyGroupsComponent } from './my-groups/my-groups.component';
@@ -14,7 +14,6 @@ import { NotificationsDetailComponent } from './group-chat/request-notifications
 @NgModule({
     imports: [
         CommonModule,
-        SharedModule,
         RouterModule,
         NewGroupChatComponent,
         ChatPolicyComponent,

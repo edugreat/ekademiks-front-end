@@ -22,7 +22,7 @@ export class GroupRequestComponent implements OnInit{
 
 
   
-  groupChats?:GroupChatInfo;
+  groupChats?:Map<number, GroupChatInfo>;
 
 
   myGroupsSub?:Subscription;
@@ -60,7 +60,7 @@ export class GroupRequestComponent implements OnInit{
   fetchChatGroups() {
    
     this.chatService.fetchGroupChats().subscribe({
-      next:(groupChats:GroupChatInfo) => {
+      next:(groupChats:Map<number, GroupChatInfo>) => {
 
         this.groupChats = groupChats;
       },
@@ -78,14 +78,14 @@ export class GroupRequestComponent implements OnInit{
 
 
     // retrieves true if the current user is already a member of the group chat
-    isGroupMember(groupId:string): boolean {
+    isGroupMember(groupId:number): boolean {
      
      if(this._myGroupIds?.length){
 
      
-      const _id = Number(groupId);
+      
 
-      return this._myGroupIds.findIndex(id => id === _id) >= 0;
+      return this._myGroupIds.findIndex(id => id === groupId) >= 0;
      
     }
 
@@ -136,16 +136,16 @@ export class GroupRequestComponent implements OnInit{
 
       
 
-      sendRequest(groupId: string) {
+      sendRequest(groupId: number) {
        
         if(this.groupChats!.hasOwnProperty(Number(groupId))){
 
-          const data = this.groupChats![Number(groupId)];
+          const data = this.groupChats!.get(Number(groupId));
 
           let joinRequest:GroupJoinRequest = {
-            groupId: groupId,
+            groupId: `${groupId}`,
             requesterId: `${this.currentUser!.id}`,
-            groupAdminId: data.groupAdminId,
+            groupAdminId: data!.groupAdminId,
             requestedAt: new Date(),
             requester:this.currentUser!.firstName
           }
@@ -173,7 +173,7 @@ export class GroupRequestComponent implements OnInit{
         }
 
         // checks if the current user has sent a join request for this group chat(referenced by groupId) which has yet to be approved
-        hasPendingRequest(groupId:string):boolean{
+        hasPendingRequest(groupId:number):boolean{
 
           if(sessionStorage.getItem('pending_req')){
 
@@ -181,7 +181,7 @@ export class GroupRequestComponent implements OnInit{
            
 
             // checks if the user has already sent a join request to the group referenced by the group id, and is now awaiting app
-            return pendingReqs.findIndex(req => Number(req) === Number(groupId)) !== -1;
+            return pendingReqs.findIndex(req => Number(req) ===groupId) !== -1;
           } else {
             
             return false

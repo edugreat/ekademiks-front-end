@@ -4,7 +4,6 @@ import { AssessmentsService } from './assessments.service';
 import { Observable, Subscription, finalize } from 'rxjs';
 
 import { AuthService, User } from '../auth/auth.service';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { NgIf, NgFor } from '@angular/common';
 import { SpinnerComponent } from '../shared/spinner/spinner.component';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -61,16 +60,9 @@ export class AssessmentComponent implements OnInit, OnDestroy {
     private assessmentService: AssessmentsService,
     private authService: AuthService,
     private breakpointService: BreakpointService
-  ) { }
-
-  ngOnInit(): void {
-
-    this._currentUser();
-    this.getSubjectNames();
-
-
+  ) {
     effect(() => {
-      if (this.userDevice() === this.breakpointService.XS) {
+      if (this.userDevice() === 'xs') {
 
         this.deviceXs = true;
         this.col = 1;
@@ -79,6 +71,12 @@ export class AssessmentComponent implements OnInit, OnDestroy {
         this.col = Math.max(1, Math.ceil(this.totalSubjects / 2));
       }
     })
+   }
+
+  ngOnInit(): void {
+
+    this._currentUser();
+    this.getSubjectNames();
 
   }
 

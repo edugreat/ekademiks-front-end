@@ -181,6 +181,7 @@ export class AuthService {
 
       // confirm the student belongs in a chat group
       this.isGroupMember(user.id).pipe(take(1)).subscribe(member => {
+        console.log(`is group member: ${member}`);
         if(member === true){
           sessionStorage.setItem('inGroup','yes');
 

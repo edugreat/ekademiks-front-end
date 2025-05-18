@@ -39,6 +39,8 @@ export class AssignmentComponent implements OnInit, OnDestroy {
   fileDroppedWarning = '';
 
   today = new Date().setHours(0,0,0,0);
+
+  submissionDate = new Date();
   
 
 
@@ -93,6 +95,8 @@ export class AssignmentComponent implements OnInit, OnDestroy {
     private router: Router, private fb: FormBuilder, private authService: AuthService
   ) {
 
+    this.submissionDate.setDate(this.submissionDate.getDate()+1);
+    console.log(`submission date: ${this.submissionDate}`);
     this.assignmentForm = this.fb.group({
       id:new FormControl(0),
       name: new FormControl('', Validators.required),
@@ -103,7 +107,7 @@ export class AssignmentComponent implements OnInit, OnDestroy {
       allocatedMark: new FormControl<number | undefined>(undefined, [Validators.required]),
       totalQuestion: new FormControl<number | undefined>(undefined, [Validators.required, Validators.min(1)]),
       creationDate: new FormControl(new Date()),
-      submissionEnds: new FormControl(new Date(), Validators.required),
+      submissionEnds: new FormControl(this.submissionDate, Validators.required),
       assignment: this.fb.array([])
     });
 

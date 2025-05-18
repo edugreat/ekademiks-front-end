@@ -13,13 +13,6 @@ export class BreakpointService {
 
   public breakpoint$ = this.breakpointSub.asObservable();
 
-
-  public XS = 'xs';
-  public SM = 'sm';
-  public MD = 'md';
-  public LG = 'lg';
-  
-
   constructor() {
 
     this.breakpoint.observe([
@@ -27,22 +20,31 @@ export class BreakpointService {
       Breakpoints.Small,
       Breakpoints.Medium,
       Breakpoints.Large,
+      Breakpoints.XLarge
     ]).subscribe(result => {
 
       if(result.breakpoints[Breakpoints.XSmall]){
 
-        this.breakpointSub.next('xs');
+        this.breakpointSub.next(BreakPoint.XS);
       }else if(result.breakpoints[Breakpoints.Small]){
 
-        this.breakpointSub.next('sm');
+        this.breakpointSub.next(BreakPoint.SM);
       }else if(result.breakpoints[Breakpoints.Medium]){
 
-        this.breakpointSub.next('md');
+        this.breakpointSub.next(BreakPoint.MD);
       }else if(result.breakpoints[Breakpoints.Large]){
-          this.breakpointSub.next('lg');
+          this.breakpointSub.next(BreakPoint.LG);
+        }else{
+          BreakPoint.LG
         }
       });
     }
 
    }
 
+ enum BreakPoint  {
+  XS = 'xs',
+  SM = 'sm',
+  MD = 'md',
+  LG = 'lg'
+}

@@ -43,6 +43,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
 
 
+
   private breakpointSub?:Subscription;
 
   constructor(
@@ -56,7 +57,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
    effect(() => {
 
-    if(this.userDevice() === breakpointService.LG || this.userDevice() === breakpointService.MD){
+    if(this.userDevice() === Breaks.LG || this.userDevice() === Breaks.MD){
 
       this.rowspan = 1.5;
     }
@@ -186,5 +187,13 @@ export class HomeComponent implements OnInit, OnDestroy {
 
       return !this.authService.isLoggedIn;
     }
+}
+
+enum Breaks{
+  XS = 'xs',
+  SM = 'sm',
+  MD = 'md',
+  LG = 'lg',
+  XL = 'xl'
 }
 

@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { effect, inject, Injectable, Injector, NgZone, signal } from '@angular/core';
 import { AuthService, User } from '../auth/auth.service';
-import { BehaviorSubject, catchError } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { EventSourceMessage, fetchEventSource } from '@microsoft/fetch-event-source';
 
@@ -110,10 +109,9 @@ export class AdminNotificationsService {
               this.connectionState.set('error');
             }
             
-            else{  console.log('not 200 ok response')
-            }
+           
 
-            throw new Error(`Connection failed: ${response.status} ${response.statusText}`);
+            //throw new Error(`Connection failed: ${response.status} ${response.statusText}`);
           });
 
         },
@@ -156,7 +154,11 @@ export class AdminNotificationsService {
             console.error('SSE error', err);
             this.connectionState.set('error');
 
-            if(err.name === 'AbortError') return;
+            if(err.name === 'AbortError') {
+              this.disconnectFromSSE();
+
+              return;
+            }
 
               this.attemptReconnection(user);
             
@@ -193,7 +195,7 @@ export class AdminNotificationsService {
   private attemptReconnection(user: User) {
     if (this.retryCount < this.maxRetries) {
 
-      const delay = Math.min(this.baseDelay * 2 ** this.retryCount, 30000);
+      const delay = Math.min(this.baseDelay * 2 ** this.retryCount, 45000);
 
       this.retryCount++;
 

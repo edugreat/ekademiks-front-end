@@ -77,10 +77,51 @@
     <span *ngIf="isLoggedInStudent() || isAdmin()" id="user" > <mat-icon>person</mat-icon> Hi {{userName | uppercase}} </span>
 
   <span  style="margin-left: 100px;" *ngIf="isAdmin()">
-    <ad-notifier/>
+    <admin-notifier/>
 </span>
-    <button routerLink="/notifications" *ngIf="isLoggedInStudent() && unreadNotifications === 0 "  id="notifications" ><mat-icon   >notifications</mat-icon></button>
-    <button  routerLink="/notifications" *ngIf="isLoggedInStudent() &&  unreadNotifications > 0"  id="notifications"  ><mat-icon aria-hidden="false" [matBadge]="unreadNotifications" matBadgePosition="above after" matBadgeSize="small" matBadgeColor="warn" >notifications_active</mat-icon></button>
+    
+@if (isLoggedInStudent()) {
+    <div id="notificationsDiv">
+       
+        @if (unreadNotificationsCount() === 0) {
+            <button id="notifications" routerLink="/notifications">
+                <mat-icon matTooltip="No notifications" >notification</mat-icon>
+            </button>
+        }
+        @if (unreadNotificationsCount() > 0) {
+
+            <button id="notifications" routerLink="/notifications" >
+                <mat-icon [matTooltip]="notificationMsg" aria-hidden="false" [matBadge]="unreadNotificationsCount()" matBadgePosition="above after" matBadgeSize="small" matBadgeColor="warn" >notifications_active</mat-icon>
+            </button>
+        }
+        @if(connectionState() === 'connected'){
+
+            <span matTooltip="connected" >
+              <mat-icon class="connected" >signal_wifi_4_bar</mat-icon>
+            </span>
+          }
+    
+          @if(connectionState() === 'connecting'){
+           <span class="connecting" >reconnecting {{networkBusyIndicator}}</span>
+          }
+    
+          @if(connectionState() === 'disconnected'){
+    
+            <span matTooltip="disconnected" class="disconnected" >
+            <mat-icon  >signal_wifi_4_bar</mat-icon>
+            </span>
+          }
+
+          @if(connectionState() === 'error'){
+            <span matTooltip="unstable connection" class="disconnected" >
+            <mat-icon  >signal_wifi_statusbar_not_connected</mat-icon>
+            </span>
+          }
+    </div>
+
+
+}
+   
     <span id="topMenuLoginLogout" >
         <a *ngIf="!loggedIn()" mat-button [routerLink]="['/login']" class="top-menu-item" ><mat-icon>login</mat-icon>Login</a>
         <a (click)="logout()" *ngIf="loggedIn()"  mat-button class="top-menu-item"  ><mat-icon>logout</mat-icon>Logout</a>
