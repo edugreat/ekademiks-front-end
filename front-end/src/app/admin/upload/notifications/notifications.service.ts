@@ -1,9 +1,10 @@
-import { computed, effect, Injectable, NgZone, signal } from '@angular/core';
+import { computed, effect, inject, Injectable, NgZone, signal } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AuthService, User } from '../../../auth/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { EventSourceMessage, fetchEventSource } from '@microsoft/fetch-event-source';
+import { LogoutDetectorService } from '../../../logout-detector.service';
 
 @Injectable({
   providedIn: 'root'
@@ -31,9 +32,14 @@ export class NotificationsService {
 
   private baseDelay = 1000;
 
+  private zone = inject(NgZone);
+  private  authService = inject(AuthService);
+  private http = inject(HttpClient);
+  private logoutDetectorService = inject(LogoutDetectorService);
+
   connectionState = signal<'connecting'|'connected'|'disconnected'|'error'>('disconnected');
 
-  constructor(private zone: NgZone, private authService: AuthService, private http: HttpClient) {
+  constructor() {
 
 
     let currentUser = toSignal(this.authService.loggedInUserObs$);
@@ -56,6 +62,7 @@ export class NotificationsService {
 
     }, {allowSignalWrites:true});
 
+    effect(() => this.logoutDetectorService.isLogoutDetected() ? this.disconnectFromSSE() : '');
    
   }
 
@@ -90,9 +97,8 @@ export class NotificationsService {
  
          },
  
-        
- 
          signal: this.abortController.signal,
+         openWhenHidden:true,
          onopen: async (response) => {
  
            this.zone.run(() => {
@@ -109,7 +115,7 @@ export class NotificationsService {
  
              
              }else if(response.status >= 400 && response.status < 500 && response.status !== 429){
-               console.log('4xx error response')
+               console.log('4xx error response');
                this.connectionState.set('error');
              }
              
@@ -158,7 +164,7 @@ export class NotificationsService {
              console.error('SSE error', err);
              this.connectionState.set('error');
  
-             if(err.name === 'AbortError') return;
+             if(err.name === 'AbortError' && this.maxRetries <  50) return;
  
                this.attemptReconnection(user);
              
@@ -235,11 +241,13 @@ export class NotificationsService {
 export type _Notification = {
   id: number,
   type: string,
-  metadata: number,
+  metadata: number, //represents ID of what is being notified about(e.g, uploaded assignment, user requesting to join group etc)
   message: string,
   createdAt: string,
   //in the case of notification for request to join new group chat, 'notifier' is the name of the user who wants to join the group chat.
-  notifier?: string
+  notifier?: string,
+  // for notification that are related to chats messages
+  targetGroupChat?:number
 
 
 

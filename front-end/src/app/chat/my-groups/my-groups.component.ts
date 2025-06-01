@@ -86,12 +86,7 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
    
   }
 
-//  private studentId():string | undefined{
 
-//   const id = sessionStorage.getItem('studentId');
-
-//   return id ? id : undefined; 
-//  }
 
   private getGroupInfo(studentId:number){
 
@@ -100,6 +95,7 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
 
       
         this.groupChatInfo = info;
+
 
       },
 
@@ -110,10 +106,6 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
 
   connectToChat(groupId:number, groupDescription:string, groupAdminId:string){
 
-   
-   
-
-    sessionStorage.setItem('groupId',`${groupId}`);
 
     this.router.navigate([groupId, groupAdminId, groupDescription],{relativeTo: this.activatedRoute})
   }

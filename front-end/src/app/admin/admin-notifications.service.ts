@@ -3,6 +3,7 @@ import { effect, inject, Injectable, Injector, NgZone, signal } from '@angular/c
 import { AuthService, User } from '../auth/auth.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { EventSourceMessage, fetchEventSource } from '@microsoft/fetch-event-source';
+import { LogoutDetectorService } from '../logout-detector.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,14 +17,18 @@ export class AdminNotificationsService {
   private baseDelay = 1000;
   private abortController:AbortController | null = null;
 
+  private http = inject(HttpClient);
+  private authService = inject(AuthService);
+  private zone = inject(NgZone);
+  private logoutDetectorService = inject(LogoutDetectorService);
+
   notifications = signal<AssessmentResponseRecord[]>([]);
 
 
 // indicates user connection state
   connectionState = signal<'disconnected'|'connected'|'connecting'|'error'>('disconnected');
 
-  constructor(private http:HttpClient, 
-    private authService:AuthService, private zone:NgZone) {
+  constructor() {
 
 
       const currentUser = toSignal(this.authService.loggedInUserObs$);
@@ -51,7 +56,7 @@ export class AdminNotificationsService {
         )
       }, {allowSignalWrites:true});
    
-      
+      effect(() => this.logoutDetectorService.isLogoutDetected() ? this.disconnectFromSSE() : '')
       
      }
 
@@ -89,6 +94,7 @@ export class AdminNotificationsService {
        
 
         signal: this.abortController.signal,
+        openWhenHidden:true,
         onopen: async (response) => {
 
           this.zone.run(() => {

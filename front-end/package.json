@@ -29,6 +29,7 @@
     "ng-event-source": "^1.0.14",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "zod": "^3.25.42",
     "zone.js": "~0.14.3"
   },
   "devDependencies": {

@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subject, take, tap } from 'rxjs';
+import { inject, Injectable, Injector } from '@angular/core';
+import { BehaviorSubject, Observable, take, tap } from 'rxjs';
 import { Endpoints } from '../end-point';
-import { ChatCacheService } from '../chat/chat-cache.service';
+import { LogoutDetectorService } from '../logout-detector.service';
 
 @Injectable({
   providedIn: 'root'
@@ -44,7 +44,15 @@ export class AuthService {
   //Get the observable version of the behabvior subject to ensure it only emits directly to this observable which subsequently notofies subscribers
   //The of this is to not allow subscribers directly subscribe to the Behavior subject so as not to emit unintended values by calling the subject's 'next' method upon subscription
   public userName$: Observable<string> ;
-  constructor(private http: HttpClient, private endpoints:Endpoints, private chatCachedService:ChatCacheService) {
+
+  private http = inject(HttpClient);
+  private endpoints = inject(Endpoints);
+  private logoutDetectorService = inject(LogoutDetectorService);
+  
+
+
+
+  constructor() {
 
     
     this.currentUserName = new BehaviorSubject<string>(this.currentUser?.firstName || 'Student');
@@ -92,7 +100,6 @@ export class AuthService {
 
   }
 
-
   // returned redis cached object of loggedin user from the server
   cachedUser(cacheKey:string):Observable<User> {
 
@@ -107,7 +114,7 @@ export class AuthService {
 
           return;
         }
-      console.log(`user from cache: ${user}`)
+     
         this.loggedInUser = user;
         this.currentUser = user;
         this.currentUserName.next(user.firstName)
@@ -166,7 +173,6 @@ export class AuthService {
 
   //  save indication that the user is not guest
     sessionStorage.setItem("logged", "yes");
-
     sessionStorage.setItem('cachingKey', user.cachingKey!);
 
     sessionStorage.setItem('accessToken', user.accessToken);
@@ -238,11 +244,14 @@ export class AuthService {
  logout():void{
     //clears the user roles stored in memory once the user logs out
    sessionStorage.clear();
-
+   
    this.loggedInUser = undefined
-    this.chatCachedService.clearAllChats();
+   
     this.currentUserName.next('Student');
     this.studentLoginSubject.next(false);
+
+    // notifies subscribers that the user has logged out
+    this.logoutDetectorService.isLogoutDetected.set(true)
    
   }
 

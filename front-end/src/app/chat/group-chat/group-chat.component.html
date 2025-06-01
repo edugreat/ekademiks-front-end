@@ -3,7 +3,7 @@
 
 <div style="scrollbar-color: green;" *ngIf="! _viewNotificationDetails" class="chat-container">  
   <div class="chat-header">
-      <label class="chat-label">{{groupDescription}}</label>
+      <label class="chat-label">{{groupDescription()}}</label>
       <a  mat-button matTooltip="online members" *ngIf="onlineMembers"  >
         <mat-icon color="primary" >online_prediction</mat-icon>
         {{onlineMembers }}
@@ -116,5 +116,5 @@
   </div> 
 </div> 
 
-<app-request-notifications-detail *ngIf="_viewNotificationDetails" [notifications]="requestNotifications" [groupId]="groupId" (notificationDetails)="_viewNotificationDetails=$event" (clearParentJoinRequestNotification)="clearRequestNotification($event)"  ></app-request-notifications-detail>
+<app-request-notifications-detail *ngIf="_viewNotificationDetails" [notifications]="requestNotifications" [groupId]="currentGroupId" (notificationDetails)="_viewNotificationDetails=$event" (clearParentJoinRequestNotification)="clearRequestNotification($event)"  ></app-request-notifications-detail>
 

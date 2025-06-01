@@ -1,12 +1,13 @@
-import { effect, inject, Injectable, NgZone, OnDestroy } from '@angular/core';
+import { effect, inject, Injectable, NgZone, signal } from '@angular/core';
 import { Endpoints } from '../end-point';
-import { connect, defer, Observable, of, Subject, Subscription, take } from 'rxjs';
+import { BehaviorSubject, defer, map, Observable, of, Subject, Subscription } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpResponse, HttpStatusCode } from '@angular/common/http';
 import { AuthService, User } from '../auth/auth.service';
 import { _Notification as _Notification } from '../admin/upload/notifications/notifications.service';
-import { ChatCacheService } from './chat-cache.service';
-import { EventSourcePolyfill } from 'ng-event-source';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { EventSourceMessage, fetchEventSource } from '@microsoft/fetch-event-source';
+import { LogoutDetectorService } from '../logout-detector.service';
+import { LivePresenceMonitorService } from '../live-presence-monitor.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,36 +16,34 @@ export class ChatService {
 
 
 
-  // Arbitrary content for deleted chats
-  private DELETEDCHATCONTENT = '$2a$10$IFch8ji5EgMhuOQdBjdIE.tzyvQbtCEdHSsujbSUALasTHPA87GwO';
-
-
-  private reconnectionTiming: any;
   
 
-  // map of key , groupId and value Event source
-  private eventSources: Map<number, EventSourcePolyfill> = new Map();
 
-  public chatMessageSubjects: Map<number, Subject<ChatMessage>> = new Map();
+  private abortContoller:AbortController | null = null;
+  private messageUrl = 'http://localhost:8080/chats/messages';
 
-  public chatNotificationSubjects: Map<number, Subject<_Notification>> = new Map();
+  
+  // stores a user chat messages. Key is the user ID, value is a map of which key is the group id and value, an observable that emits chat messages per group
+  public chatMessageSubjects: Map<number, Map<number, BehaviorSubject<ChatMessage[] | ChatMessage>>> = new Map();
 
-  // limit SSE connections to just 5 concurrently
-  private maxConnections = 5;
+  // emits to subscribers(at the cache service), a user ID and array of group IDs, so they can begin to listen to SSE chat messages for the given user for a given chat group
+  public chatConnectionSignal = signal<Map<number, number[]>>(new Map<number, number[]>());
+// emits to subscribers(at the cache service), a user ID and group ID, so they can begin to listen to SSE notification messages for the given user for a given chat group
+  public notificationConnectionSignal = signal<Map<number, number[]>>(new Map<number, number[]>());
 
-  private _activeGroups: number[] = [];
+  // key is the studentId, value is a map of which key is the groupId and value, an observable that emits notifications per group
+  public chatNotificationSubjects: Map<number, Map<number, BehaviorSubject<_Notification[]>>> = new Map();
 
-  // keeps try of the number of reconnection counts when server sent event connection is lost
-  private retryCount = 0;
+  private logoutDetectorService = inject(LogoutDetectorService);
+  private livePresenceMonitorService = inject(LivePresenceMonitorService);
 
 
-  //initial retry backoff time of 1sec
-  private retryDelay = 45000;
-
-  private MAX_RECONNECTION_ATTEMPT = 10; //Only after 10 unsuccessful reconnection attempts would the cient stop further attempts
-
-  private reconnectionAttempt = 0; //tracks the number of attempts at re-establishing connection
-
+  
+  retryCount = 0;
+  maxRetries = 25;
+  baseDelay = 1000;
+  
+  
 
 
 
@@ -65,8 +64,6 @@ export class ChatService {
 
   backgroundUpdate$ = this._backgroundChatUpdate.asObservable();
 
-  // chat background update subscription
-  private backgroundSubscriptions = new Map<number, Subscription>();
 
   _backgroundSubscriptions?: Subscription;
 
@@ -74,14 +71,12 @@ export class ChatService {
   private userId?:number;
  
   private endpoints = inject(Endpoints);
-  private chatCachedService = inject(ChatCacheService);;
   private authService = inject(AuthService);
   private http = inject(HttpClient);
   private zone = inject(NgZone);
 
   private currentUser = toSignal(this.authService.loggedInUserObs$);
 
-  private eventListeners =  new Map<number, {chats:EventListener, heartbeat:EventListener} >();
   
 
 
@@ -90,12 +85,14 @@ export class ChatService {
 
     effect(() => {
 
-      this.currentUser() ? this.performBackgroundChatUpdate() : this.disconnectAllChatGroups();
+     if(!this.currentUser()) this.disconnectFromSSE();
      
       // one-time subscription to get the userId
       this.userId === undefined ? this.currentUser()?.id : this.userId;
     })
     
+    // disconnect fetch event source when the user logs out
+    effect(() => this.logoutDetectorService.isLogoutDetected()  ? this.disconnectFromSSE(): '')
 
   }
 
@@ -113,13 +110,66 @@ export class ChatService {
   }
 
 
-  // communicates to the server endpoint to fetch to fetch unread chats count for the given student
-  // Unread chats count is a map object having the group's id as the key, and count of unread messages(greater than or zero) as the values
+  // fetch information about all the group chats the student belongs to.
+  // key is the groupId and value is the group chat information
   groupInfo(studentId: number): Observable<Map<number, GroupChatInfo>> {
 
-    return this.http.get<Map<number, GroupChatInfo>>(`${this.endpoints.groupInfoUrl}?studentId=${studentId}`);
+    return this.http.get<any>(`${this.endpoints.groupInfoUrl}?studentId=${studentId}`)
+    .pipe(
+     
+      map((data) => {
+
+      
+      const resultMap = new Map<number, GroupChatInfo>(
+        Object.entries(data).map(([key, value]) => [Number(key), value as GroupChatInfo]));
+
+      
+
+       let chats = new Map<number, BehaviorSubject<ChatMessage[] | ChatMessage>>();
+
+      let notifications = new Map<number, BehaviorSubject<_Notification[]>>();
+    
+     
+
+     Array.from(resultMap.keys()).forEach((key) =>{
+        chats.set(key, new BehaviorSubject<ChatMessage[] | ChatMessage>([]));
+
+        notifications.set(key, new BehaviorSubject<_Notification[]>([]));
+
+        this.livePresenceMonitorService.queryUserPresence(key, this.currentUser()?.accessToken!);
+      });
+
+      // sets a map that notifies subscribers(at the cache service) of new chat messages for the given studentId
+      this.chatMessageSubjects.set(studentId, chats);
+
+      // sets a map that notifies subscribers(at the cache service) of new chat notifications for the given studentId
+      this.chatNotificationSubjects.set(studentId, notifications);
+
+      // new chat connection signal per userId(where value is an array of group IDs)
+      let m = new Map<number, number[]>();
+      m.set(studentId, [...resultMap.keys()])
+
+      // new notification connection signal per userId(where value is an array of group IDs)
+      let n = new Map<number, number[]>();
+      n.set(studentId, [...resultMap.keys()]);
+
+      this.chatConnectionSignal.set(m);
+
+      this.notificationConnectionSignal.set(n);
+      // subsbcribe to the server to immediately begin to receive both instant and previous chat messages and notifications
+      if(this.chatMessageSubjects.has(studentId) && this.chatNotificationSubjects.has(studentId)){
+
+        this.connectToMessages();
+      }
+
+     
+      return resultMap;
+
+     
+    }));
 
   }
+  
 
 
   // fetch all the group chats from the server
@@ -131,9 +181,15 @@ export class ChatService {
   // send new chat messages to the server which then broadcasts the chats in realtime to all members online
   sendNewChatMessage(newChat: ChatMessage): Observable<HttpResponse<number>> {
 
+    return this.http.post<HttpStatusCode>(this.endpoints.newChatMessageUrl, newChat, 
+      { 
+        'observe': 'response',
+        headers: {
 
+          'Authorization':`Bearer ${this.currentUser()?.accessToken}`
+        }
 
-    return this.http.post<HttpStatusCode>(this.endpoints.newChatMessageUrl, newChat, { 'observe': 'response' })
+       })
 
 
 
@@ -198,365 +254,196 @@ export class ChatService {
   }
 
   // method that establishes a unidirectional messaging system where the server forwards previous chat messages to the client via the server sent event emitter client
-  connectToChatMessages(groupId: number, studentId: number) {
+  connectToMessages() {
 
-    console.log('Connecting to chat messages...');
+      if(this.currentUser() && this.isStudent(this.currentUser())){
 
-    // cleanup existing connection
-    this.disconnectFromGroup(groupId);
+        this.disconnectFromSSE();
 
-   
-
-
-      if (!this.chatNotificationSubjects.has(groupId)) {
-        // create new notification subject
-        this.chatNotificationSubjects.set(groupId, new Subject<_Notification>());
-      }
-      // create a new Subject
-      if (!this.chatMessageSubjects.has(groupId)) {
-
-
-        console.log('Creating new chat message subject...');
-
-        this.chatMessageSubjects.set(groupId, new Subject<ChatMessage>());
+        this.connect(this.currentUser()!)
 
       }
-      // create new event source for the group
-      const eventSource = new EventSourcePolyfill(`${this.endpoints.chatMessagesUrl}?group=${groupId}&student=${studentId}`, {
+  
+  
+    }
 
-        headers: {
-          'authorization': `Bearer ${this.currentUser()?.accessToken}`,
-        },
-        heartbeatTimeout: this.retryDelay,
-        connectionTimeout: 5000
-      });
+    private async connect(user:User){
 
-      // add the event source to the map of event sources
-      this.eventSources.set(groupId, eventSource);
+      this.abortContoller = new AbortController();
 
-      this._activeGroups.push(groupId);
+      const token = user.accessToken;
 
+      try {
+        
+        await fetchEventSource(`${this.messageUrl}?studentId=${user.id}`, {
 
-      // sets up hearbeat event listener
-      const chatListener =  (event: Event) => {
-        this.zone.run(() => {
+          headers:{
 
-          const messageEvent = event as MessageEvent;
+            'Authorization': `Bearer ${token}`,
+            'Accept':'text/event-stream',
+            'Cache-Control':'no-ache',
+            'Connection':'keep-alive'
+          },
+          signal: this.abortContoller.signal,
 
-          // check if any message has been received
-          if (messageEvent) {
+          openWhenHidden:true,
 
+          onopen: async (response)  => {
 
-            const data = JSON.parse(messageEvent.data);
+            this.zone.run(() => {
 
+            if ( response.ok && response.status === 2000){
 
-            // process for the case where the message a request to join the group chat
-            if (this.isJoinGroupRequest(data)) {
+              console.log('200 ok response');
 
+              this.retryCount = 0;
 
+              return;
+            }else if(response.status >= 400 && response.status < 500 && response.status !== 429){
 
-              // emit current chat notification to subscribers
-              this.chatNotificationSubjects.get(groupId)!.next(data);
-
-
-            }  //process for the case of chat message
-            else if (this.isChatMessages(data)) {
-
-
-              //  emits new chat message to suscribers
-              this.chatMessageSubjects.get(groupId)!.next(data);
+              console.log('4xx error response');
 
             }
+            });
 
-          }
-        });
+          },
 
-      };
+          onmessage:(event:EventSourceMessage) => {
 
-      // listen for heartbeat event
-      const heartbeatListener = (event:Event) => {
+            this.zone.run(() => {
 
-        this.zone.run(() => {
+              try {
+                
+                if(event.event === 'chats'){
 
-          this.retryDelay = 35000;
-          this.retryCount = 0;
+
+                 
+
+                  const data:ChatMessage[] | ChatMessage = JSON.parse(event.data);
+
+                   // emits previous chat messages to subscriber(cache service subscribes to receive such notification)
+                 if(Array.isArray(data)){
+
+                
+                  const groupId = data[0].groupId;
+
+                  this.chatMessageSubjects.get(user.id)?.get(groupId)?.next(data);
+                 } else{
+
+                  this.chatMessageSubjects.get(user.id)?.get(data.groupId)?.next(data);
+                 }
+
+                }else if(event.event === 'notifications'){
+
+                  const notifications:_Notification[] = JSON.parse(event.data);
+
+                  // emits notification to subscribers(cache service subscribes to receive such notification)
+                  this.chatNotificationSubjects.get(user.id)?.get(notifications[0].targetGroupChat!)?.next(notifications);
+
+                }
+
+              } catch (error) {
+                console.error('error processing event', error)
+              }
+
+            });
+
+          }, 
+          onerror:(err) => {
+
+            this.zone.run(() => {
+              console.error('SSE error', err);
+
+              if(err.name === 'AbortError') return;
+
+              this.reconnectToServer();
+            });
+          },
+          onclose:() => this.abortContoller?.abort()
+
         })
-      }
 
-
-     eventSource.addEventListener('heartbeat', heartbeatListener);
-
-
-      eventSource.addEventListener('chats', chatListener);
-
-
-      this.eventListeners.set(groupId, {chats: chatListener, heartbeat: heartbeatListener});
-
-      
-
-
-      //  disconnect group from notifications on account of error
-      eventSource.onerror = (error:Event) => {
-
-        console.log(`error occurred: ${JSON.stringify(error)}`);
-
-        this.zone.run(() => {
-
+      } catch (error) {
         
-          if(error.type !== 'abort'){
-
-            this.reconnectToServer(groupId, studentId);
-          }
-        })
-
-
-
-
-      };
-
-      //  reset retry count once connected
-      eventSource.onmessage = () => {
-       
-        this.retryCount = 0;
-
-        this.retryDelay = 35000
       }
-
-
-
-
-
 
 
     }
 
+    private isStudent(user?:User): boolean{
+
+      return user ? user.roles.includes('Student') : false;
+
+
+    }
 
   
 
-  private reconnectToServer(groupId: number, studentId: number) {
+  private reconnectToServer() {
 
-    this.disconnectFromGroup(groupId);
+   if(this.retryCount < this.maxRetries){
 
-    // calculate delay with exponential backoff
-    const delay = Math.min(1000 * Math.pow(2, this.retryCount),60000);   
-
-    // schedule reconnection
+    const delay = Math.min(this.baseDelay * 2 ** this.retryCount, 30000); 
+    
+    this.retryCount++;
     setTimeout(() => {
+
+      this.connectToMessages();
       
-      if(this.reconnectionAttempt < this.MAX_RECONNECTION_ATTEMPT){
-
-        this.connectToChatMessages(groupId, studentId);
-        this.reconnectionAttempt++;
-
-      }
-
     }, delay);
 
+   }else {
+
+    this.disconnectFromSSE()
+   }
+
 
   }
 
-  // streams chat messages for the given group referenced by its ID
-  public streamChatMessagesFor(groupId: number): Observable<ChatMessage | undefined> {
+  // streams chat messages for the given group referenced by its ID, belonging to the given user(method is called from the cache service)
+  public streamChatMessagesFor(studentId:number, groupId: number): Observable<ChatMessage[] | ChatMessage | undefined> {
 
 
     return defer(() => {
 
-      const message = this.chatMessageSubjects.get(groupId);
+      const subject = this.chatMessageSubjects.get(studentId)?.get(groupId);
 
-      return message ? this.chatMessageSubjects.get(groupId)!.asObservable() : of(undefined);
-    })
-
-
-
-    //  return this.chatMessageSubjects.get(groupId) ? this.chatMessageSubjects.get(groupId)!.asObservable() : of(undefined)
-  }
-
-  // special method that get notified when message for a given group are recieved. The group must have been unssubscribed from the component
-  // due to the user visiting another group they belong to. In order to still keep getting realtime messages, this method only performs background
-  //chat updates for the group which has been unsubscribed from observable when chats arrive.
-  private performBackgroundChatUpdate() {
-
-    this._backgroundSubscriptions = this.backgroundUpdate$.subscribe((groupId: number) => {
-
-      // subscribe to get chat messages since the user has clicked to different group at the component level
-      if (groupId) {
-
-
-        // unsubscribe from previous subscription if there's any to avoid memory leak
-        this.backgroundSubscriptions.get(groupId)?.unsubscribe();
-
-        // replace the subscription with the new one.
-        this.backgroundSubscriptions.set(groupId, this.streamChatMessagesFor(groupId).subscribe({
-
-          next: (data: ChatMessage | undefined) => {
-
-            if (data) {
-
-              this.addToChats(data);
-
-
-            }
-
-          }
-        }));
-
-
-      } else if (groupId < 0) {
-
-      
-
-        // unsubscribe unsubscribe this group from background chat updates since the group actively routed to in the component
-        this.backgroundSubscriptions.get((-1 * groupId))?.unsubscribe();
-      }
+      return subject ? subject.asObservable() : of(undefined);
     })
 
   }
-
-  private async addToChats(incomingChat: ChatMessage) {
-
-    let savedChats = await this.getCachedChats(incomingChat.groupId);
-
-    switch (incomingChat.content) {
-      case this.DELETEDCHATCONTENT:
-
-        // delete the message from savedChats
-        savedChats.splice(savedChats.findIndex(c => c.id === incomingChat.id), 1);
-
-        // get replied chats for the deleted chat
-        let repliedChats = this.repliers(incomingChat.id!, savedChats);
-
-        if (repliedChats.length) {
-
-          for (let index = 0; index < repliedChats.length; index++) {
-
-            //set the name and id of the user that deleted the chat
-
-            repliedChats[index].deleterId = incomingChat.deleterId;
-            repliedChats[index].deleter = incomingChat.deleter;
-
-          }
-
-          // update the content of saveChats
-          repliedChats.forEach(r => {
-
-            savedChats.splice(savedChats.findIndex(c => c.id === r.id), 1, r);
-          })
-        }
-
-        break;
-
-      default:
-
-        // search for the chat in the array of savedChats
-        const index = savedChats.findIndex(c => c.id === incomingChat.id);
-
-        //  check of the incoming chat is an edited version of a previous chat
-        if (index !== -1 && incomingChat.content !== savedChats[index].content) {
-
-          savedChats[index].content = incomingChat.content;
-          savedChats[index].isEditedChat = true;
-        } else if (index === -1) {
-
-          // this is the case of a new chat message
-          savedChats.push(incomingChat);
-        }
-
-
-        break;
-    }
-
-
-    // update the session storage
-
-    this.cachedMessage(incomingChat.groupId, savedChats);
-
-  }
-
-  // return an array of chat replies for the chat referenced by id
-  repliers(id: number, savedChats: ChatMessage[]): ChatMessage[] {
-
-
-    return savedChats.filter(c => c.repliedTo === id);
-  }
-
-  public streamChatNotificationsFor(groupId: number): Observable<_Notification | undefined> {
 
   
-
+  // streams notification messages for the given group referenced by its ID, belonging to the given user(method is called from the cache service)
+  public streamChatNotificationsFor(studentId :number,groupId: number): Observable<_Notification[] | undefined> {
+    
     return defer(() => {
 
-      const notification = this.chatNotificationSubjects.get(groupId);
+      const notification = this.chatNotificationSubjects.get(studentId)?.get(groupId);
 
-      return notification ? this.chatNotificationSubjects.get(groupId)!.asObservable() : of(undefined);
+      return notification ? notification.asObservable() : of(undefined);
     })
 
 
   }
 
-  public get backgroundChatUpdate() {
+ 
+  
 
-    return this._backgroundChatUpdate;
+ 
 
+ 
+  // stop further receiving of messages
+  disconnectFromSSE() {
+
+    this.abortContoller?.abort();
+    this.abortContoller = null;
+
+   
   }
-
-  disconnectFromGroup(groupId: number): void {
-    if (this.eventSources.has(groupId)) {
-      const eventSource = this.eventSources.get(groupId);
-      
-      if (eventSource) {
-        // Remove all listeners
-        const listeners = this.eventListeners.get(groupId);
-        if (listeners) {
-          eventSource.removeEventListener('chats', listeners.chats);
-          eventSource.removeEventListener('heartbeat', listeners.heartbeat);
-          this.eventListeners.delete(groupId);
-        }
-        
-        // Nullify callbacks
-        eventSource.onerror = ()=>{};
-        eventSource.onmessage = ()=>{};
-        
-        // Close connection
-        eventSource.close();
-      }
-      
-      // Clean up maps
-      this.eventSources.delete(groupId);
-      this._activeGroups = this._activeGroups.filter(id => id !== groupId);
-    }
-  }
-  private get activeUsers() {
-
-    return this._activeGroups
-  }
-
-  //save messages to indexedDb storage
-  async cachedMessage(groupId: number, messages: ChatMessage[]) {
-
-    await this.chatCachedService.saveChat(`${groupId}`, messages)
-
-  }
-
-  // retrieves messages from session storage if there's any, or empty array if there's none
-  getCachedChats(groupId: number) {
-
-    return this.chatCachedService.getCachedChat(`${groupId}`)
-  }
-
-  // provides mechanism for sorting chat messages by date
-  private byDate(): ((a: ChatMessage, b: ChatMessage) => number) | undefined {
+  
 
 
-    return (a, b) => {
-
-
-
-
-      if ((a.sentAt as Date).getTime() > (b.sentAt as Date).getTime()) return 1;
-      if ((a.sentAt as Date).getTime() < (b.sentAt as Date).getTime()) return -1;
-      return 0;
-    };
-  }
 
   // deletes a given chat message whose groupId is the key and chatId is the value of the map
   deleteChatMessage(map: { [x: number]: number }, deleterId: number): Observable<HttpResponse<number>> {
@@ -564,73 +451,16 @@ export class ChatService {
 
     return this.http.delete<HttpStatusCode>(`${this.endpoints.deleteChatUrl}?del_id=${deleterId}`, {
       body: map,
-      observe: "response"
+      observe: "response",
+      headers: {
+        'Authorization':`Bearer ${this.currentUser()?.accessToken}`
+      }
     })
 
   }
 
 
-  // disconnect the user from all the group when they log out
-  disconnectAllChatGroups() {
-
-
-    if (this.eventSources) {
-
-
-
-      this.eventSources.forEach((_, groupId) => this.disconnectFromGroup(groupId!))
-
-
-
-      clearTimeout(this.reconnectionTiming);
-
-      // disconnect all active groups from the server
-      this.disconnectFromServer();
-    }
-
-    // disconnect all chat groups from the server's SSE
-
-  }
-
-  public disconnectFromServer(studentId?: number, groupId?: number): Observable<HttpResponse<number>> {
-
-    const map = new Map<number, number>();
-
-
-    if (groupId && studentId) {
-
-      map.set(studentId, groupId);
-    } else {
-
-      const _activeGroups = this.activeUsers;
-
-
-      if(this.userId){
-        _activeGroups.forEach(group => map.set(this.userId!, group, ));
-      }
-     
-    }
-
-    return this.http.post<HttpStatusCode>(this.endpoints.disconnectUrl, map, { observe: 'response' });
-
-
-  }
-
-
-  // checks if the new notification received is a request to join group chat or about new member that has just joined the group chat
-  private isJoinGroupRequest(data: any): data is _Notification {
-
-    return (data as _Notification).notifier !== undefined &&
-      ((data as _Notification).type === 'join group' || (data as _Notification).type === 'new member');
-  }
-
-  // check if the notification received is chat message
-  private isChatMessages(data: any): data is ChatMessage {
-
-    return (data as ChatMessage).onlineMembers !== undefined;
-  }
-
-
+  
   // implements functionality for editing group chat names
   editGroupName(_studentId: string, groupId: string, currentGroupName: string): Observable<HttpResponse<number>> {
 
@@ -666,9 +496,15 @@ export class ChatService {
   updateChat(editableChat: ChatMessage): Observable<HttpResponse<number>> {
 
 
+    return this.http.put<HttpStatusCode>(this.endpoints.editChatUrl, editableChat, { 
+      observe: 'response',
+      headers: {
 
+        'Authorization': `Bearer ${this.currentUser()?.accessToken}`
 
-    return this.http.put<HttpStatusCode>(this.endpoints.editChatUrl, editableChat, { observe: 'response' });
+      }
+    
+    });
 
 
   }
