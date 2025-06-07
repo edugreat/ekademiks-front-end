@@ -46,7 +46,6 @@ export class CssLoaderService {
         cssFile = 'desktop-style.css';
      }
 
-     console.log(`mobile view ${userView}`);
      this.loadCSS(cssFile);
     }
 

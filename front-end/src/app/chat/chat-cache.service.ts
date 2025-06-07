@@ -7,7 +7,6 @@ import { _Notification } from '../admin/upload/notifications/notifications.servi
 import { User } from '../auth/auth.service';
 import { Subscription } from 'rxjs';
 import { LogoutDetectorService } from '../logout-detector.service';
-import { LivePresenceMonitorService } from '../live-presence-monitor.service';
 
 @Injectable({
   providedIn: 'root'
@@ -21,13 +20,7 @@ export class ChatCacheService extends Dexie{
   
   private chatService = inject(ChatService);
 
-  private liveUserPresenceMonitorService = inject(LivePresenceMonitorService);
-
-  // this signal property keeps track of the number of online users in the group chat that the user is currently viewing
-  private onlineGroupChatsPresenceSubscription?:Subscription;
-  
-// this signal property keeps track of the number of online users in the group chat that the user is currently viewing
-  onlineUserPresenceCounts = signal<number | undefined>(undefined);
+  public activeUsersCountByGroup:Map<number, WritableSignal<number | undefined>> = new Map();
 
   private chatConnectionSignal = computed(() => this.chatService.chatConnectionSignal().size > 0 ? this.chatService.chatConnectionSignal() : new Map<number, number[]>());
   
@@ -77,7 +70,6 @@ chatNotifications = signal<_Notification[]>([]);
     this.chatCache = this.table('chatCache');
     this.notificationCache = this.table('notificationCache');
 
-    effect(() => console.log(`the current group id: ${this.currentGroupId()}`))
     
     this.subscribeToChatMessages();
 
@@ -88,17 +80,13 @@ chatNotifications = signal<_Notification[]>([]);
 
       if(this.currentGroupId()) {
         this.streamChatsForGroup(this.currentGroupId()!);
-
-        this.subscribeToUserLivePresence(this.currentGroupId()!);
-
-
       }
-    })
+    },{allowSignalWrites:true})
 
-
-    effect(() => this.logoutDetectorService.isLogoutDetected() ? this.clearAllChats(): '');
+   
 
   }
+
 
 
   private subscribeToChatNotifications() {
@@ -140,13 +128,7 @@ chatNotifications = signal<_Notification[]>([]);
 
    this.chatMessageSubscriptions.clear();
 
-   if(this.chatService.chatConnectionSignal().size > 0){
- console.log(`signal emitted with new user connection`);
-    
-   }else{
-    console.log(`no user connection signal emitted`);}
-    
-
+   
     Array.from(this.chatConnectionSignal().keys())
       .forEach(userId => {
 
@@ -182,14 +164,7 @@ chatNotifications = signal<_Notification[]>([]);
       });
   }
 
-  private subscribeToUserLivePresence(groupChatId:number){
-
-   this.onlineGroupChatsPresenceSubscription?.unsubscribe();
-
-   this.onlineGroupChatsPresenceSubscription = this.liveUserPresenceMonitorService.streamUserPresenceForGroup(groupChatId)
-                                               .subscribe(currentCount => this.onlineUserPresenceCounts.set(currentCount));
-  }
-
+ 
   // save or update chat history
   async persistChatsToDB(groupId:string, messages:ChatMessage[]){
 
@@ -230,6 +205,8 @@ chatNotifications = signal<_Notification[]>([]);
 
 
   private async addToChatMessages(incomingChat: ChatMessage) {
+
+    
   
       let savedChats = await this.getCachedChats(`${incomingChat.groupId}`);
   
@@ -281,12 +258,9 @@ chatNotifications = signal<_Notification[]>([]);
 
             // send instantly to listener if actively listening
             if(this.currentGroupId() && incomingChat.groupId === this.currentGroupId()){
-              if(this.currentGroupId() && this.currentGroupId() === incomingChat.groupId){
-
+             
                 this.streamChatsForGroup(incomingChat.groupId, incomingChat);
                        
-              }
-
             }
           }
   
@@ -314,13 +288,18 @@ chatNotifications = signal<_Notification[]>([]);
 
       }
 
+     
+
     }
 
+   
     // method that fetches from indexedDB, chat messages for a given group chat ID.
   //  If instant chat is given, then only stream the instant chat message, else stream the previous chat messages
     private async streamChatsForGroup(groupId:number, instantChat?:ChatMessage){
 
       if(instantChat){
+
+        console.log(`receiving instant chat from the cached-service: ${JSON.stringify(instantChat)}`)
 
         this.chatMessages.set(instantChat);
 

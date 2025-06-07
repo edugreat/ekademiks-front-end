@@ -88,7 +88,7 @@ export class ChatService {
      if(!this.currentUser()) this.disconnectFromSSE();
      
       // one-time subscription to get the userId
-      this.userId === undefined ? this.currentUser()?.id : this.userId;
+      this.userId = this.currentUser()?.id;
     })
     
     // disconnect fetch event source when the user logs out
@@ -121,7 +121,8 @@ export class ChatService {
 
       
       const resultMap = new Map<number, GroupChatInfo>(
-        Object.entries(data).map(([key, value]) => [Number(key), value as GroupChatInfo]));
+        Object.entries(data).filter(([key]) => typeof key ==='string' && key.trim() !== '' && !isNaN(Number(key)))
+      .map(([key, value]) => [Number(key), value as GroupChatInfo]));
 
       
 
@@ -129,15 +130,16 @@ export class ChatService {
 
       let notifications = new Map<number, BehaviorSubject<_Notification[]>>();
     
-     
+     const userGroupChatIds = Array.from(resultMap.keys());
 
-     Array.from(resultMap.keys()).forEach((key) =>{
+     userGroupChatIds.forEach((key) =>{
         chats.set(key, new BehaviorSubject<ChatMessage[] | ChatMessage>([]));
 
         notifications.set(key, new BehaviorSubject<_Notification[]>([]));
 
-        this.livePresenceMonitorService.queryUserPresence(key, this.currentUser()?.accessToken!);
       });
+
+      this.livePresenceMonitorService.populateGroupChatPresence(userGroupChatIds, this.currentUser()?.accessToken!, this.userId!);
 
       // sets a map that notifies subscribers(at the cache service) of new chat messages for the given studentId
       this.chatMessageSubjects.set(studentId, chats);
@@ -292,17 +294,12 @@ export class ChatService {
 
             this.zone.run(() => {
 
-            if ( response.ok && response.status === 2000){
+            if ( response.ok || response.status === 200){
 
-              console.log('200 ok response');
-
+             
               this.retryCount = 0;
 
               return;
-            }else if(response.status >= 400 && response.status < 500 && response.status !== 429){
-
-              console.log('4xx error response');
-
             }
             });
 
@@ -330,6 +327,7 @@ export class ChatService {
                   this.chatMessageSubjects.get(user.id)?.get(groupId)?.next(data);
                  } else{
 
+                  console.log(`received instant message: ${data}`)
                   this.chatMessageSubjects.get(user.id)?.get(data.groupId)?.next(data);
                  }
 

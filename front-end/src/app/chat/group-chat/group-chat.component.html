@@ -4,10 +4,12 @@
 <div style="scrollbar-color: green;" *ngIf="! _viewNotificationDetails" class="chat-container">  
   <div class="chat-header">
       <label class="chat-label">{{groupDescription()}}</label>
-      <a  mat-button matTooltip="online members" *ngIf="onlineMembers"  >
+     @if (userLivePresence) {
+      <a  mat-button matTooltip="online members"   >
         <mat-icon color="primary" >online_prediction</mat-icon>
-        {{onlineMembers }}
+        {{userLivePresence }} {{userLivePresence === 1 ? 'user online' : userLivePresence ? 'users online' : ''}}
       </a>
+     }
 
       <a *ngIf="isGroupAdmin() && requestNotificationCount() > 0"
          mat-button matTooltip="new requests" (click)="viewNotificationDetails()" >

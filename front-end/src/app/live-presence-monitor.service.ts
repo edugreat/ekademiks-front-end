@@ -1,7 +1,6 @@
-import { group } from '@angular/animations';
-import { inject, Injectable, NgZone, signal, WritableSignal } from '@angular/core';
+import { inject, Injectable, NgZone, signal } from '@angular/core';
 import { EventSourceMessage, fetchEventSource } from '@microsoft/fetch-event-source';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, defer, Observable, of, ReplaySubject } from 'rxjs';
 import { z } from 'zod';
 
 @Injectable({
@@ -13,15 +12,16 @@ export class LivePresenceMonitorService {
 
   private zone = inject(NgZone);
 
-  // keeps a unique track of group chat IDs logged in users are currently present in
-  private groupChatPresence = signal<number[]>([]);
 
   // keeps track of the number of online users in each group chat
-  private userPresenceCounts = signal<Map<number, number>>(new Map());
+ // private usersPerGroupPresenceCounts = signal<Map<number, number>>(new Map());
 
-  private userPresencePublisher: Map<number, BehaviorSubject<number>> = new Map();
+  private usersPerGroupPublisher: Map<number, BehaviorSubject<number>> = new Map();
+
+  // property tracks and signals the count of group chats user are currently interacting with
+  private groupChatPresence = new ReplaySubject<number[]>(1);
   
-  private livePresenceUrl = 'http://localhost:8080/live-presence';
+  private livePresenceUrl = 'http://localhost:8080/chats/live-presence';
  private abortController:AbortController | null = null;
 
  retryCount = 0;
@@ -32,41 +32,39 @@ export class LivePresenceMonitorService {
 
 
 
-  private updateUserPresenceCounts(groupId:number, currentCount:number){
-  
-    if(this.userPresenceCounts().has(groupId)){
-     this.userPresenceCounts().set(groupId, currentCount);
-     // notify subscribers of the change
-    this.userPresencePublisher.get(groupId)?.next(currentCount);
-
-    }
-
-  }
-
   // method provide interface for subscribers to be notified on user presence publication
   public streamUserPresenceForGroup(groupChatId: number):Observable<number | undefined>{
 
-    return this.userPresencePublisher.get(groupChatId) 
-    ? this.userPresencePublisher.get(groupChatId)!.asObservable() : of(undefined);
-    
+    return defer(() => {
+   
+    const  publisher = this.usersPerGroupPublisher.get(groupChatId);
+
+      return publisher ? publisher.asObservable() : of(undefined);
+    })
   }
 
-  // this method ensures one-time query for user presence per group chat to which users log in
-  public queryUserPresence(groupChatId:number, accessToken:string){
- 
-    if(!this.groupChatPresence().includes(groupChatId)){
-  //  add this ID to the list of group chats to query user live presence
-  this.groupChatPresence.update((prev) => [...prev, groupChatId]);
+  // This method is used to populate the count of group chats users are logging into
+  public populateGroupChatPresence(userGroupChatIds:number[], accessToken:string, studentId:number){
 
-  // the automatically queryPresenceForAll()
-  this.queryPresenceForAll(accessToken);
+    //  add this ID to the list of group chats to query user live presence
+    userGroupChatIds.forEach(groupId => {
+      this.usersPerGroupPublisher.set(groupId, new BehaviorSubject<number>(0));
+    })
 
-    }
+    this.groupChatPresence.next(userGroupChatIds);
 
+    this.queryPresence(userGroupChatIds, accessToken, studentId);
+
+  
   }
 
   // since each SSE query must cleanse previous queries, there is need to submit all active group chat IDs for fresh queries
-  private async queryPresenceForAll(accessToken:string){
+  private async queryPresence(userGroupChatIds:number[],accessToken:string, studentId:number){
+
+   
+   
+    this.abortController?.abort();
+    this.abortController = null;
 
     this.abortController = new AbortController();
    try {
@@ -74,7 +72,8 @@ export class LivePresenceMonitorService {
     await fetchEventSource(`${this.livePresenceUrl}`, {
 
       headers: {
-         'group-chat-ids': JSON.stringify(this.groupChatPresence()),
+        'user-group-chat-ids': userGroupChatIds.join(','),
+        'studentId':`${studentId}`,
         'Authorization': `Bearer ${accessToken}`,
         'Accept': 'text/event-stream',
         'Cache-Control': 'no-cache',
@@ -100,10 +99,13 @@ export class LivePresenceMonitorService {
 
           if(event.event === 'live-presence'){
 
-            const livePresence = this.entrySchema().safeParse(JSON);
+            const livePresence = this.entrySchema().safeParse(JSON.parse(event.data));
+            
             if(livePresence.success){
 
-              this.updateUserPresenceCounts(livePresence.data.key, livePresence.data.value);
+              this.updateUserPerGroupPresenceCounts(livePresence.data.key, livePresence.data.value);
+
+            
 
             }else{
               console.error('Invalid live presence data:', livePresence.error);
@@ -121,7 +123,7 @@ export class LivePresenceMonitorService {
             return;
           }
 
-          this.reconnectToServer(accessToken);
+          this.reconnectToServer(userGroupChatIds, accessToken, studentId);
         })
       }
     })
@@ -132,7 +134,16 @@ export class LivePresenceMonitorService {
 
   }
 
-  private reconnectToServer(accessToken:string){
+
+
+  private updateUserPerGroupPresenceCounts(groupId:number, currentCount:number){
+
+   // notify subscribers of the change
+   this.usersPerGroupPublisher.get(groupId)?.next(currentCount);
+
+  }
+
+  private reconnectToServer(userGroupChatIds:number[], accessToken:string, studentId:number){
 
     if(this.retryCount < this.maxRetries){
  
@@ -141,7 +152,7 @@ export class LivePresenceMonitorService {
      this.retryCount++;
      setTimeout(() => {
  
-       this.queryPresenceForAll(accessToken);
+       this.queryPresence(userGroupChatIds, accessToken, studentId);
        
      }, delay);
  
@@ -152,6 +163,11 @@ export class LivePresenceMonitorService {
  
  
    }
+
+   public getGroupChatPresence(){
+
+    return this.groupChatPresence;
+   }
  
 
   private disconnectFromSSE(){
@@ -160,12 +176,7 @@ export class LivePresenceMonitorService {
     this.abortController = null;
   }
 
-  // returns number of group chats currently being monitored for live presence
-  public get groupChatPresenceCounts():number[]{
-
-    return this.groupChatPresence();
-
-  }
+  
   private entrySchema(){
 
     return z.object({

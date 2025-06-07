@@ -3,6 +3,7 @@ import { inject, Injectable, Injector } from '@angular/core';
 import { BehaviorSubject, Observable, take, tap } from 'rxjs';
 import { Endpoints } from '../end-point';
 import { LogoutDetectorService } from '../logout-detector.service';
+import { ChatCacheService } from '../chat/chat-cache.service';
 
 @Injectable({
   providedIn: 'root'
@@ -36,7 +37,7 @@ export class AuthService {
   // Subject that emits to subscribers a map object of key(group chat id) and value(dates the user joined the group)
   private groupJoinedDateSubject = new BehaviorSubject<Date>(new Date());
 
-  public groupJoinDateOb$ = this.groupJoinedDateSubject.asObservable();
+  private groupJoinDateOb$ = this.groupJoinedDateSubject.asObservable();
  
   //A subject to emit the name of the currently logged in user (initially emits the generic placeholder 'Student'). Subscribers receive up to date information
   private currentUserName:BehaviorSubject<string> 
@@ -48,6 +49,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private endpoints = inject(Endpoints);
   private logoutDetectorService = inject(LogoutDetectorService);
+  private injector = inject(Injector);
   
 
 
@@ -58,6 +60,7 @@ export class AuthService {
     this.currentUserName = new BehaviorSubject<string>(this.currentUser?.firstName || 'Student');
     this.userName$= this.currentUserName.asObservable();
 
+    
   
    }
   
@@ -131,8 +134,6 @@ export class AuthService {
     this._groupJoinDates = new Map(Object.entries(joinedDate).map(([key, val])  => [Number(key), new Date(val)]));
 
     
-
-    
   }
 
   // returns into the Observale, the value for the given key(i.e the date the user joined the given group chat)
@@ -140,6 +141,7 @@ export class AuthService {
 
     this.groupJoinedDateSubject.next(this._groupJoinDates.get(groupId) || new Date());
 
+    return this.groupJoinDateOb$;
   
   }
 
@@ -187,7 +189,7 @@ export class AuthService {
 
       // confirm the student belongs in a chat group
       this.isGroupMember(user.id).pipe(take(1)).subscribe(member => {
-        console.log(`is group member: ${member}`);
+       
         if(member === true){
           sessionStorage.setItem('inGroup','yes');
 
@@ -249,9 +251,15 @@ export class AuthService {
    
     this.currentUserName.next('Student');
     this.studentLoginSubject.next(false);
+    
+    this.injector.get(ChatCacheService).clearAllChats();
 
     // notifies subscribers that the user has logged out
-    this.logoutDetectorService.isLogoutDetected.set(true)
+    this.logoutDetectorService.isLogoutDetected.set(true);
+
+    setTimeout(() => {
+      location.reload();
+    }, 1000);
    
   }
 

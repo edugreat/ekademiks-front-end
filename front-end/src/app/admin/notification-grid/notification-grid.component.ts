@@ -44,8 +44,7 @@ export class NotificationGridComponent {
      
 
 
-      console.log(`screen size: ${screenSize}`);
-
+     
       this.cssLoadingService.createCSSLink(screenSize);
 
       if (['xs', 'sm', 'md', 'lg', 'xl'].includes(screenSize)) {

@@ -1,12 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HomeService {
-  welcomeMsgUrl = 'http://localhost:8080/tests/welcome'
+  welcomeMsgUrl = 'http://localhost:8080/tests/welcome';
+
+  private welcomeMessage:string[] = [];
 
   constructor(private http: HttpClient) { }
 
@@ -14,7 +16,9 @@ export class HomeService {
   //fetches the welcome messages from the server
   getWelecomeMessages():Observable<string[]>{
 
-    return this.http.get<string[]>(this.welcomeMsgUrl);
+    if(this.welcomeMessage.length) return of(this.welcomeMessage);
+
+    return this.http.get<string[]>(this.welcomeMsgUrl).pipe(tap(msg => this.welcomeMessage = msg));
   }
 }
 

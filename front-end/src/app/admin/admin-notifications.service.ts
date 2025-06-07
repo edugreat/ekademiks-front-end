@@ -39,13 +39,11 @@ export class AdminNotificationsService {
 
         if(user && this.isAdminUser(user)){
 
-          console.log('there is user')
           
 
           this.connectToNotifications(user)
         } else {
 
-          console.log('no user or not admin user');
           this.disconnectFromSSE();
         }
 
@@ -69,7 +67,6 @@ export class AdminNotificationsService {
   }
   private async connectToNotifications(user: User) {
 
-    console.log('connecting to notifications');
 
     this.disconnectFromSSE();
     this.connectionState.set('connecting');
@@ -101,7 +98,6 @@ export class AdminNotificationsService {
 
             if(response.ok && response.status === 200){
 
-              console.log('200 ok response')
 
               this.connectionState.set('connected');
 
@@ -111,7 +107,7 @@ export class AdminNotificationsService {
 
             
             }else if(response.status >= 400 && response.status < 500 && response.status !== 429){
-              console.log('4xx error response')
+              
               this.connectionState.set('error');
             }
             
@@ -130,17 +126,11 @@ export class AdminNotificationsService {
 
               if(event.event === 'responseUpdate'){
 
-                console.log('response update notification received');
-
                 const data:AssessmentResponseRecord = JSON.parse(event.data);
-
-                console.log(JSON.stringify(data, null,1))
 
                const index = this.notifications().findIndex((n) => n.topic === data.topic && n.instructorId === data.instructorId && n.postedOn === data.postedOn);
                if(index === -1){
 
-                console.log('adding new notifications')
-                
                 this.notifications.update(prev => [...prev, data]);
                
 
@@ -173,7 +163,7 @@ export class AdminNotificationsService {
 
         onclose: () => {
           this.zone.run(() => {
-            console.log('SSE connection closed');
+          
             this.connectionState.set('disconnected');
 
           

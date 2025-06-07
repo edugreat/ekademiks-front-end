@@ -22,6 +22,7 @@ import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { FormsModule } from '@angular/forms';
 import { NotificationsDetailComponent } from './request-notifications-detail/notifications-detail.component';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { LivePresenceMonitorService } from '../../live-presence-monitor.service';
 
 @Component({
   selector: 'app-group-chat',
@@ -69,8 +70,7 @@ export class GroupChatComponent implements OnDestroy {
   //  shows if the snack bar is currently opened to display notifications
   private isSnackBarOPen = false;
 
-
-
+ 
 
   chatNotificationSub?: Subscription;
 
@@ -104,6 +104,8 @@ export class GroupChatComponent implements OnDestroy {
   private activatedRoute = inject(ActivatedRoute);
   private chatCachedService = inject(ChatCacheService);
   private authService = inject(AuthService);
+  private livePresenceMonitorService = inject(LivePresenceMonitorService);
+
 
   currentUser = toSignal(this.authService.loggedInUserObs$);
 
@@ -116,7 +118,10 @@ export class GroupChatComponent implements OnDestroy {
 
   })));
 
- currentGroupId?:number;
+
+  
+
+ currentGroupId = -1 ;
  previousGroupId?:number;
 
   //the group description every group must have, which idealy defines their ideology
@@ -125,13 +130,13 @@ export class GroupChatComponent implements OnDestroy {
   // Date representing instance a user joins a group chat
   groupJoinDate?: Date;
 
+  userPresenceSub?:Subscription;
 
 
-
+  userLivePresence?:number;;
   constructor() {
 
-    console.log(`group chat constructor called`)
-
+   
     effect(() => {
 
       if (this.groupDescription() && this.groupIdSignal()) {
@@ -140,7 +145,7 @@ export class GroupChatComponent implements OnDestroy {
         // first time the component receives a view, or each time the user visits different group chat they belong to
         if(!this.currentGroupId || (this.currentGroupId && this.currentGroupId !== this.groupIdSignal()) ){
 
-          this.currentGroupId = this.groupIdSignal();
+          this.currentGroupId = this.groupIdSignal()!;
           
           
 
@@ -149,15 +154,24 @@ export class GroupChatComponent implements OnDestroy {
 
 
         // fetched date the user joined the goup chat each time they click different group they belong to
-        this.authService.groupJoinDateOb$.pipe(take(1)).subscribe(date => this.groupJoinDate = date);
+        this.authService.getJoinDates(this.currentGroupId).pipe(take(1)).subscribe(date => this.groupJoinDate = date);
 
         this.hadRecentPosts(Number(this.currentUser()!.id), Number(this.currentGroupId));
 
         }
 
+        this.userPresenceSub?.unsubscribe();
+       this.userPresenceSub = this.livePresenceMonitorService.streamUserPresenceForGroup(this.currentGroupId).subscribe(userPresence => {
+      
+        this.userLivePresence = userPresence;
+
+        })
+
+
       }
     },{allowSignalWrites:true});
 
+   
 
     // subscribe to receive from the cached service, chat message updates for the current groupId routed by the activated route
     effect(() => {
@@ -165,7 +179,7 @@ export class GroupChatComponent implements OnDestroy {
       const message = this.chatCachedService.chatMessages();
       if ((Array.isArray(message) && message.length) || (!Array.isArray(message) && message)) {
 
-        console.log(`complex conditions`)
+       
       
        setTimeout(() => {
         this.updateChatMessages(this.chatCachedService.chatMessages());
@@ -192,12 +206,27 @@ export class GroupChatComponent implements OnDestroy {
 
     })
 
+
+
+    effect(() => {
+      if (this.groupIdSignal()) {
+        this.currentGroupId = this.groupIdSignal()!;
+        this.chatCachedService.currentGroupId.set(this.currentGroupId);
+
+        
+      
+      }
+    },{allowSignalWrites: true});
+
+   
+   
   }
 
 
   ngOnDestroy(): void {
 
 
+    this.userPresenceSub?.unsubscribe()
 
     clearInterval(this.snackBarTimer);
 
@@ -253,11 +282,7 @@ export class GroupChatComponent implements OnDestroy {
 
           console.log(`could not copy to clipboard due to ${error}`)
 
-        } else {
-
-          console.log(`Unknown error while copying to clipboard`)
-
-        }
+        } 
       }
 
     }
@@ -362,16 +387,7 @@ export class GroupChatComponent implements OnDestroy {
   }
 
 
-  // get the number of online members from the session storage
-  get onlineMembers(): number | undefined {
-
-    const currentlyOnline = sessionStorage.getItem(`online_members_${this.currentGroupId}`);
-
-
-    return currentlyOnline ? Number(currentlyOnline) : undefined
-
-
-  }
+  
 
 
   // Automatically scrolls to the bottom (allowing views) when previous chats keep populated and when new chat arrives

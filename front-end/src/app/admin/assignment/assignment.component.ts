@@ -96,7 +96,7 @@ export class AssignmentComponent implements OnInit, OnDestroy {
   ) {
 
     this.submissionDate.setDate(this.submissionDate.getDate()+1);
-    console.log(`submission date: ${this.submissionDate}`);
+    
     this.assignmentForm = this.fb.group({
       id:new FormControl(0),
       name: new FormControl('', Validators.required),
@@ -618,8 +618,6 @@ export class AssignmentComponent implements OnInit, OnDestroy {
 
   // processes submission date change event called when the user changes date for assignment submissio
   submissionDateChange($event: MatDatepickerInputEvent<Date>) {
-
-    console.log(`date changed to: ${$event.value} -> ${this.submissionEnds.value}`)
     
     this.submissionEnds.setValue($event.value);
     }
@@ -682,8 +680,6 @@ export class AssignmentComponent implements OnInit, OnDestroy {
 
      
      
-
-      console.log(`submission: ${this.submissionEnds.value}`)
       assignmentDetails.assignmentResourceDTO = [];
 
     
@@ -697,8 +693,7 @@ export class AssignmentComponent implements OnInit, OnDestroy {
 
      
 
-      console.log(`${JSON.stringify(assignmentDetails, null, 1)}`)
-
+      
         this.assignmentService.postAssignment(assignmentDetails).pipe(take(1)).subscribe({
           next:(val) => console.log(val),
 

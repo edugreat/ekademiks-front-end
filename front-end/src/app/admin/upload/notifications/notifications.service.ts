@@ -62,7 +62,14 @@ export class NotificationsService {
 
     }, {allowSignalWrites:true});
 
-    effect(() => this.logoutDetectorService.isLogoutDetected() ? this.disconnectFromSSE() : '');
+    effect(() => {
+      if(this.logoutDetectorService.isLogoutDetected()){
+
+        this.disconnectFromSSE();
+
+      }
+
+    },{allowSignalWrites:true} );
    
   }
 
@@ -75,8 +82,7 @@ export class NotificationsService {
 
   private async connectToNotifications(user: User) {
  
-     console.log('connecting to notifications');
- 
+    
      this.disconnectFromSSE();
      this.connectionState.set('connecting');
  
@@ -103,10 +109,9 @@ export class NotificationsService {
  
            this.zone.run(() => {
  
-             if(response.ok && response.status === 200){
+             if(response.ok || response.status === 200){
  
-               console.log('200 ok response')
- 
+              
                this.connectionState.set('connected');
  
              this.retryCount = 0;
@@ -115,7 +120,7 @@ export class NotificationsService {
  
              
              }else if(response.status >= 400 && response.status < 500 && response.status !== 429){
-               console.log('4xx error response');
+               
                this.connectionState.set('error');
              }
              
@@ -134,16 +139,13 @@ export class NotificationsService {
  
                if(event.event === 'notifications'){
  
-                 console.log('response update notification received');
- 
+                
                  const data:_Notification = JSON.parse(event.data);
  
-                 console.log(JSON.stringify(data, null,1))
- 
+                 
                 const index = this.unreadNotifications().findIndex((n) => n.id === data.id);
                 if(index === -1){
  
-                 console.log('adding new notifications')
                  
                  this.unreadNotifications.update(prev => [...prev, data]);
                 
@@ -173,7 +175,6 @@ export class NotificationsService {
  
          onclose: () => {
            this.zone.run(() => {
-             console.log('SSE connection closed');
              this.connectionState.set('disconnected');
  
            

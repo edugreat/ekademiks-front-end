@@ -87,8 +87,7 @@ export class AssignmentAttemptComponent implements OnInit {
       },
 
       complete:() => {
-        console.log(`${JSON.stringify(this.assignmentDetails, null, 1)}`);
-
+        
         // TODO: Mark this assignment as being read by the student
       }
     })
@@ -104,7 +103,7 @@ takeAssignment() {
     
     next:(resources) => {
 
-      console.log(`resources: ${JSON.stringify(resources, null, 1)}`);
+      
     },
 
     error:(err) => console.log(`error: ${err.error}`),

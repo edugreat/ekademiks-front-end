@@ -4,7 +4,6 @@ import { AssessmentsService, Levels } from '../assessment/assessments.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HomeService } from './home.service';
 import { AuthService, User } from '../auth/auth.service';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 import { WelcomeComponent } from './welcome/welcome.component';
 import { MatGridList, MatGridTile } from '@angular/material/grid-list';
@@ -138,7 +137,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       // get the academic status of current user(SENIOR or JUNIOR status)
       const level = this.currentUser?.status;
 
-      console.log('level '+level)
+     
 
       if(level) this.router.navigate(['/assessments', level]);
     } else {

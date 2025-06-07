@@ -147,7 +147,7 @@ export class NewGroupChatComponent implements OnInit {
 
         if(response.status === HttpStatusCode.Ok){
 
-         this.authService.groupJoinedDates(id)
+         this.authService.groupJoinedDates(id).subscribe();
 
          this.router.navigate(['/my-groups', id]);
 
