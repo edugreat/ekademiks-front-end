@@ -250,7 +250,7 @@ chatNotifications = signal<_Notification[]>([]);
           if (index !== -1 && incomingChat.content !== savedChats[index].content) {
   
             savedChats[index].content = incomingChat.content;
-            savedChats[index].isEditedChat = true;
+            savedChats[index].editedChat = true;
           } else if (index === -1) {
   
             // this is the case of a new chat message

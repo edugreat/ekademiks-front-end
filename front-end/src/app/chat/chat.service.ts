@@ -517,7 +517,7 @@ export type ChatMessage = {
   senderId: number,
   senderName?: string,
   content: string,
-  isEditedChat: boolean,
+  editedChat: boolean,
   repliedTo?: number,//ID of the chat that was replied to assuming this was a replied chat
   repliedToChat?: string,//The actual chat message that was replied to if this was a replied chat
   deleterId?: number,//points to the user who deleted a given chat that some replies

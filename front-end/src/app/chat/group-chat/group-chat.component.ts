@@ -179,6 +179,7 @@ export class GroupChatComponent implements OnDestroy {
       const message = this.chatCachedService.chatMessages();
       if ((Array.isArray(message) && message.length) || (!Array.isArray(message) && message)) {
 
+        console.log(`${JSON.stringify(message, null, 1)}`)
        
       
        setTimeout(() => {
@@ -443,7 +444,7 @@ export class GroupChatComponent implements OnDestroy {
             groupId: editableChat.groupId,
             senderId: editableChat.senderId,
             content: this.newChatContent,
-            isEditedChat: true,
+            editedChat: true,
             sentAt: editableChat.sentAt
 
           }
@@ -456,7 +457,7 @@ export class GroupChatComponent implements OnDestroy {
 
                 // replace existing chat with the edited chat
                 editableChat!.content = this.newChatContent;
-                editableChat!.isEditedChat = true;
+                editableChat!.editedChat = true;
 
                 this.newChatContent = '';
 
@@ -493,7 +494,7 @@ export class GroupChatComponent implements OnDestroy {
           senderId: Number(this.currentUser()?.id),
           senderName: '',//not actually a required field, but to prevent server reporting error 
           content: this.newChatContent,
-          isEditedChat: false,
+          editedChat: false,
           repliedTo: this.currentlyClickedChat.id,
           repliedToChat: this.currentlyClickedChat.content,
           sentAt: new Date()
@@ -526,7 +527,7 @@ export class GroupChatComponent implements OnDestroy {
           senderId: Number(this.currentUser()?.id),
           senderName: '',//not actually a required field, but to prevent server reporting error 
           content: this.newChatContent,
-          isEditedChat: false,
+          editedChat: false,
           sentAt: new Date()
         };
 

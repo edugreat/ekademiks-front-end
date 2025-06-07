@@ -43,7 +43,7 @@
         <div class="chat-message-container" >
          <div style="display: flex; flex-direction: column;">
           <span [ngStyle]="{'background-color':chat.senderId === currentUser()?.id ? '#d2f0c4':'#f5f7f4'}" class="message-content" > {{ chat.content }}</span>
-          <span *ngIf="chat.isEditedChat" style="font-size: 0.5rem; margin-left: 3px; color: rgb(58, 25, 2); " >Edited </span>
+          <span *ngIf="chat.editedChat" style="font-size: 0.5rem; margin-left: 3px; color: rgb(58, 25, 2); " >Edited </span>
          </div>
           <span class="reply-icon" *ngIf="chat.repliedTo"> <mat-icon>reply</mat-icon> </span>
           <span [matTooltip]="hasBeenDeleted(chat.repliedTo) ? chatDeleter(chat) : '' " (click)="goToChat(chat.repliedTo)" class="repliedChat" *ngIf="chat.repliedTo" >{{chat.repliedToChat}}</span> 
