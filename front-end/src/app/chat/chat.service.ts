@@ -1,4 +1,4 @@
-import { effect, inject, Injectable, NgZone, signal } from '@angular/core';
+import { effect, inject, Injectable, Injector, NgZone, signal } from '@angular/core';
 import { Endpoints } from '../end-point';
 import { BehaviorSubject, defer, map, Observable, of, Subject, Subscription } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpResponse, HttpStatusCode } from '@angular/common/http';
@@ -23,6 +23,9 @@ export class ChatService {
   private messageUrl = 'http://localhost:8080/chats/messages';
 
   
+  // internal cache for users group chat info where key is userId, and each internal map's key is the groupchat ID
+  private userGroupChatInfo:Map<number, Map<number, GroupChatInfo>> = new Map();
+
   // stores a user chat messages. Key is the user ID, value is a map of which key is the group id and value, an observable that emits chat messages per group
   public chatMessageSubjects: Map<number, Map<number, BehaviorSubject<ChatMessage[] | ChatMessage>>> = new Map();
 
@@ -36,8 +39,9 @@ export class ChatService {
 
   private logoutDetectorService = inject(LogoutDetectorService);
   private livePresenceMonitorService = inject(LivePresenceMonitorService);
-
-
+   
+  private injector = inject(Injector);
+  
   
   retryCount = 0;
   maxRetries = 25;
@@ -114,6 +118,8 @@ export class ChatService {
   // key is the groupId and value is the group chat information
   groupInfo(studentId: number): Observable<Map<number, GroupChatInfo>> {
 
+   if(this.userGroupChatInfo.has(studentId)) return of(this.userGroupChatInfo.get(studentId)!)
+
     return this.http.get<any>(`${this.endpoints.groupInfoUrl}?studentId=${studentId}`)
     .pipe(
      
@@ -124,6 +130,7 @@ export class ChatService {
         Object.entries(data).filter(([key]) => typeof key ==='string' && key.trim() !== '' && !isNaN(Number(key)))
       .map(([key, value]) => [Number(key), value as GroupChatInfo]));
 
+      this.userGroupChatInfo.set(studentId, resultMap);
       
 
        let chats = new Map<number, BehaviorSubject<ChatMessage[] | ChatMessage>>();

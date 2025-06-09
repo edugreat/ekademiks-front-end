@@ -5,7 +5,7 @@ import Dexie from 'dexie';
 import { ChatMessage, ChatService } from './chat.service';
 import { _Notification } from '../admin/upload/notifications/notifications.service';
 import { User } from '../auth/auth.service';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { LogoutDetectorService } from '../logout-detector.service';
 
 @Injectable({
@@ -55,6 +55,8 @@ chatNotifications = signal<_Notification[]>([]);
   // this writable signal keeps track of the current groupId the user wants to access their stored chat messages, and also gets notified of instant messages for the group.
   currentGroupId:WritableSignal<number | undefined> = signal(undefined);
 
+ 
+ 
    
   // Arbitrary content for deleted chats
   private DELETEDCHATCONTENT = '$2a$10$IFch8ji5EgMhuOQdBjdIE.tzyvQbtCEdHSsujbSUALasTHPA87GwO';
@@ -169,6 +171,9 @@ chatNotifications = signal<_Notification[]>([]);
   async persistChatsToDB(groupId:string, messages:ChatMessage[]){
 
     await this.chatCache.put({groupId, messages});
+
+    
+    
   }
 
   async persistNotificationToDB(groupId:string, notifications:_Notification[]){
@@ -398,6 +403,8 @@ chatNotifications = signal<_Notification[]>([]);
   
       return savedChats.filter(c => c.repliedTo === id);
     }
+
+   
 }
 
 interface ChatEntry{
