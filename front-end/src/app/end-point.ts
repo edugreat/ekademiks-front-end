@@ -224,13 +224,6 @@ export class Endpoints {
     public get createGroupChatUrl() {
         return this._createGroupChatUrl;
     }
-
-    private _isGroupMemberUrl = `${this.chatUrl}/inGroup`;
-
-    public get isGroupMemberUrl(){
-
-        return this._isGroupMemberUrl;
-    }
    
     private _groupInfoUrl  = `${this.chatUrl}/group_info`;
 

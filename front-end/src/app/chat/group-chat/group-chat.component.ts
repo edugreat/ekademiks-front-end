@@ -1,6 +1,6 @@
 
 
-import { Component, effect, ElementRef, Inject, inject, OnDestroy, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { Component, effect, ElementRef, Inject, inject, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { ChatMessage, ChatService } from '../chat.service';
 import { ActivatedRoute } from '@angular/router';
 import { map, Subscription, take } from 'rxjs';
@@ -31,7 +31,7 @@ import { LivePresenceMonitorService } from '../../live-presence-monitor.service'
   standalone: true,
   imports: [NgIf, MatProgressSpinner, MatAnchor, MatTooltip, MatIcon, MatBadge, NgFor, MatIconButton, MatMenuTrigger, NgStyle, MatMenu, MatMenuItem, MatFormField, MatLabel, MatSuffix, MatInput, CdkTextareaAutosize, FormsModule, NotificationsDetailComponent, DatePipe]
 })
-export class GroupChatComponent implements OnDestroy {
+export class GroupChatComponent implements OnDestroy, OnInit {
 
 
 
@@ -179,18 +179,16 @@ export class GroupChatComponent implements OnDestroy {
       const message = this.chatCachedService.chatMessages();
       if ((Array.isArray(message) && message.length) || (!Array.isArray(message) && message)) {
 
-        console.log(`${JSON.stringify(message, null, 1)}`)
-       
+        
       
-       setTimeout(() => {
+       
         this.updateChatMessages(this.chatCachedService.chatMessages());
-       },10);
 
         setTimeout(() => {
 
           this.scrollToBottom();
 
-        }, 0);
+        }, 1000);
       }
 
     });
@@ -223,7 +221,10 @@ export class GroupChatComponent implements OnDestroy {
    
   }
 
-
+ngOnInit(): void {
+  
+  this.previousGroupId = undefined;
+}
   ngOnDestroy(): void {
 
 
@@ -561,42 +562,32 @@ export class GroupChatComponent implements OnDestroy {
   private updateChatMessages(chat:ChatMessage[] | ChatMessage){
 
     // one-time execution logic when the user visits the group chat for the first time
-    if(!this.currentGroupId || (this.currentGroupId && this.currentGroupId !== this.previousGroupId)){
+    if(this.currentGroupId && (this.currentGroupId !== this.previousGroupId) && Array.isArray(chat)){
 
       
       // clear previous chat messages
       this.chatMessages.splice(0);
 
-      if(Array.isArray(chat)){
-       
         this.chatMessages.push(...chat);
-      } else {
+     
+
+      this.previousGroupId = this.currentGroupId;
+
+
+      // executes as the user stays on the group chat(this method ensures also that deletion of messages gets reflected in realtime)
+    }  else if(this.currentGroupId === this.previousGroupId){
+      
+      if(Array.isArray(chat)){
+
+        this.chatMessages.splice(0);
+
+        this.chatMessages.push(...chat);
+      }else if(!Array.isArray(chat) && chat){
 
         this.chatMessages.push(chat);
       }
 
-      this.previousGroupId = this.currentGroupId;
-
-
-      return;
-      // execution when the user receives previous chats as they visit the group chat different from the previous one
-    } else if(this.currentGroupId !== this.previousGroupId && Array.isArray(chat)){
-
     
-      // clear previous chats
-      this.chatMessages.splice(0);
-      this.chatMessages.push(...chat);
-
-      this.previousGroupId = this.currentGroupId;
-
-      return;
-
-      // only executes for real-time instant chat messages as the user stays on the current group chat
-    } else if(this.currentGroupId === this.previousGroupId && !Array.isArray(chat)){
-      
-
-      this.chatMessages.push(chat);
-
     }
   }
 

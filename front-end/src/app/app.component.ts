@@ -210,7 +210,9 @@ private x = ['.', '.', '.'];
     // checks if the current user belongs in any group chat. This is for conditional display of chat functionalities
     get isGroupMemeber(): boolean {
      
-      return sessionStorage.getItem('inGroup') !== null;
+     if(this.currentUser()) return this.currentUser()!.isGroupMember;
+
+     return false;
 
       }
       

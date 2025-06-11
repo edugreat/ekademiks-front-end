@@ -2,6 +2,7 @@ import { inject, Injectable, NgZone, signal } from '@angular/core';
 import { EventSourceMessage, fetchEventSource } from '@microsoft/fetch-event-source';
 import { BehaviorSubject, defer, Observable, of, ReplaySubject } from 'rxjs';
 import { z } from 'zod';
+import { LogoutDetectorService } from './logout-detector.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +12,7 @@ import { z } from 'zod';
 export class LivePresenceMonitorService {
 
   private zone = inject(NgZone);
+  private logoutDetectorService = inject(LogoutDetectorService);
 
 
   // keeps track of the number of online users in each group chat
@@ -67,6 +69,7 @@ export class LivePresenceMonitorService {
     this.abortController = null;
 
     this.abortController = new AbortController();
+    this.logoutDetectorService.addAbortController(this.abortController);
    try {
     
     await fetchEventSource(`${this.livePresenceUrl}`, {

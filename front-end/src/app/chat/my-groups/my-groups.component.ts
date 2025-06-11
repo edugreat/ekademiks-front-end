@@ -162,13 +162,9 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
                }
                
               },
-              error:(err) => console.log(err),
+              error:(err) => console.log(err)
 
-              complete:() => {
-                
-                // clears off
-              sessionStorage.removeItem('inGroup');
-              }
+             
             })
           }
         })
@@ -279,13 +275,16 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
                     // This flag would not be needed if the page were refreshed as the system will update user legibility to post.
                     sessionStorage.setItem('forbidden', (this.editableChat.key as string));
 
-                    this.authService.isGroupMember(this.currentUser()!.id).pipe(take(1)).subscribe(member => {
+                    const cachingKey = sessionStorage.getItem('cachingKey');
+                     if(cachingKey){
 
-                      // does not belong to any group chat
-                      if(!member){
+                      this.authService.cachedUser(cachingKey).subscribe(_=>{
 
-                        sessionStorage.removeItem('inGroup');
 
+                          // does not belong to any group chat
+                      if(!(this.currentUser() && this.currentUser()?.isGroupMember)){
+
+                       
                         // route them to the home page
                         this.router.navigate(['/home']);
                       }else{
@@ -293,11 +292,15 @@ export class MyGroupsComponent implements OnInit, OnDestroy{
                         // update the group chat info
                         this.getGroupInfo(this.currentUser()!.id);
                       }
-                    })
+
+                      })
+                    
+                     }
+                    
+                    
                   }
 
-                },
-                error:(err) => console.log(err)
+                }
               })
             }
           })

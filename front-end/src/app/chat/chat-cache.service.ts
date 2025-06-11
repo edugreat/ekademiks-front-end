@@ -304,13 +304,14 @@ chatNotifications = signal<_Notification[]>([]);
 
       if(instantChat){
 
-        console.log(`receiving instant chat from the cached-service: ${JSON.stringify(instantChat)}`)
+       
 
         this.chatMessages.set(instantChat);
 
         return;
       }
 
+      console.log(`streaming chat for ${groupId}`)
       this.getCachedChats(`${groupId}`).then(messages => this.chatMessages.set(messages));
       
     }
@@ -363,11 +364,17 @@ chatNotifications = signal<_Notification[]>([]);
 
     async updateChatsAfterDeletetion(groupId:number, deletedChatId:number, deleter:User){
 
+      console.log(`groupId:${groupId}, deletedChatId:${deletedChatId}, deleter:${deleter.firstName}`)
+
       // get the chats from which this was deleted
       let groupChats = await this.getCachedChats(`${groupId}`);
 
+      console.log(`cached chats: ${JSON.stringify(groupChats, null,1 )}`)
+
       // get the deleted chat index
       let index = groupChats.findIndex(c => c.id === deletedChatId);
+
+      console.log(`index of deleted chat: ${index}`)
 
       if(index !== -1){
 
@@ -389,6 +396,8 @@ chatNotifications = signal<_Notification[]>([]);
         // replace replier with its updated version
         groupChats.splice(groupChats.findIndex(c => c.id === replier.id), 1, replier);
       });
+
+      console.log(`after deletion: ${JSON.stringify(groupChats, null,1)}`)
       
       this.persistChatsToDB(`${groupId}`, groupChats);
 

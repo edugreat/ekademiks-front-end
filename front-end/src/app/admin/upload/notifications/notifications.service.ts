@@ -62,15 +62,7 @@ export class NotificationsService {
 
     }, {allowSignalWrites:true});
 
-    effect(() => {
-      if(this.logoutDetectorService.isLogoutDetected()){
-
-        this.disconnectFromSSE();
-
-      }
-
-    },{allowSignalWrites:true} );
-   
+    
   }
 
 
@@ -87,6 +79,7 @@ export class NotificationsService {
      this.connectionState.set('connecting');
  
      this.abortController = new AbortController();
+     this.logoutDetectorService.addAbortController(this.abortController);
  
      const token = user.accessToken;
  
@@ -166,7 +159,7 @@ export class NotificationsService {
              console.error('SSE error', err);
              this.connectionState.set('error');
  
-             if(err.name === 'AbortError' && this.maxRetries <  50) return;
+             if(err.name === 'AbortError' || this.maxRetries <  50) return;
  
                this.attemptReconnection(user);
              
@@ -177,6 +170,7 @@ export class NotificationsService {
            this.zone.run(() => {
              this.connectionState.set('disconnected');
  
+             this.abortController?.abort();
            
              
            });
@@ -193,7 +187,7 @@ export class NotificationsService {
          this.connectionState.set('error');
          console.error('SSE connection failed:', err);
          
-       //  this.attemptReconnection(user);
+       
        })
      }
  

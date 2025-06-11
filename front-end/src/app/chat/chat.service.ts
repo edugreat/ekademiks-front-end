@@ -40,7 +40,6 @@ export class ChatService {
   private logoutDetectorService = inject(LogoutDetectorService);
   private livePresenceMonitorService = inject(LivePresenceMonitorService);
    
-  private injector = inject(Injector);
   
   
   retryCount = 0;
@@ -280,6 +279,8 @@ export class ChatService {
 
       this.abortContoller = new AbortController();
 
+      this.logoutDetectorService.addAbortController(this.abortContoller);
+
       const token = user.accessToken;
 
       try {
@@ -328,13 +329,14 @@ export class ChatService {
                    // emits previous chat messages to subscriber(cache service subscribes to receive such notification)
                  if(Array.isArray(data)){
 
+                 
                 
                   const groupId = data[0].groupId;
 
                   this.chatMessageSubjects.get(user.id)?.get(groupId)?.next(data);
                  } else{
 
-                  console.log(`received instant message: ${data}`)
+                 
                   this.chatMessageSubjects.get(user.id)?.get(data.groupId)?.next(data);
                  }
 

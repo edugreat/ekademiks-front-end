@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, Injector } from '@angular/core';
+import { effect, inject, Injectable, Injector } from '@angular/core';
 import { BehaviorSubject, Observable, take, tap } from 'rxjs';
 import { Endpoints } from '../end-point';
 import { LogoutDetectorService } from '../logout-detector.service';
@@ -59,6 +59,14 @@ export class AuthService {
     
     this.currentUserName = new BehaviorSubject<string>(this.currentUser?.firstName || 'Student');
     this.userName$= this.currentUserName.asObservable();
+
+    effect(() => {
+
+      if(this.logoutDetectorService.isLogoutDetected()){
+
+        this.logoutDetectorService.abortControllers();
+      }
+    })
 
     
   
@@ -164,18 +172,12 @@ export class AuthService {
 
   
  
-  // observable of boolean value that checks if the current user belongs in any group chat
-  public isGroupMember(studentId:number):Observable<boolean>{
-
-    return this.http.get<boolean>(`${this.endpoints.isGroupMemberUrl}?id=${studentId}`);
-
-  }
   //saves the just logged in user's token to the session storage
   private saveToSession(user:User){
 
   //  save indication that the user is not guest
     sessionStorage.setItem("logged", "yes");
-    sessionStorage.setItem('cachingKey', user.cachingKey!);
+    sessionStorage.setItem('cachingKey', String(user.id));
 
     sessionStorage.setItem('accessToken', user.accessToken);
    
@@ -185,18 +187,12 @@ export class AuthService {
       sessionStorage.setItem('refreshToken', user.refreshToken);
     }
 
-    if(this.isLoggedInStudent){
+    if(this.isLoggedInStudent && this.currentUser?.isGroupMember){
 
-      // confirm the student belongs in a chat group
-      this.isGroupMember(user.id).pipe(take(1)).subscribe(member => {
-       
-        if(member === true){
-          sessionStorage.setItem('inGroup','yes');
 
-          // retrieve information about when they join the group chats
-          this.groupJoinedDates(user.id).pipe(take(1)).subscribe();
-        }
-      })
+ // retrieve information about when they join the group chats
+    this.groupJoinedDates(user.id).pipe(take(1)).subscribe();
+     
     }
 
    
@@ -257,9 +253,9 @@ export class AuthService {
     // notifies subscribers that the user has logged out
     this.logoutDetectorService.isLogoutDetected.set(true);
 
-    setTimeout(() => {
-      location.reload();
-    }, 1000);
+    // setTimeout(() => {
+    //   location.reload();
+    // }, 1000);
    
   }
 
@@ -303,11 +299,11 @@ export interface User{
   mobileNumber: string,
   email:string,
   statusCode:number,
-  cachingKey?:string, // used to look up redis cached object
   status:string //SENIOR or JUNIOR
   accessToken:string,
   refreshToken:string,
   signInErrorMessage:string,
+  isGroupMember:boolean,
   roles:string[],
   
 }
