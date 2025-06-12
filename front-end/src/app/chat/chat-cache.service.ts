@@ -211,7 +211,9 @@ chatNotifications = signal<_Notification[]>([]);
 
   private async addToChatMessages(incomingChat: ChatMessage) {
 
-    
+    if(incomingChat){
+
+
   
       let savedChats = await this.getCachedChats(`${incomingChat.groupId}`);
   
@@ -243,6 +245,19 @@ chatNotifications = signal<_Notification[]>([]);
 
             })
           }
+
+
+      // perform final update to keep the database in sync
+      this.persistChatsToDB(String(incomingChat.groupId), savedChats);
+
+
+      // send instantly to listener if actively listening
+      if(this.currentGroupId() && incomingChat.groupId === this.currentGroupId()){
+       
+        this.streamChatsForGroup(incomingChat.groupId);
+               
+    }
+
   
           break;
   
@@ -256,27 +271,44 @@ chatNotifications = signal<_Notification[]>([]);
   
             savedChats[index].content = incomingChat.content;
             savedChats[index].editedChat = true;
+
+             // perform final update to keep the database in sync
+            this.persistChatsToDB(String(incomingChat.groupId), savedChats);
+             // send instantly to listener if actively listening
+         if(this.currentGroupId() && incomingChat.groupId === this.currentGroupId()){
+       
+            this.streamChatsForGroup(incomingChat.groupId);
+               
+    }
+
           } else if (index === -1) {
   
             // this is the case of a new chat message
             savedChats.push(incomingChat);
 
-            // send instantly to listener if actively listening
+
+            this.persistChatsToDB(String(incomingChat.groupId), savedChats)
+
             if(this.currentGroupId() && incomingChat.groupId === this.currentGroupId()){
-             
-                this.streamChatsForGroup(incomingChat.groupId, incomingChat);
-                       
+
+              this.streamChatsForGroup(incomingChat.groupId, incomingChat);
+
             }
+
+          
           }
-  
-  
+
+    
           break;
+
+
+          
       }
   
   
-      // perform final update to keep the database in sync
-      this.persistChatsToDB(`${incomingChat.groupId}`, savedChats);
 
+    }
+    
     }
 
     // method that gets called once previous chat messages get retrieved for the first time.
@@ -311,8 +343,8 @@ chatNotifications = signal<_Notification[]>([]);
         return;
       }
 
-      console.log(`streaming chat for ${groupId}`)
-      this.getCachedChats(`${groupId}`).then(messages => this.chatMessages.set(messages));
+     
+      this.getCachedChats(String(groupId)).then(messages => this.chatMessages.set(messages));
       
     }
 
@@ -320,20 +352,20 @@ chatNotifications = signal<_Notification[]>([]);
     private streamChatNotificationsForGroup(groupId:number){
 
 
-      this.getCachedNotification(`${groupId}`).then(n => this.chatNotifications.set(n));
+      this.getCachedNotification(String(groupId)).then(n => this.chatNotifications.set(n));
     }
 
    
     private async addToNotifications(notification:_Notification){
 
       // get already existing notifications
-      const existingNotifications = await this.getCachedNotification(`${notification.id}`);
+      const existingNotifications = await this.getCachedNotification(String(notification.id));
 
       if(!existingNotifications.length){
 
         existingNotifications.push(notification);
 
-        this.persistNotificationToDB(`${notification.id}`, existingNotifications);
+        this.persistNotificationToDB(String(notification.id), existingNotifications);
       }else{
 
         // ensure no duplicate notification
@@ -343,7 +375,7 @@ chatNotifications = signal<_Notification[]>([]);
 
       existingNotifications.push(notification);
 
-      this.persistNotificationToDB(`${notification.id}`, existingNotifications);
+      this.persistNotificationToDB(String(notification.id), existingNotifications);
      }
       }
 
@@ -356,55 +388,7 @@ chatNotifications = signal<_Notification[]>([]);
 
     }
 
-    /*
-    method that updates the cached chat messages after deletion of a given chat
-    The update is done on the client side once 200 status ok is received from the server for the operation.
-    This is just to excessive server calls for operation like this
-    */
-
-    async updateChatsAfterDeletetion(groupId:number, deletedChatId:number, deleter:User){
-
-      console.log(`groupId:${groupId}, deletedChatId:${deletedChatId}, deleter:${deleter.firstName}`)
-
-      // get the chats from which this was deleted
-      let groupChats = await this.getCachedChats(`${groupId}`);
-
-      console.log(`cached chats: ${JSON.stringify(groupChats, null,1 )}`)
-
-      // get the deleted chat index
-      let index = groupChats.findIndex(c => c.id === deletedChatId);
-
-      console.log(`index of deleted chat: ${index}`)
-
-      if(index !== -1){
-
-     let staleChat =   groupChats.splice(index, 1);
     
-     if(staleChat.length){
-
-
-      // get chats that may have replied to the deleted chats
-      const chatRepliers = this.repliers(deletedChatId, groupChats);
-
-      // update chat repliers with info about the users that deleted the chat
-      chatRepliers.forEach(replier => {
-
-        replier.deleterId = deleter.id;
-
-        replier.deleter = deleter.firstName;
-
-        // replace replier with its updated version
-        groupChats.splice(groupChats.findIndex(c => c.id === replier.id), 1, replier);
-      });
-
-      console.log(`after deletion: ${JSON.stringify(groupChats, null,1)}`)
-      
-      this.persistChatsToDB(`${groupId}`, groupChats);
-
-      this.streamChatsForGroup(groupId);
-     }
-    }
-    }
   
     // return an array of chat replies for the chat referenced by id
     repliers(id: number, savedChats: ChatMessage[]): ChatMessage[] {

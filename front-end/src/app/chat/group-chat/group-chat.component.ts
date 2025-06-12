@@ -361,7 +361,7 @@ ngOnInit(): void {
 
             if (response.status === HttpStatusCode.Ok) {
 
-              this.chatCachedService.updateChatsAfterDeletetion(this.currentlyClickedChat!.groupId, this.currentlyClickedChat!.id!, this.currentUser()!);
+             console.log('ok');
             }
           }
         })
