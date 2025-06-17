@@ -34,8 +34,8 @@ export const myAppRoutes: Routes = [
   { path: 'assessments/:level', loadComponent: () => import('../assessment/assessment.component').then(m => m.AssessmentComponent) },
   { path: 'disabled', loadComponent: () => import('../account-disabled/account-disabled.component').then(m => m.AccountDisabledComponent) },
   { path: 'new-group', loadComponent: () => import('../chat/new-group-chat/new-group-chat.component').then(m => m.NewGroupChatComponent), 
-    canActivate: [chatGuard], 
-    canMatch: [chatGuard] 
+    canActivate: [authGuard], 
+    canMatch: [authGuard] 
   },
   { path: 'assignment/:id', loadComponent: () => import('../assessment/assignment-attempt/assignment-attempt.component').then(m => m.AssignmentAttemptComponent), 
     canActivate: [authGuard], 
@@ -49,8 +49,8 @@ export const myAppRoutes: Routes = [
     children: [
       { path: ':group_id/:group_admin_id/:description', loadComponent: () => import('../chat/group-chat/group-chat.component').then(m => m.GroupChatComponent) }
     ], 
-    canActivate: [authGuard], 
-    canMatch: [authGuard] 
+    canActivate: [chatGuard], 
+    canMatch: [chatGuard] 
   },
   { path: 'assessment-panel/:subject/:category', loadComponent: () => import('../assessment/assessment-expansion-panel/assessment-expansion-panel.component').then(m => m.AssessmentExpansionPanelComponent) },
   { path: 'start/:topic/:duration/:subject/:category', loadComponent: () => import('../test/test.component').then(m => m.TestComponent), 

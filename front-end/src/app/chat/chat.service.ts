@@ -321,7 +321,8 @@ export class ChatService {
                 
                 if(event.event === 'chats'){
 
-
+                 
+              
                  
 
                   const data:ChatMessage[] | ChatMessage = JSON.parse(event.data);
@@ -329,13 +330,13 @@ export class ChatService {
                    // emits previous chat messages to subscriber(cache service subscribes to receive such notification)
                  if(Array.isArray(data)){
 
-                 
                 
                   const groupId = data[0].groupId;
 
                   this.chatMessageSubjects.get(user.id)?.get(groupId)?.next(data);
                  } else{
 
+                  
                  
                   this.chatMessageSubjects.get(user.id)?.get(data.groupId)?.next(data);
                  }
