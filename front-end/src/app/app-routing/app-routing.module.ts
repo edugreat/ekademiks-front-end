@@ -23,7 +23,10 @@ export const myAppRoutes: Routes = [
     canActivate: [authGuard], 
     canMatch: [authGuard] 
   },
-
+  { path: 'admin/:parameter', 
+    canMatch: [adminGuard], 
+    loadChildren: () => import('../admin/admin.module').then(m => m.ADMIN_ROUTES) 
+  },
   {
    path: 'admin/notifications', loadComponent:() => import('../admin/notification-grid/notification-grid.component').then(m => m.NotificationGridComponent),
   
@@ -75,10 +78,7 @@ export const myAppRoutes: Routes = [
     canMatch: [adminGuard] 
   },
   { path: 'no-access/:code', loadComponent: () => import('../auth/access-denied/access-denied.component').then(m => m.AccessDeniedComponent) },
-  { path: 'admin/:parameter', 
-    canMatch: [adminGuard], 
-    loadChildren: () => import('../admin/admin.module').then(m => m.ADMIN_ROUTES) 
-  },
+  
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 ];
 

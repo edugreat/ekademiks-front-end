@@ -9,7 +9,7 @@ type pageInfo = {
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AdminService, Student } from '../../admin.service';
 import { Subscription } from 'rxjs';
-import { Router, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { HttpResponse, HttpStatusCode } from '@angular/common/http';
 import { NgIf, NgFor } from '@angular/common';
@@ -51,7 +51,7 @@ export class StudentListComponent implements OnInit, OnDestroy{
 
 
   constructor(private adminService:AdminService, private router:Router,
-    private confirmation:ConfirmationDialogService){
+    private confirmation:ConfirmationDialogService, private activatedRoute:ActivatedRoute) {
 
 
   }
@@ -245,7 +245,7 @@ nextPage() {
       // Routes to the student's performance details page
       goToPerformanceDetails(id: number) {
         
-        this.router.navigate(['students-list',id])
+        this.router.navigate([id],{relativeTo:this.activatedRoute});
 
         }
 

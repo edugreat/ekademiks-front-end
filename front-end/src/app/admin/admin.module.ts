@@ -7,31 +7,31 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () => import('./admin.component').then(m => m.AdminComponent),
     children: [
       {
-        path: 'upload',
+        path: 'test',
         loadComponent: () => import('./upload/upload-test.component').then(m => m.UploadTestComponent),
       },
       {
-        path: 'fetch',
+        path: 'fetch-tests',
         loadComponent: () => import('./fetch/test-fetch.component').then(m => m.TestFetchComponent),
       },
       {
-        path: 'upload-subject',
+        path: 'subject',
         loadComponent: () => import('./upload/upload-subject.component').then(m => m.UploadSubjectComponent),
       },
       {
-        path: 'category-upload',
+        path: 'category',
         loadComponent: () => import('./upload/category.upload.component').then(m => m.CategoryUploadComponent),
       },
       {
-        path: 'subject-fetch',
+        path: 'fetch-subjects',
         loadComponent: () => import('./fetch/subject-fetch.component').then(m => m.SubjectFetchComponent),
       },
       {
-        path: 'category-fetch',
+        path: 'fetch-categories',
         loadComponent: () => import('./fetch/category-fetch.component').then(m => m.CategoryFetchComponent),
       },
       {
-        path: 'topic-fetch',
+        path: 'fetch-topics',
         loadComponent: () => import('./fetch/topic-fetch.component').then(m => m.TopicFetchComponent),
       },
       {
@@ -59,7 +59,7 @@ export const ADMIN_ROUTES: Routes = [
         loadComponent: () => import('./fetch/student-list/student-list.component').then(m => m.StudentListComponent),
       },
       {
-        path: 'student-details',
+        path: 'student-list/:id',
         loadComponent: () =>
           import('./fetch/student-list/student-details-page/student-details-page.component').then(
             m => m.StudentDetailsPageComponent

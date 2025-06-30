@@ -54,7 +54,9 @@ export class AdminNotificationsService {
         )
       }, {allowSignalWrites:true});
    
-      effect(() => this.logoutDetectorService.isLogoutDetected() ? this.disconnectFromSSE() : '')
+      effect(() => {
+        this.logoutDetectorService.isLogoutDetected() ? this.disconnectFromSSE() : ''
+      }, {allowSignalWrites:true})
       
      }
 
