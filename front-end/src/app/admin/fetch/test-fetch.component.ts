@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AdminService, AssessmentCategory } from '../admin.service';
 import { Subscription } from 'rxjs';
-import { Router, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { NgIf, NgFor } from '@angular/common';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
@@ -26,7 +26,7 @@ export class TestFetchComponent implements OnInit, OnDestroy {
 
   pageInfo?:paginationInfo;
 
-  constructor(private adminService: AdminService, private router:Router){}
+  constructor(private adminService: AdminService, private router:Router, private activatedRoute:ActivatedRoute){}
 
 
   ngOnInit(): void {
@@ -37,6 +37,7 @@ export class TestFetchComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
 
     this.categorySub?.unsubscribe();
+    
     
   }
   private fetchAssessmentCategories(page?: number) {  
@@ -80,7 +81,7 @@ export class TestFetchComponent implements OnInit, OnDestroy {
   // Method that fetches basic assessment information such as all subjcts name, test and their durations etc using the provided category id
   fetchAssessmentInfo(categoryId: number) {
 
-    this.router.navigate(['f/test', categoryId])
+    this.router.navigate([categoryId],{relativeTo:this.activatedRoute})
 
     
     }

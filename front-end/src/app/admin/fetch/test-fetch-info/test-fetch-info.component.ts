@@ -55,7 +55,7 @@ export class TestFetchInfoComponent implements OnInit, OnDestroy {
     this.activatedRoute.paramMap.subscribe(data => {
 
 
-      const id = data.get('id');
+      const id = data.get('categoryId');
       if (id) {
 
 

@@ -66,7 +66,7 @@ export const ADMIN_ROUTES: Routes = [
           ),
       },
       {
-        path: 'test-fetch-info',
+        path: 'fetch-tests/:categoryId',
         loadComponent: () => import('./fetch/test-fetch-info/test-fetch-info.component').then(m => m.TestFetchInfoComponent),
       },
       {
